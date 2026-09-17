@@ -11,12 +11,13 @@ import { Text } from '@/ui/components/common/Text';
 import { useToast } from '@/ui/components/common/Toast';
 
 interface TwoFactorSettingsProps {
-    user: User;
+    user: User | undefined;
 }
 
 export const TwoFactorSettings = ({
     user,
 }: TwoFactorSettingsProps): React.ReactNode => {
+    const skeleton = !user;
     const {
         isLoading,
         isConfirmLoading,
@@ -70,19 +71,25 @@ export const TwoFactorSettings = ({
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <Text weight="bold">Two-Factor Authentication</Text>
-                            <Pill variant={user.totpEnabled ? 'success' : 'caution'}>
-                                {user.totpEnabled ? 'Enabled' : 'Not enabled'}
+                            <Pill
+                                skeleton={skeleton}
+                                variant={
+                                    user?.totpEnabled ? 'success' : 'caution'
+                                }
+                            >
+                                {user?.totpEnabled ? 'Enabled' : 'Not enabled'}
                             </Pill>
                         </div>
-                        <Text size="xs" variant="muted">
-                            {user.totpEnabled
+                        <Text size="xs" skeleton={skeleton} variant="muted">
+                            {user?.totpEnabled
                                 ? '2FA is currently enabled.'
                                 : 'Add an extra security layer to your account.'}
                         </Text>
                     </div>
-                    {user.totpEnabled ? null : (
+                    {user?.totpEnabled ? null : (
                         <Button
                             size="sm"
+                            skeleton={skeleton}
                             variant="normal"
                             onClick={handleStartSetup}
                         >
@@ -91,7 +98,7 @@ export const TwoFactorSettings = ({
                     )}
                 </div>
 
-                {user.totpEnabled ? (
+                {user?.totpEnabled ? (
                     <div className="space-y-3 border-t border-border-subtle pt-4">
                         <Text size="xs" variant="muted">
                             Enter an authenticator code to regenerate backup

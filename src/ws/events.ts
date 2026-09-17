@@ -576,6 +576,8 @@ export const WsEvents = {
     DELETE_MESSAGE_SERVER: 'delete_message_server',
     MESSAGE_SERVER_DELETED: 'message_server_deleted',
     MESSAGES_SERVER_BULK_DELETED: 'messages_server_bulk_deleted',
+    MESSAGES_SERVER_BULK_DELETED_BY_AUTHOR:
+        'messages_server_bulk_deleted_by_author',
     MARK_CHANNEL_READ: 'mark_channel_read',
     CHANNEL_UNREAD_UPDATED: 'channel_unread_updated',
     SERVER_UNREAD_UPDATED: 'server_unread_updated',

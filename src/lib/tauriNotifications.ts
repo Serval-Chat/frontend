@@ -5,10 +5,9 @@ import {
     sendNotification,
 } from '@tauri-apps/plugin-notification';
 
+import { isTauri } from '@/utils/tauri';
 import { wsClient } from '@/ws/client';
 import { type IMentionEvent, type IMessageDm, WsEvents } from '@/ws/events';
-
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
 
 export async function initTauriNotifications(
     queryClient: QueryClient,

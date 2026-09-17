@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
 import { BouncingDots } from '@/ui/animations/BouncingDots';
+import { Skeleton } from '@/ui/components/common/Skeleton';
 
 import {
     type ButtonSize,
@@ -19,6 +20,8 @@ export interface ButtonProps extends Omit<
     variant?: ButtonVariant;
     size?: ButtonSize;
     loading?: boolean;
+    /** Renders this button as a skeleton placeholder of the same size, disabled. */
+    skeleton?: boolean;
     retainSize?: boolean;
     square?: boolean;
     fullWidth?: boolean;
@@ -41,6 +44,7 @@ const ButtonComponent = ({
     variant = 'normal',
     size = 'md',
     loading,
+    skeleton,
     retainSize,
     square,
     fullWidth,
@@ -86,7 +90,7 @@ const ButtonComponent = ({
     const computedStyle: React.CSSProperties = {
         ...buttonBaseStyle,
         ...(variant === 'nav' ? {} : buttonSizeStyles[size]),
-        ...variantStyleSet.base,
+        ...(skeleton ? {} : variantStyleSet.base),
         ...(isActive ? variantStyleSet.hover : {}),
         ...(square ? buttonSquareSizeStyles[size] : {}),
         ...(fullWidth ? { width: '100%' } : {}),
@@ -97,8 +101,37 @@ const ButtonComponent = ({
         ...((retainSize || loading) && dimensions.width !== 'auto'
             ? { width: dimensions.width, height: dimensions.height }
             : {}),
+        ...(skeleton
+            ? {
+                  position: 'relative',
+                  background: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  pointerEvents: 'none',
+              }
+            : {}),
         ...style,
     };
+
+    if (skeleton) {
+        return (
+            <span aria-hidden style={computedStyle} {...props}>
+                <span style={{ display: 'contents', visibility: 'hidden' }}>
+                    {Icon && iconPosition === 'left' ? (
+                        <Icon size={iconSize} style={{ flexShrink: 0 }} />
+                    ) : null}
+                    {children}
+                    {Icon && iconPosition === 'right' ? (
+                        <Icon size={iconSize} style={{ flexShrink: 0 }} />
+                    ) : null}
+                </span>
+                <Skeleton
+                    className="absolute inset-0"
+                    style={{ borderRadius: 'inherit' }}
+                />
+            </span>
+        );
+    }
 
     return (
         <button

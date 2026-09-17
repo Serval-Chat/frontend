@@ -1328,13 +1328,26 @@ export const useKickMember = (
 
 export const useBanMember = (
     serverId: string,
-): UseMutationResult<void, Error, { userId: string; reason?: string }> => {
+): UseMutationResult<
+    void,
+    Error,
+    {
+        userId: string;
+        reason?: string;
+        deleteMessageDuration?: string;
+    }
+> => {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ userId, reason }): Promise<void> =>
-            serversApi.banUser(serverId, userId, reason),
+        mutationFn: ({ userId, reason, deleteMessageDuration }): Promise<void> =>
+            serversApi.banUser(
+                serverId,
+                userId,
+                reason,
+                deleteMessageDuration,
+            ),
         onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),

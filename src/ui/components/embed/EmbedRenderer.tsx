@@ -22,7 +22,7 @@ import { useToast } from '@/ui/components/common/Toast';
 import { cn } from '@/utils/cn';
 import { extractApiError } from '@/utils/extractApiError';
 import { APP_LOCALE } from '@/utils/locale';
-import { getSafeUrl } from '@/utils/proxy';
+import { getSafeUrl, isSafeVideoUrl, isSafeYoutubeEmbedUrl } from '@/utils/proxy';
 import {
     type ParserOptions,
     ParserPresets,
@@ -273,7 +273,11 @@ const EmbedCard = memo(
 
         if (!hasContent) return null;
 
-        if (embed.type === 'youtube' && embed.video?.url) {
+        if (
+            embed.type === 'youtube' &&
+            embed.video?.url &&
+            isSafeYoutubeEmbedUrl(embed.video.url)
+        ) {
             const isShorts = embed.url?.includes('/shorts/') ?? false;
             return (
                 <div
@@ -375,7 +379,7 @@ const EmbedCard = memo(
                                 allowFullScreen
                                 className="absolute inset-0 h-full w-full"
                                 referrerPolicy="strict-origin-when-cross-origin"
-                                sandbox="allow-presentation allow-scripts allow-same-origin allow-popups"
+                                sandbox="allow-presentation allow-scripts allow-popups"
                                 src={embed.video.url}
                                 title={embed.title ?? 'YouTube video'}
                                 onLoad={onResize}
@@ -386,7 +390,11 @@ const EmbedCard = memo(
             );
         }
 
-        if (embed.type === 'video' && embed.video?.url) {
+        if (
+            embed.type === 'video' &&
+            embed.video?.url &&
+            isSafeVideoUrl(embed.video.url)
+        ) {
             return (
                 <div className="mt-1 flex w-fit">
                     <video

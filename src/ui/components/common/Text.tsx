@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 
+import { Skeleton } from '@/ui/components/common/Skeleton';
 import {
     type FontSizeKey,
     type FontWeightKey,
@@ -51,6 +52,8 @@ export interface TextProps extends Omit<
     fontStyle?: 'italic' | 'normal';
     htmlFor?: string;
     style?: CSSProperties;
+    /** Renders this text as a skeleton placeholder, sized to the real content. */
+    skeleton?: boolean;
 }
 
 const variantColorMap: Record<TextVariant, string> = {
@@ -102,6 +105,7 @@ export const Text = ({
     fontStyle,
     style,
     children,
+    skeleton,
     ...props
 }: TextProps) => {
     const s: CSSProperties = {};
@@ -127,6 +131,25 @@ export const Text = ({
     if (transform !== undefined) s.textTransform = transformMap[transform];
     if (fontStyle !== undefined)
         s.fontStyle = fontStyle === 'italic' ? 'italic' : 'normal';
+
+    if (skeleton) {
+        return (
+            <Tag
+                aria-hidden
+                style={{
+                    ...s,
+                    ...style,
+                    position: 'relative',
+                    display: 'inline-block',
+                }}
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...props}
+            >
+                <span style={{ visibility: 'hidden' }}>{children}</span>
+                <Skeleton className="absolute inset-0" variant="text" />
+            </Tag>
+        );
+    }
 
     return (
         <Tag

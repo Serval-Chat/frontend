@@ -123,6 +123,25 @@ describe('NavigationSync', (): void => {
         expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
     });
 
+    it('clears channel context on server members pages', (): void => {
+        const validServerId = '0327554478565752811';
+        vi.mocked(useLocation).mockReturnValue({
+            pathname: `/chat/@server/${validServerId}/members`,
+        } as never);
+        vi.mocked(useParams).mockReturnValue({
+            serverId: validServerId,
+        });
+        vi.mocked(useAppSelector).mockReturnValue({
+            selectedChannelId: '0327554478565752812',
+            selectedServerId: validServerId,
+        } as never);
+
+        render(<NavigationSync />);
+
+        expect(mockDispatch).toHaveBeenCalledWith(setSelectedChannelId(null));
+        expect(mockDispatch).toHaveBeenCalledWith(setTargetMessageId(null));
+    });
+
     it('does not leave the restored last channel active when entering self-roles from another server', (): void => {
         const validServerId = '0327554478565752811';
         vi.mocked(useLocation).mockReturnValue({

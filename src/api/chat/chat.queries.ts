@@ -25,6 +25,7 @@ interface EditUserMessageVariables {
 }
 
 export const CHAT_QUERY_KEYS = {
+    allMessages: ['chat', 'messages'] as const,
     userMessages: (
         userId: string | null,
         targetMessageId: string | null = null,

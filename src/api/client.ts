@@ -5,11 +5,9 @@ import axios, {
 
 import { getBrowserApiBaseUrl } from '@/utils/apiBaseUrl';
 import { getAuthToken, removeAuthToken } from '@/utils/authToken';
+import { isTauri } from '@/utils/tauri';
 
 import { tauriAdapter } from './tauriAdapter';
-
-const isTauri = (): boolean =>
-    'window' in globalThis && '__TAURI__' in globalThis;
 
 // serialize arrays as repeated keys (inChannel=a&inChannel=b) so NestJS
 // whitelist validation doesn't choke on bracket notation (inChannel[]=a).

@@ -10,6 +10,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { MiniProfile } from '@/ui/components/profile/MiniProfile';
 import { ServerSection } from '@/ui/components/servers/ServerSection';
 import { cn } from '@/utils/cn';
+import { SERVER_SUBPAGE_PATHS } from '@/utils/serverSubpages';
 
 /**
  * @description Secondary navigation bar
@@ -32,9 +33,11 @@ export const SecondaryNavBar = () => {
     const inSwipePanel = useMobileSwipeContext();
     const location = useLocation();
 
-    const isRolesView = location.pathname.endsWith('/self-roles');
+    const isRolesView = location.pathname.endsWith(
+        SERVER_SUBPAGE_PATHS.selfRoles,
+    );
     const isChannelsView = location.pathname.endsWith(
-        '/channels-and-categories',
+        SERVER_SUBPAGE_PATHS.channelsAndCategories,
     );
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;

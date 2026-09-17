@@ -679,7 +679,7 @@ export const setupGlobalWsHandlers = (
                         queryKey: FRIEND_REQUESTS_QUERY_KEY,
                     });
                     void queryClient.invalidateQueries({
-                        queryKey: ['chat', 'messages'],
+                        queryKey: CHAT_QUERY_KEYS.allMessages,
                     });
                 }
             },

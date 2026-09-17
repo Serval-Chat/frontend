@@ -1707,6 +1707,14 @@ class TextParser {
         return null;
     }
 
+    private isSafeLinkUrl(url: string): boolean {
+        const normalized = url.replace(/[\t\r\n]/g, '').trim();
+        const schemeMatch = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(normalized);
+        const scheme = schemeMatch?.[1];
+        if (!scheme) return true;
+        return scheme.toLowerCase() === 'http' || scheme.toLowerCase() === 'https';
+    }
+
     private tryParseNamedLink(): ASTNode | null {
         const start = this.index;
         if (this.text.charAt(this.index) === '[') {
@@ -1735,7 +1743,7 @@ class TextParser {
                     this.index++;
                 }
 
-                if (urlDepth === 0 && url) {
+                if (urlDepth === 0 && url && this.isSafeLinkUrl(url)) {
                     this.index++; // Skip )
                     return {
                         type: 'link',

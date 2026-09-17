@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Clock, Trophy, Users } from 'lucide-react';
 
 import { chatApi } from '@/api/chat/chat.api';
+import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { MessagePoll } from '@/api/chat/chat.types';
 import { useMe } from '@/api/users/users.queries';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
@@ -119,7 +120,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
         },
         onSuccess: () => {
             void queryClient.invalidateQueries({
-                queryKey: ['chat', 'messages'],
+                queryKey: CHAT_QUERY_KEYS.allMessages,
             });
         },
     });

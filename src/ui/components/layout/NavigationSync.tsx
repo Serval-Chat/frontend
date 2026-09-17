@@ -9,6 +9,7 @@ import {
     setSelectedServerId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
+import { isServerSubpage } from '@/utils/serverSubpages';
 import { isValidSnowflakeId } from '@/utils/validation';
 
 /**
@@ -40,9 +41,7 @@ export const NavigationSync = (): null => {
                 return;
             }
 
-            const isSpecialView =
-                path.endsWith('/self-roles') ||
-                path.endsWith('/channels-and-categories');
+            const isSpecialView = isServerSubpage(path);
 
             if (selectedServerId !== params.serverId) {
                 dispatch(setSelectedServerId(params.serverId));

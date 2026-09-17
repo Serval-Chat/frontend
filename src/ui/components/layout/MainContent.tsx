@@ -25,6 +25,7 @@ import { Text } from '@/ui/components/common/Text';
 import { FriendRequestList } from '@/ui/components/friends/FriendRequestList';
 import { Box } from '@/ui/components/layout/Box';
 import { cn } from '@/utils/cn';
+import { SERVER_SUBPAGE_PATHS } from '@/utils/serverSubpages';
 
 const ActiveVoiceRoom = React.lazy(
     (): Promise<{ default: never } | { default: () => null }> =>
@@ -47,6 +48,12 @@ const ServerChannelsPage = React.lazy(() =>
             default: m.ServerChannelsPage,
         }),
     ),
+);
+
+const ServerMembersPage = React.lazy(() =>
+    import('@/ui/components/servers/ServerMembersPage').then((m) => ({
+        default: m.ServerMembersPage,
+    })),
 );
 
 const ActiveVoiceRoomMount = React.memo(() => {
@@ -299,9 +306,14 @@ export const MainContent = () => {
     const inSwipePanel = useMobileSwipeContext();
     const location = useLocation();
 
-    const isRolesView = location.pathname.endsWith('/self-roles');
+    const isRolesView = location.pathname.endsWith(
+        SERVER_SUBPAGE_PATHS.selfRoles,
+    );
     const isChannelsView = location.pathname.endsWith(
-        '/channels-and-categories',
+        SERVER_SUBPAGE_PATHS.channelsAndCategories,
+    );
+    const isMembersView = location.pathname.endsWith(
+        SERVER_SUBPAGE_PATHS.members,
     );
 
     const isNothingSelected = !selectedFriendId && !selectedChannelId;
@@ -328,6 +340,7 @@ export const MainContent = () => {
                     isNothingSelected &&
                     !isRolesView &&
                     !isChannelsView &&
+                    !isMembersView &&
                     'max-md:hidden',
             )}
         >
@@ -338,6 +351,10 @@ export const MainContent = () => {
             ) : isChannelsView ? (
                 <React.Suspense fallback={null}>
                     <ServerChannelsPage />
+                </React.Suspense>
+            ) : isMembersView ? (
+                <React.Suspense fallback={null}>
+                    <ServerMembersPage />
                 </React.Suspense>
             ) : isSplitViewActive ? (
                 <Box className="chat-background flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">

@@ -51,15 +51,21 @@ vi.mock('@/api/friends/friends.queries', () => ({
     useTogglePinFriend: () => ({ mutate: vi.fn() }),
 }));
 
+const banMemberMock = vi.fn();
+const useServerDetailsMock = vi.fn(
+    (): { data: { ownerId: string } | null } => ({ data: null }),
+);
+const useMembersMock = vi.fn((): { data: never[] } => ({ data: [] }));
+
 vi.mock('@/api/servers/servers.queries', () => ({
     useServers: (): { data: never[] } => ({ data: [] }),
     useAddRoleToMember: () => ({ mutate: vi.fn(), isPending: false }),
     useRemoveRoleFromMember: () => ({ mutate: vi.fn(), isPending: false }),
     useKickMember: () => ({ mutate: vi.fn() }),
-    useBanMember: () => ({ mutate: vi.fn() }),
+    useBanMember: () => ({ mutate: banMemberMock }),
     useTimeoutMember: () => ({ mutate: vi.fn() }),
-    useServerDetails: (): { data: null } => ({ data: null }),
-    useMembers: (): { data: never[] } => ({ data: [] }),
+    useServerDetails: () => useServerDetailsMock(),
+    useMembers: () => useMembersMock(),
 }));
 
 vi.mock('@/api/users/users.queries', () => ({
@@ -100,12 +106,19 @@ vi.mock(
         BlockUserModal: (): null => null,
     }),
 );
-vi.mock(
-    '@/ui/components/servers/modals/BanUserModal',
-    (): { BanUserModal: () => null } => ({
-        BanUserModal: (): null => null,
-    }),
-);
+vi.mock('@/ui/components/servers/modals/BanUserModal', () => ({
+    BanUserModal: ({
+        onConfirm,
+    }: {
+        onConfirm: (reason: string, deleteMessageDuration?: string) => void;
+    }) => (
+        <button
+            onClick={(): void => onConfirm('test reason', '24h')}
+        >
+            Confirm Ban
+        </button>
+    ),
+}));
 vi.mock(
     '@/ui/components/servers/modals/KickUserModal',
     (): { KickUserModal: () => null } => ({
@@ -158,6 +171,8 @@ describe('UserItem', (): void => {
             status: 'online',
             setStatus: vi.fn(),
         });
+        useServerDetailsMock.mockReturnValue({ data: null });
+        useMembersMock.mockReturnValue({ data: [] });
     });
 
     it('renders a bot tag for bot users', (): void => {
@@ -234,5 +249,32 @@ describe('UserItem', (): void => {
         render(<UserItem noFetch user={otherUser} userId="user-2" />);
 
         expect(screen.getByTitle('Offline')).toBeInTheDocument();
+    });
+
+    it('forwards the selected deleteMessageDuration when banning a member', (): void => {
+        useServerDetailsMock.mockReturnValue({ data: { ownerId: 'me' } });
+        const otherUser: User = {
+            id: 'user-2',
+            username: 'alice',
+            isBot: false,
+        } as User;
+
+        render(
+            <UserItem
+                noFetch
+                serverId="server-1"
+                user={otherUser}
+                userId="user-2"
+            />,
+        );
+
+        fireEvent.click(screen.getByText('Ban Member'));
+        fireEvent.click(screen.getByText('Confirm Ban'));
+
+        expect(banMemberMock).toHaveBeenCalledWith({
+            userId: 'user-2',
+            reason: 'test reason',
+            deleteMessageDuration: '24h',
+        });
     });
 });

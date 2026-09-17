@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Hash, Tag } from 'lucide-react';
+import { Hash, Tag, Users } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import {
@@ -9,6 +9,7 @@ import {
     useOnboarding,
     useServerDetails,
 } from '@/api/servers/servers.queries';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useServerWS } from '@/hooks/ws/useServerWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -16,11 +17,18 @@ import {
     setSelectedChannelId,
     setTargetMessageId,
 } from '@/store/slices/navSlice';
+import { SERVER_SUBPAGE_PATHS, isServerSubpage } from '@/utils/serverSubpages';
 
 import { ChannelItem } from './ChannelItem';
 import { ChannelList } from './ChannelList';
 import { ServerBanner } from './ServerBanner';
 import { SidebarSkeleton } from './SidebarSkeleton';
+
+const MEMBER_MANAGEMENT_PERMISSIONS = [
+    'banMembers',
+    'kickMembers',
+    'moderateMembers',
+] as const;
 
 const ServerOnboardingModal = React.lazy(() =>
     import('./onboarding/ServerOnboardingModals').then((m) => ({
@@ -58,14 +66,18 @@ export const ServerSection = () => {
     const { data: categories, isPlaceholderData: isPlaceholderCategories } =
         useCategories(selectedServerId);
     const { data: onboarding } = useOnboarding(selectedServerId);
+    const { hasPermission, isOwner } = usePermissions(selectedServerId);
+    const canViewMembers =
+        isOwner ||
+        MEMBER_MANAGEMENT_PERMISSIONS.some((permission): boolean =>
+            hasPermission(permission),
+        );
 
     useServerWS(selectedServerId ?? undefined);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
-    const isSpecialView =
-        location.pathname.endsWith('/self-roles') ||
-        location.pathname.endsWith('/channels-and-categories');
+    const isSpecialView = isServerSubpage(location.pathname);
 
     useEffect((): void => {
         if (!selectedServerId) return;
@@ -158,6 +170,18 @@ export const ServerSection = () => {
                 ) : (
                     <>
                         <div className="shrink-0 border-b border-border-subtle px-2 py-2">
+                            {canViewMembers ? (
+                                <ChannelItem
+                                    iconComponent={Users}
+                                    name="Members"
+                                    type="text"
+                                    onClick={(): void => {
+                                        void navigate(
+                                            `/chat/@server/${selectedServerId}${SERVER_SUBPAGE_PATHS.members}`,
+                                        );
+                                    }}
+                                />
+                            ) : null}
                             {(onboarding?.onboarding.selfAssignableRoleIds
                                 .length ?? 0) > 0 ? (
                                 <ChannelItem
@@ -166,7 +190,7 @@ export const ServerSection = () => {
                                     type="text"
                                     onClick={(): void => {
                                         void navigate(
-                                            `/chat/@server/${selectedServerId}/self-roles`,
+                                            `/chat/@server/${selectedServerId}${SERVER_SUBPAGE_PATHS.selfRoles}`,
                                         );
                                     }}
                                 />
@@ -177,7 +201,7 @@ export const ServerSection = () => {
                                 type="text"
                                 onClick={(): void => {
                                     void navigate(
-                                        `/chat/@server/${selectedServerId}/channels-and-categories`,
+                                        `/chat/@server/${selectedServerId}${SERVER_SUBPAGE_PATHS.channelsAndCategories}`,
                                     );
                                 }}
                             />

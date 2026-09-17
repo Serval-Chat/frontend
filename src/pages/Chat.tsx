@@ -27,6 +27,7 @@ import { transitions } from '@/ui/animations';
 import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
 import { UnacknowledgedWarningModal } from '@/ui/components/warnings/UnacknowledgedWarningModal';
+import { isServerSubpage } from '@/utils/serverSubpages';
 
 const isMobileViewport = (): boolean =>
     globalThis.window !== undefined &&
@@ -218,9 +219,7 @@ export const Chat = () => {
         if (error) console.error('Error fetching user:', error);
     }, [user, error]);
 
-    const isServerSubpageView =
-        location.pathname.endsWith('/self-roles') ||
-        location.pathname.endsWith('/channels-and-categories');
+    const isServerSubpageView = isServerSubpage(location.pathname);
 
     // 0 = list view, 1 = chat view OR pending requests view OR server subpage view
     const inChat = !!(selectedFriendId || selectedChannelId);

@@ -12,6 +12,7 @@ import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import '@/sentry';
 import '@/styles/index.css';
+import { RootErrorBoundary } from '@/ui/components/common/RootErrorBoundary';
 import { ToastProvider } from '@/ui/components/common/Toast';
 import { Seo } from '@/ui/components/seo/Seo';
 import { InAppNotificationProvider } from '@/ui/notifications/InAppNotificationProvider';
@@ -31,20 +32,22 @@ createRoot(document.querySelector('#root')!).render(
                     <ThemeProvider>
                         <ToastProvider>
                             <BrowserRouter>
-                                <LimitedAnimationsProvider>
-                                    <InAppNotificationProvider>
-                                        <Seo />
-                                        <Suspense
-                                            fallback={
-                                                <div className="flex h-screen items-center justify-center">
-                                                    Loading...
-                                                </div>
-                                            }
-                                        >
-                                            <AppRoutes />
-                                        </Suspense>
-                                    </InAppNotificationProvider>
-                                </LimitedAnimationsProvider>
+                                <RootErrorBoundary>
+                                    <LimitedAnimationsProvider>
+                                        <InAppNotificationProvider>
+                                            <Seo />
+                                            <Suspense
+                                                fallback={
+                                                    <div className="flex h-screen items-center justify-center">
+                                                        Loading...
+                                                    </div>
+                                                }
+                                            >
+                                                <AppRoutes />
+                                            </Suspense>
+                                        </InAppNotificationProvider>
+                                    </LimitedAnimationsProvider>
+                                </RootErrorBoundary>
                             </BrowserRouter>
                         </ToastProvider>
                     </ThemeProvider>

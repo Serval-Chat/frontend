@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+    Ban,
     Check,
     Copy,
     CornerUpLeft,
@@ -14,6 +15,7 @@ import {
     Trash2,
     UserMinus,
     UserPlus,
+    UserX,
     X,
 } from 'lucide-react';
 
@@ -53,6 +55,13 @@ interface ContextMenuParams {
     onRemoveRole?: (roleId: string) => void;
     onRetryMessage?: () => void;
     onDiscardMessage?: () => void;
+    canBan?: boolean;
+    canKick?: boolean;
+    canTimeout?: boolean;
+    isHigherHierarchy?: boolean;
+    onBan?: () => void;
+    onKick?: () => void;
+    onTimeout?: () => void;
 }
 
 function buildContextMenuItems({
@@ -83,6 +92,13 @@ function buildContextMenuItems({
     onRemoveRole,
     onRetryMessage,
     onDiscardMessage,
+    canBan,
+    canKick,
+    canTimeout,
+    isHigherHierarchy,
+    onBan,
+    onKick,
+    onTimeout,
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
 
@@ -231,6 +247,40 @@ function buildContextMenuItems({
     }
 
     if (
+        !isMessageSender &&
+        message.serverId &&
+        isHigherHierarchy &&
+        (canBan || canKick || canTimeout)
+    ) {
+        items.push({ type: 'divider' });
+
+        if (canTimeout && onTimeout) {
+            items.push({
+                label: 'Timeout Member',
+                icon: Shield,
+                variant: 'danger',
+                onClick: onTimeout,
+            });
+        }
+        if (canKick && onKick) {
+            items.push({
+                label: 'Kick Member',
+                icon: UserX,
+                variant: 'danger',
+                onClick: onKick,
+            });
+        }
+        if (canBan && onBan) {
+            items.push({
+                label: 'Ban Member',
+                icon: Ban,
+                variant: 'danger',
+                onClick: onBan,
+            });
+        }
+    }
+
+    if (
         allServerRoles &&
         canManageRoles &&
         onAddRole &&
@@ -334,6 +384,13 @@ export function useMessageContextMenu(
         onRemoveRole,
         onRetryMessage,
         onDiscardMessage,
+        canBan,
+        canKick,
+        canTimeout,
+        isHigherHierarchy,
+        onBan,
+        onKick,
+        onTimeout,
     } = params;
 
     return React.useMemo(
@@ -366,6 +423,13 @@ export function useMessageContextMenu(
                 onRemoveRole,
                 onRetryMessage,
                 onDiscardMessage,
+                canBan,
+                canKick,
+                canTimeout,
+                isHigherHierarchy,
+                onBan,
+                onKick,
+                onTimeout,
             }),
 
         [
@@ -396,6 +460,13 @@ export function useMessageContextMenu(
             onRemoveRole,
             onRetryMessage,
             onDiscardMessage,
+            canBan,
+            canKick,
+            canTimeout,
+            isHigherHierarchy,
+            onBan,
+            onKick,
+            onTimeout,
         ],
     );
 }

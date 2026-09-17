@@ -9,6 +9,7 @@ import {
     useServerDetails,
 } from '@/api/servers/servers.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 
 import { ServerSection } from './ServerSection';
@@ -25,6 +26,8 @@ vi.mock('@/store/hooks', () => ({
 }));
 
 vi.mock('@/hooks/ws/useServerWS', () => ({ useServerWS: vi.fn() }));
+
+vi.mock('@/hooks/usePermissions', () => ({ usePermissions: vi.fn() }));
 
 vi.mock('@/api/servers/servers.queries', () => ({
     useCategories: vi.fn(),
@@ -105,6 +108,10 @@ describe('ServerSection scroll container', (): void => {
                 voice: { voiceParticipants: {} },
             } as never),
         );
+        vi.mocked(usePermissions).mockReturnValue({
+            hasPermission: () => false,
+            isOwner: false,
+        } as never);
     });
 
     it('mounts the scroll container before the channel list, and keeps the same element once loaded', (): void => {

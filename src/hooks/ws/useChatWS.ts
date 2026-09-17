@@ -633,6 +633,60 @@ export function useChatWS(
     );
 
     useWebSocket(
+        WsEvents.MESSAGES_SERVER_BULK_DELETED_BY_AUTHOR,
+        useCallback(
+            async (payload: {
+                senderId: string;
+                serverId: string;
+                after: string;
+            }): Promise<void> => {
+                const afterDate = new Date(payload.after);
+                const [chatKey, messagesKey, channelKey] =
+                    CHAT_QUERY_KEYS.channelMessages(payload.serverId, null);
+                const isMatchingChannelMessagesQuery = (query: {
+                    queryKey: readonly unknown[];
+                }): boolean =>
+                    query.queryKey[0] === chatKey &&
+                    query.queryKey[1] === messagesKey &&
+                    query.queryKey[2] === channelKey &&
+                    query.queryKey[3] === payload.serverId;
+
+                await queryClient.cancelQueries({
+                    predicate: isMatchingChannelMessagesQuery,
+                });
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: isMatchingChannelMessagesQuery,
+                    },
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.map((msg): ChatMessage =>
+                                    msg.senderId === payload.senderId &&
+                                    new Date(msg.createdAt) >= afterDate
+                                        ? {
+                                              ...msg,
+                                              deletedAt:
+                                                  new Date().toISOString(),
+                                          }
+                                        : msg,
+                                ),
+                            ),
+                        };
+                    },
+                );
+            },
+            [queryClient],
+        ),
+    );
+
+    useWebSocket(
         WsEvents.MESSAGE_SERVER_EDITED,
         useCallback(
             (payload: {

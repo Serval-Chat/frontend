@@ -153,3 +153,40 @@ export function useMessagePermissions(
 
     return { canEdit, canDelete, canPin };
 }
+
+/**
+ * @description Whether the current user can ban/kick/timeout the message's
+ * sender, and whether the current user outranks them in the role hierarchy.
+ * Mirrors the ban/kick/timeout permission checks in ServerSection.tsx's
+ * MEMBER_MANAGEMENT_PERMISSIONS and UserItem.tsx's canBan/canKick/canTimeout
+ * — keep those in sync if a permission name changes here.
+ */
+export function useMessageModerationPermissions(
+    isOwner: boolean,
+    hasPermission: (perm: keyof RolePermissions) => boolean,
+    myHighestRolePosition: number,
+    targetHighestRolePosition: number,
+): {
+    canBan: boolean;
+    canKick: boolean;
+    canTimeout: boolean;
+    isHigherHierarchy: boolean;
+} {
+    const canBan =
+        isOwner || hasPermission('administrator') || hasPermission('banMembers');
+
+    const canKick =
+        isOwner ||
+        hasPermission('administrator') ||
+        hasPermission('kickMembers');
+
+    const canTimeout =
+        isOwner ||
+        hasPermission('administrator') ||
+        hasPermission('moderateMembers');
+
+    const isHigherHierarchy =
+        isOwner || myHighestRolePosition > targetHighestRolePosition;
+
+    return { canBan, canKick, canTimeout, isHigherHierarchy };
+}

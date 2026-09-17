@@ -514,10 +514,12 @@ export const serversApi = {
         serverId: string,
         userId: string,
         reason?: string,
+        deleteMessageDuration?: string,
     ): Promise<void> => {
         await apiClient.post(`/api/v1/servers/${serverId}/bans`, {
             userId,
             reason,
+            deleteMessageDuration,
         });
     },
 

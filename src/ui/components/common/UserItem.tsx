@@ -1126,8 +1126,8 @@ const UserItemInner = React.memo(
                         onClose={(): void => {
                             setIsBanModalOpen(false);
                         }}
-                        onConfirm={(reason): void => {
-                            banMember({ userId, reason });
+                        onConfirm={(reason, deleteMessageDuration): void => {
+                            banMember({ userId, reason, deleteMessageDuration });
                         }}
                     />
                 ) : null}

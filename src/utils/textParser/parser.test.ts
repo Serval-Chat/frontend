@@ -377,6 +377,61 @@ describe('TextParser', (): void => {
         ]);
     });
 
+    it('should NOT parse a named link with a javascript: URL as a link', (): void => {
+        const text = 'Click [here](javascript:alert(document.cookie)) now';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'text',
+                content:
+                    'Click [here](javascript:alert(document.cookie)) now',
+            },
+        ]);
+    });
+
+    it('should NOT parse named links with other dangerous URL schemes as a link', (): void => {
+        const dangerousUrls = [
+            'javascript:alert(1)',
+            'JavaScript:alert(1)',
+            'data:text/html,<script>alert(1)</script>',
+            'vbscript:msgbox(1)',
+            'file:///etc/passwd',
+        ];
+
+        for (const url of dangerousUrls) {
+            const text = `[click me](${url})`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([{ type: 'text', content: text }]);
+        }
+    });
+
+    it('should still parse named links with http/https URLs as a link', (): void => {
+        const text = '[Serchat](https://rolling.catfla.re)';
+        const nodes = parseText(text, ParserPresets.MESSAGE);
+        expect(nodes).toEqual([
+            {
+                type: 'link',
+                url: 'https://rolling.catfla.re',
+                text: 'Serchat',
+            },
+        ]);
+    });
+
+    it('should NOT parse a named link with a tab/newline hidden inside a dangerous scheme', (): void => {
+        const dangerousUrls = [
+            'java\tscript:alert(1)',
+            'java\nscript:alert(1)',
+            'java\rscript:alert(1)',
+            '\tjavascript:alert(1)',
+        ];
+
+        for (const url of dangerousUrls) {
+            const text = `[click me](${url})`;
+            const nodes = parseText(text, ParserPresets.MESSAGE);
+            expect(nodes).toEqual([{ type: 'text', content: text }]);
+        }
+    });
+
     it('should parse named links within another element', (): void => {
         const text = '# Check [Serchat](https://rolling.catfla.re) now';
         const nodes = parseText(text, ParserPresets.MESSAGE);

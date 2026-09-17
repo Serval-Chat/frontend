@@ -6,6 +6,7 @@ import { Check, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Box } from '@/ui/components/layout/Box';
+import { colors } from '@/ui/theme';
 import { cn } from '@/utils/cn';
 
 import { Input } from './Input';
@@ -107,12 +108,18 @@ export const DropdownWithSearch = ({
             <Button
                 fullWidth
                 className={cn(
-                    'flex w-full items-center justify-between rounded-lg border border-border-subtle bg-bg-secondary px-4 py-2 text-sm shadow-none transition-all duration-200 hover:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none',
-                    isOpen && 'border-primary ring-2 ring-primary/20',
+                    'flex h-10 w-full items-center justify-between rounded-lg px-4 py-2 text-sm shadow-none transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:outline-none',
+                    isOpen && 'ring-2 ring-primary/20',
                 )}
                 justify="between"
+                style={{
+                    backgroundColor: colors.bgSubtle,
+                    borderColor: isOpen
+                        ? colors.primary
+                        : colors.borderSubtle,
+                }}
                 type="button"
-                variant="ghost"
+                variant="normal"
                 onClick={handleToggle}
             >
                 <div className="flex items-center gap-3 truncate">

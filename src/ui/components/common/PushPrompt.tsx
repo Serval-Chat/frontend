@@ -6,8 +6,7 @@ import { setupWebPush } from '@/lib/pushClient';
 import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Text } from '@/ui/components/common/Text';
-
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
+import { isTauri } from '@/utils/tauri';
 
 export const PushPrompt = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -15,6 +14,13 @@ export const PushPrompt = () => {
 
     useEffect((): (() => void) | undefined => {
         if (isTauri() || !('Notification' in globalThis)) return;
+
+        if (
+            Notification.permission === 'denied' ||
+            Notification.permission === 'granted'
+        ) {
+            return;
+        }
 
         if (Notification.permission === 'default') {
             const isDismissed =

@@ -10,7 +10,7 @@ import { Text } from '@/ui/components/common/Text';
 import { canUsePasskeys } from '@/utils/webauthn';
 
 interface PasswordlessSettingsProps {
-    user: User;
+    user: User | undefined;
 }
 
 export const PasswordlessSettings = ({
@@ -26,6 +26,7 @@ export const PasswordlessSettings = ({
     } = usePasswordless();
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [password, setPassword] = useState('');
+    const skeleton = !user;
 
     if (!canUsePasskeys()) return null;
 
@@ -35,7 +36,7 @@ export const PasswordlessSettings = ({
     };
 
     const handleEnable = (): void => {
-        void enable(password).then(closeConfirmModal);
+        void enable(password).finally(closeConfirmModal);
     };
 
     return (
@@ -45,18 +46,21 @@ export const PasswordlessSettings = ({
                     <div className="flex items-center gap-2">
                         <Text weight="bold">Passwordless Sign-In</Text>
                         <Pill
-                            variant={user.passwordless ? 'success' : 'neutral'}
+                            skeleton={skeleton}
+                            variant={
+                                user?.passwordless ? 'success' : 'neutral'
+                            }
                         >
-                            {user.passwordless ? 'Enabled' : 'Not enabled'}
+                            {user?.passwordless ? 'Enabled' : 'Not enabled'}
                         </Pill>
                     </div>
-                    <Text size="xs" variant="muted">
-                        {user.passwordless
+                    <Text size="xs" skeleton={skeleton} variant="muted">
+                        {user?.passwordless
                             ? 'Your password is removed. Sign in with a passkey, or a recovery key if you lose access to one.'
                             : 'Remove your password entirely and sign in only with a passkey, backed by one-time recovery keys.'}
                     </Text>
                 </div>
-                {user.passwordless ? (
+                {user?.passwordless ? (
                     <Button
                         loading={isRegenerating}
                         size="sm"
@@ -70,6 +74,7 @@ export const PasswordlessSettings = ({
                 ) : (
                     <Button
                         size="sm"
+                        skeleton={skeleton}
                         variant="normal"
                         onClick={(): void => {
                             setIsConfirmModalOpen(true);

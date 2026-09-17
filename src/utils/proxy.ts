@@ -38,13 +38,41 @@ export const isInternalUrl = (url: string | undefined): boolean => {
         if (browserApiBaseUrl !== '' && url.startsWith(browserApiBaseUrl)) {
             return true;
         }
-
-        if (url.includes('/api/v1/files/download/')) return true;
     } catch {
         return true;
     }
 
     return false;
+};
+
+const YOUTUBE_EMBED_HOSTS = new Set([
+    'www.youtube.com',
+    'youtube.com',
+    'www.youtube-nocookie.com',
+    'youtube-nocookie.com',
+]);
+
+export const isSafeYoutubeEmbedUrl = (url: string | undefined): boolean => {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return (
+            parsed.protocol === 'https:' &&
+            YOUTUBE_EMBED_HOSTS.has(parsed.hostname.toLowerCase())
+        );
+    } catch {
+        return false;
+    }
+};
+
+export const isSafeVideoUrl = (url: string | undefined): boolean => {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
 };
 
 export const getSafeUrl = (url: string | undefined): string | undefined => {

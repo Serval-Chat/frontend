@@ -15,7 +15,10 @@ import {
 import { useAddReaction } from '@/api/reactions/reactions.queries';
 import {
     useAddRoleToMember,
+    useBanMember,
+    useKickMember,
     useRemoveRoleFromMember,
+    useTimeoutMember,
 } from '@/api/servers/servers.queries';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import type { QuickReactionEmoji } from '@/hooks/useFrequentlyUsedEmojis';
@@ -34,11 +37,18 @@ import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
+import { BanUserModal } from '@/ui/components/servers/modals/BanUserModal';
+import { KickUserModal } from '@/ui/components/servers/modals/KickUserModal';
+import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModal';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 
-import { useMessageData, useMessagePermissions } from './Message.hooks';
+import {
+    useMessageData,
+    useMessageModerationPermissions,
+    useMessagePermissions,
+} from './Message.hooks';
 import type { MessageProps, Role } from './Message.types';
 import { MessageActions } from './MessageActions';
 import { useMessageContextMenu } from './MessageContextMenu';
@@ -105,6 +115,10 @@ export const Message = React.memo(
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
+        const [isBanModalOpen, setIsBanModalOpen] = React.useState(false);
+        const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
+        const [isTimeoutModalOpen, setIsTimeoutModalOpen] =
+            React.useState(false);
         const avatarRef = React.useRef<HTMLDivElement>(null);
         const pickerRef = React.useRef<HTMLDivElement>(null);
         const reactRef = React.useRef<HTMLButtonElement>(null);
@@ -138,6 +152,12 @@ export const Message = React.memo(
 
         const { mutate: addRole } = useAddRoleToMember(message.serverId || '');
         const { mutate: removeRole } = useRemoveRoleFromMember(
+            message.serverId || '',
+        );
+
+        const { mutate: banMember } = useBanMember(message.serverId || '');
+        const { mutate: kickMember } = useKickMember(message.serverId || '');
+        const { mutate: timeoutMember } = useTimeoutMember(
             message.serverId || '',
         );
 
@@ -382,6 +402,19 @@ export const Message = React.memo(
             return Math.max(...myRoles.map((r): number => r.position));
         }, [me, roleMap, fullMemberMap]);
 
+        const targetHighestRolePosition = React.useMemo((): number => {
+            if (!senderRoles || senderRoles.length === 0) return -1;
+            return Math.max(...senderRoles.map((r): number => r.position));
+        }, [senderRoles]);
+
+        const { canBan, canKick, canTimeout, isHigherHierarchy } =
+            useMessageModerationPermissions(
+                isOwner,
+                checkPermission,
+                myHighestRolePosition,
+                targetHighestRolePosition,
+            );
+
         const contextMenuItems = useMessageContextMenu({
             message,
             user,
@@ -422,6 +455,19 @@ export const Message = React.memo(
                 message._pending != null && message._localId && discardMessage
                     ? (): void => discardMessage(message._localId!)
                     : undefined,
+            canBan,
+            canKick,
+            canTimeout,
+            isHigherHierarchy,
+            onBan: !isMessageSender
+                ? (): void => setIsBanModalOpen(true)
+                : undefined,
+            onKick: !isMessageSender
+                ? (): void => setIsKickModalOpen(true)
+                : undefined,
+            onTimeout: !isMessageSender
+                ? (): void => setIsTimeoutModalOpen(true)
+                : undefined,
         });
 
         const handleRetry = React.useCallback((): void => {
@@ -688,6 +734,53 @@ export const Message = React.memo(
                         setColorResolverReport(null);
                     }}
                 />
+                {isKickModalOpen ? (
+                    <KickUserModal
+                        isOpen={isKickModalOpen}
+                        userAvatar={user.profilePicture}
+                        username={user.username}
+                        onClose={(): void => {
+                            setIsKickModalOpen(false);
+                        }}
+                        onConfirm={(): void => {
+                            kickMember(message.senderId);
+                        }}
+                    />
+                ) : null}
+                {isBanModalOpen ? (
+                    <BanUserModal
+                        isOpen={isBanModalOpen}
+                        userAvatar={user.profilePicture}
+                        username={user.username}
+                        onClose={(): void => {
+                            setIsBanModalOpen(false);
+                        }}
+                        onConfirm={(reason, deleteMessageDuration): void => {
+                            banMember({
+                                userId: message.senderId,
+                                reason,
+                                deleteMessageDuration,
+                            });
+                        }}
+                    />
+                ) : null}
+                {isTimeoutModalOpen ? (
+                    <TimeoutUserModal
+                        isOpen={isTimeoutModalOpen}
+                        userAvatar={user.profilePicture}
+                        username={user.username}
+                        onClose={(): void => {
+                            setIsTimeoutModalOpen(false);
+                        }}
+                        onConfirm={(duration, reason): void => {
+                            timeoutMember({
+                                userId: message.senderId,
+                                duration,
+                                reason,
+                            });
+                        }}
+                    />
+                ) : null}
             </Box>
         );
     },

@@ -5,6 +5,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminRoute } from '@/ui/components/layout/AdminRoute';
 import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
 import { NavigationSync } from '@/ui/components/layout/NavigationSync';
+import { isTauri } from '@/utils/tauri';
 
 const Admin = lazy(() =>
     import('@/pages/Admin').then((m) => ({ default: m.Admin })),
@@ -57,8 +58,6 @@ const TauriGateway = lazy(
         ),
 );
 const Tos = lazy(() => import('@/pages/Tos').then((m) => ({ default: m.Tos })));
-
-const isTauri = (): boolean => '__TAURI__' in globalThis;
 
 const WebOnly = ({
     children,
@@ -129,6 +128,10 @@ export const AppRoutes = (): React.ReactNode => (
                 <Route
                     element={<NavigationSync />}
                     path="@server/:serverId/channels-and-categories"
+                />
+                <Route
+                    element={<NavigationSync />}
+                    path="@server/:serverId/members"
                 />
                 <Route
                     element={<NavigationSync />}

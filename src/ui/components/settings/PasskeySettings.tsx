@@ -58,6 +58,7 @@ export const PasskeySettings = (): React.ReactNode => {
                     <div className="flex items-center gap-2">
                         <Text weight="bold">Passkeys</Text>
                         <Pill
+                            skeleton={isLoading}
                             variant={
                                 passkeys.length > 0 ? 'success' : 'neutral'
                             }
@@ -82,13 +83,53 @@ export const PasskeySettings = (): React.ReactNode => {
                 </Button>
             </div>
 
+            {isLoading ? (
+                <div className="space-y-2 border-t border-border-subtle pt-4">
+                    <div className="flex items-center justify-between gap-3 rounded-md border border-border-subtle bg-background p-3">
+                        <div className="min-w-0">
+                            <Text
+                                skeleton
+                                className="truncate"
+                                size="sm"
+                                weight="bold"
+                            >
+                                Placeholder Passkey
+                            </Text>
+                            <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                                <Text skeleton size="xs" variant="muted">
+                                    Added 3 days ago
+                                </Text>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                skeleton
+                                icon={Pencil}
+                                size="sm"
+                                variant="ghost"
+                            >
+                                Rename
+                            </Button>
+                            <Button
+                                skeleton
+                                icon={Trash2}
+                                size="sm"
+                                variant="ghost"
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
             {!isLoading && passkeys.length === 0 ? (
                 <Text size="xs" variant="muted">
                     No passkeys yet.
                 </Text>
             ) : null}
 
-            {passkeys.length > 0 ? (
+            {!isLoading && passkeys.length > 0 ? (
                 <div className="space-y-2 border-t border-border-subtle pt-4">
                     {passkeys.map((passkey) => (
                         <div
@@ -114,6 +155,7 @@ export const PasskeySettings = (): React.ReactNode => {
                                             }}
                                         />
                                         <Button
+                                            disabled={!renameValue.trim()}
                                             loading={mutatingId === passkey.id}
                                             size="sm"
                                             variant="normal"

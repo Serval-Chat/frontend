@@ -5,6 +5,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 
@@ -63,7 +64,7 @@ export const useAddReaction = (): UseMutationResult<
         onSuccess: (response, variables): void => {
             const { messageId } = variables;
             queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
-                { queryKey: ['chat', 'messages'] },
+                { queryKey: CHAT_QUERY_KEYS.allMessages },
                 (
                     old,
                 ):
@@ -127,7 +128,7 @@ export const useRemoveReaction = (): UseMutationResult<
         onSuccess: (response, variables): void => {
             const { messageId } = variables;
             queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
-                { queryKey: ['chat', 'messages'] },
+                { queryKey: CHAT_QUERY_KEYS.allMessages },
                 (
                     old,
                 ):

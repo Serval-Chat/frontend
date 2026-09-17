@@ -1,7 +1,6 @@
 import { apiClient } from '@/api/client';
 import { getAuthToken } from '@/utils/authToken';
-
-const isTauri = (): boolean => '__TAURI_INTERNALS__' in globalThis;
+import { isTauri } from '@/utils/tauri';
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {
     const padding = '='.repeat((4 - (base64.length % 4)) % 4);

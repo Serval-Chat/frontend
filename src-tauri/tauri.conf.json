@@ -10,7 +10,7 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
-    "withGlobalTauri": true,
+    "withGlobalTauri": false,
     "windows": [
       {
         "title": "Serchat",
@@ -18,11 +18,55 @@
         "height": 600,
         "resizable": true,
         "fullscreen": false,
-        "devtools": true
+        "devtools": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "https://challenges.cloudflare.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+        "img-src": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https://*.tenor.com",
+          "https://*.googleapis.com",
+          "https://*.githubusercontent.com",
+          "https://www.gravatar.com",
+          "https://ser.chat",
+          "https://catfla.re",
+          "https://rolling.catfla.re",
+          "https://static.klipy.com",
+          "http://127.0.0.1:3000",
+          "http://localhost:3000"
+        ],
+        "media-src": ["'self'", "https:", "http:", "data:", "blob:"],
+        "connect-src": [
+          "'self'",
+          "https://ser.chat",
+          "wss://ser.chat",
+          "https://catfla.re",
+          "https://rolling.catfla.re",
+          "wss://catfla.re",
+          "wss://rolling.catfla.re",
+          "https://rtc.catfla.re",
+          "wss://rtc.catfla.re",
+          "http://127.0.0.1:3000",
+          "ws://127.0.0.1:3000",
+          "http://localhost:3000",
+          "ws://localhost:3000",
+          "http://127.0.0.1:17880",
+          "ws://127.0.0.1:17880"
+        ],
+        "frame-src": [
+          "https://www.youtube.com",
+          "https://www.youtube-nocookie.com",
+          "https://challenges.cloudflare.com"
+        ],
+        "object-src": ["'none'"]
+      }
     }
   },
   "plugins": {

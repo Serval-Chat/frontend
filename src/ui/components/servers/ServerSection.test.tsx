@@ -1,8 +1,9 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { useNavigate } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as ServerQueries from '@/api/servers/servers.queries';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
     clearLastOpenedChannelForServer,
@@ -33,6 +34,10 @@ vi.mock('@/store/slices/navSlice', () => ({
 
 vi.mock('@/hooks/ws/useServerWS', () => ({
     useServerWS: vi.fn(),
+}));
+
+vi.mock('@/hooks/usePermissions', () => ({
+    usePermissions: vi.fn(),
 }));
 
 vi.mock('@/api/servers/servers.queries', () => ({
@@ -88,6 +93,10 @@ describe('ServerSection fallback logic', (): void => {
                     roles: [],
                 },
             },
+        } as never);
+        vi.mocked(usePermissions).mockReturnValue({
+            hasPermission: () => false,
+            isOwner: false,
         } as never);
     });
 
@@ -204,5 +213,88 @@ describe('ServerSection fallback logic', (): void => {
         expect(mockDispatch).toHaveBeenCalledWith(
             clearLastOpenedChannelForServer('validServer123'),
         );
+    });
+});
+
+describe('ServerSection Members button visibility', (): void => {
+    beforeEach((): void => {
+        vi.clearAllMocks();
+        vi.mocked(useNavigate).mockReturnValue(vi.fn());
+        vi.mocked(useAppDispatch).mockReturnValue(vi.fn());
+        vi.mocked(useAppSelector).mockImplementation((selector) => {
+            const state = {
+                nav: {
+                    selectedServerId: 'validServer123',
+                    selectedChannelId: 'realChannel1',
+                    lastOpenedChannelByServer: {},
+                },
+            };
+            return selector(state as never);
+        });
+
+        vi.mocked(ServerQueries.useServerDetails).mockReturnValue({
+            data: { id: 'validServer123', name: 'Valid Server' },
+            isLoading: false,
+            isError: false,
+        } as never);
+        vi.mocked(ServerQueries.useChannels).mockReturnValue({
+            data: [{ id: 'realChannel1', type: 'text', position: 0 }],
+            isPlaceholderData: false,
+            isError: false,
+        } as never);
+        vi.mocked(ServerQueries.useCategories).mockReturnValue({
+            data: [],
+            isPlaceholderData: false,
+        } as never);
+        vi.mocked(ServerQueries.useOnboarding).mockReturnValue({
+            data: {
+                onboarding: {
+                    enabled: false,
+                    guidelines: '',
+                    selfAssignableRoleIds: [],
+                    landingChannelId: null,
+                    welcomeChannelIds: [],
+                },
+                member: {
+                    hiddenChannelIds: [],
+                    hiddenCategoryIds: [],
+                    roles: [],
+                },
+            },
+        } as never);
+    });
+
+    it('hides the Members button when the caller has none of banMembers/kickMembers/moderateMembers', (): void => {
+        vi.mocked(usePermissions).mockReturnValue({
+            hasPermission: () => false,
+            isOwner: false,
+        } as never);
+
+        render(<ServerSection />);
+
+        expect(screen.queryByText('Members')).not.toBeInTheDocument();
+    });
+
+    it('shows the Members button when the caller has only kickMembers', (): void => {
+        vi.mocked(usePermissions).mockReturnValue({
+            hasPermission: (permission: string): boolean =>
+                permission === 'kickMembers',
+            isOwner: false,
+        } as never);
+
+        render(<ServerSection />);
+
+        expect(screen.getByText('Members')).toBeInTheDocument();
+    });
+
+    it('shows the Members button for the server owner regardless of granted permissions', (): void => {
+        vi.mocked(usePermissions).mockReturnValue({
+            hasPermission: () => false,
+            isOwner: true,
+        } as never);
+
+        render(<ServerSection />);
+
+        expect(screen.getByText('Members')).toBeInTheDocument();
     });
 });

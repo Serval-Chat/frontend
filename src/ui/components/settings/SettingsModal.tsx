@@ -5,82 +5,24 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Heading } from '@/ui/components/common/Heading';
 import { IconButton } from '@/ui/components/common/IconButton';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { Modal } from '@/ui/components/common/Modal';
 import { ModalCloseButton } from '@/ui/components/common/ModalCloseButton';
 import { cn } from '@/utils/cn';
 
+import { AccessibilitySettings } from './AccessibilitySettings';
+import { AccountSettings } from './AccountSettings';
+import { ActiveSessionsSettings } from './ActiveSessionsSettings';
+import { AppearanceSettings } from './AppearanceSettings';
+import { AvatarDecorationsSettings } from './AvatarDecorationsSettings';
+import { BlockingSettings } from './BlockingSettings';
+import { DeveloperSettings } from './DeveloperSettings';
+import { KeybindSettings } from './KeybindSettings';
+import { NotificationSettings } from './NotificationSettings';
+import { PrivacySettings } from './PrivacySettings';
+import { SecuritySettings } from './SecuritySettings';
 import { SettingsSidebar } from './SettingsSidebar';
-
-const AccessibilitySettings = React.lazy(() =>
-    import('./AccessibilitySettings').then((m) => ({
-        default: m.AccessibilitySettings,
-    })),
-);
-
-const AccountSettings = React.lazy(() =>
-    import('./AccountSettings').then((m) => ({ default: m.AccountSettings })),
-);
-
-const AppearanceSettings = React.lazy(() =>
-    import('./AppearanceSettings').then((m) => ({
-        default: m.AppearanceSettings,
-    })),
-);
-
-const BlockingSettings = React.lazy(() =>
-    import('./BlockingSettings').then((m) => ({ default: m.BlockingSettings })),
-);
-
-const DeveloperSettings = React.lazy(() =>
-    import('./DeveloperSettings').then((m) => ({
-        default: m.DeveloperSettings,
-    })),
-);
-
-const StandingSettings = React.lazy(() =>
-    import('./StandingSettings').then((m) => ({ default: m.StandingSettings })),
-);
-
-const NotificationSettings = React.lazy(() =>
-    import('./NotificationSettings').then((m) => ({
-        default: m.NotificationSettings,
-    })),
-);
-
-const KeybindSettings = React.lazy(() =>
-    import('./KeybindSettings').then((m) => ({
-        default: m.KeybindSettings,
-    })),
-);
-
-const AvatarDecorationsSettings = React.lazy(() =>
-    import('./AvatarDecorationsSettings').then((m) => ({
-        default: m.AvatarDecorationsSettings,
-    })),
-);
-
-const PrivacySettings = React.lazy(() =>
-    import('./PrivacySettings').then((m) => ({ default: m.PrivacySettings })),
-);
-
-const ActiveSessionsSettings = React.lazy(() =>
-    import('./ActiveSessionsSettings').then((m) => ({
-        default: m.ActiveSessionsSettings,
-    })),
-);
-
-const WebsiteConnectionsSettings = React.lazy(() =>
-    import('./WebsiteConnectionsSettings').then((m) => ({
-        default: m.WebsiteConnectionsSettings,
-    })),
-);
-
-const SecuritySettings = React.lazy(() =>
-    import('./SecuritySettings').then((m) => ({
-        default: m.SecuritySettings,
-    })),
-);
+import { StandingSettings } from './StandingSettings';
+import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -120,12 +62,6 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     developer: 'developer',
 };
 
-const SettingsSectionLoading = () => (
-    <div className="flex min-h-[240px] flex-1 items-center justify-center">
-        <LoadingSpinner size="lg" />
-    </div>
-);
-
 export const SettingsModal = ({
     isOpen,
     onClose,
@@ -138,25 +74,14 @@ export const SettingsModal = ({
     const routeSection = SECTION_URL_MAP[urlSegment] ?? 'account';
 
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
-    const [pendingSection, setPendingSection] = useState<string | null>(null);
 
-    const activeSection = pendingSection ?? sectionOverride ?? routeSection;
-    const isSectionLoading =
-        (pendingSection !== null && pendingSection !== routeSection) ||
-        (sectionOverride !== null &&
-            sectionOverride !== undefined &&
-            sectionOverride !== routeSection);
+    const activeSection = sectionOverride ?? routeSection;
 
     const handleSetSection = (sectionId: string): void => {
-        setPendingSection(sectionId);
         setIsMobileSidebarOpen(false);
         const urlPath = SECTION_ID_TO_URL[sectionId] ?? 'my-account';
         void navigate(`/chat/@setting/${urlPath}`, { replace: true });
     };
-
-    if (pendingSection !== null && pendingSection === routeSection) {
-        setPendingSection(null);
-    }
 
     return (
         <Modal
@@ -212,57 +137,46 @@ export const SettingsModal = ({
                         <ModalCloseButton onClick={onClose} />
                     </div>
 
-                    <div
-                        className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6"
-                        key={activeSection}
-                    >
-                        {isSectionLoading ? (
-                            <SettingsSectionLoading />
-                        ) : (
-                            <React.Suspense
-                                fallback={<SettingsSectionLoading />}
-                            >
-                                {activeSection === 'account' ? (
-                                    <AccountSettings />
-                                ) : null}
-                                {activeSection === 'connections' ? (
-                                    <WebsiteConnectionsSettings />
-                                ) : null}
-                                {activeSection === 'security' ? (
-                                    <SecuritySettings />
-                                ) : null}
-                                {activeSection === 'sessions' ? (
-                                    <ActiveSessionsSettings />
-                                ) : null}
-                                {activeSection === 'appearance' ? (
-                                    <AppearanceSettings />
-                                ) : null}
-                                {activeSection === 'accessibility' ? (
-                                    <AccessibilitySettings />
-                                ) : null}
-                                {activeSection === 'privacy' ? (
-                                    <PrivacySettings />
-                                ) : null}
-                                {activeSection === 'blocking' ? (
-                                    <BlockingSettings />
-                                ) : null}
-                                {activeSection === 'standing' ? (
-                                    <StandingSettings />
-                                ) : null}
-                                {activeSection === 'notifications' ? (
-                                    <NotificationSettings />
-                                ) : null}
-                                {activeSection === 'keybinds' ? (
-                                    <KeybindSettings />
-                                ) : null}
-                                {activeSection === 'developer' ? (
-                                    <DeveloperSettings />
-                                ) : null}
-                                {activeSection === 'decorations' ? (
-                                    <AvatarDecorationsSettings />
-                                ) : null}
-                            </React.Suspense>
-                        )}
+                    <div className="scrollbar-thin scrollbar-thumb-bg-secondary scrollbar-track-transparent flex-1 overflow-y-auto p-6">
+                        {activeSection === 'account' ? (
+                            <AccountSettings />
+                        ) : null}
+                        {activeSection === 'connections' ? (
+                            <WebsiteConnectionsSettings />
+                        ) : null}
+                        {activeSection === 'security' ? (
+                            <SecuritySettings />
+                        ) : null}
+                        {activeSection === 'sessions' ? (
+                            <ActiveSessionsSettings />
+                        ) : null}
+                        {activeSection === 'appearance' ? (
+                            <AppearanceSettings />
+                        ) : null}
+                        {activeSection === 'accessibility' ? (
+                            <AccessibilitySettings />
+                        ) : null}
+                        {activeSection === 'privacy' ? (
+                            <PrivacySettings />
+                        ) : null}
+                        {activeSection === 'blocking' ? (
+                            <BlockingSettings />
+                        ) : null}
+                        {activeSection === 'standing' ? (
+                            <StandingSettings />
+                        ) : null}
+                        {activeSection === 'notifications' ? (
+                            <NotificationSettings />
+                        ) : null}
+                        {activeSection === 'keybinds' ? (
+                            <KeybindSettings />
+                        ) : null}
+                        {activeSection === 'developer' ? (
+                            <DeveloperSettings />
+                        ) : null}
+                        {activeSection === 'decorations' ? (
+                            <AvatarDecorationsSettings />
+                        ) : null}
                     </div>
                 </div>
             </div>

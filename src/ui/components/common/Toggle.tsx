@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Skeleton } from '@/ui/components/common/Skeleton';
 import { colors, fontSize, radius } from '@/ui/theme';
 
 export interface ToggleProps extends Omit<
@@ -10,6 +11,8 @@ export interface ToggleProps extends Omit<
     label?: string;
     onCheckedChange?: (checked: boolean) => void;
     style?: React.CSSProperties;
+    /** Renders this toggle as a skeleton placeholder of the same size. */
+    skeleton?: boolean;
 }
 
 const labelBaseStyle: React.CSSProperties = {
@@ -60,12 +63,34 @@ export const Toggle = ({
     onChange,
     style,
     ref,
+    skeleton,
     ...props
 }: ToggleProps) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         onChange?.(e);
         onCheckedChange?.(e.target.checked);
     };
+
+    if (skeleton) {
+        return (
+            <span
+                aria-hidden
+                style={{ ...labelBaseStyle, ...style }}
+            >
+                <Skeleton
+                    className="rounded-full"
+                    style={trackBaseStyle}
+                />
+                {label ? (
+                    <Skeleton
+                        className="h-[1em] w-16"
+                        style={{ fontSize: fontSize.sm }}
+                        variant="text"
+                    />
+                ) : null}
+            </span>
+        );
+    }
 
     return (
         <label
