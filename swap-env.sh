@@ -27,11 +27,11 @@ write_prod_backup() {
 if grep -q '^VITE_API_BASE_URL=http://127\.0\.0\.1:3000/' .env 2>/dev/null; then
   write_dev_backup
   write_prod_backup
-  mv .env.prod .env
+  cp .env.prod .env
   echo "Switched to production .env"
 else
   write_prod_backup
   write_dev_backup
-  mv .env.dev .env
+  cp .env.dev .env
   echo "Switched to development .env"
 fi
