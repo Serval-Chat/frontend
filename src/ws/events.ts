@@ -344,6 +344,7 @@ export interface IMentionEvent {
     sender: string;
     serverId?: string;
     channelId?: string;
+    pingId?: string;
     message: IMessageServer | IMessageDm;
 }
 

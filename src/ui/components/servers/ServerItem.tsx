@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import {
+    Bug,
     Check,
     Copy,
     FolderInput,
@@ -49,6 +50,12 @@ const InviteFriendsModal = React.lazy(() =>
     })),
 );
 
+const PingDebugModal = React.lazy(() =>
+    import('./modals/PingDebugModal').then((m) => ({
+        default: m.PingDebugModal,
+    })),
+);
+
 const CONTEXT_MENU_TAP_SUPPRESSION_MS = 2000;
 
 interface ServerItemProps {
@@ -75,6 +82,7 @@ export const ServerItem = React.memo(
         const [isSettingsOpen, setIsSettingsOpen] = useState(false);
         const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
         const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+        const [isPingDebugOpen, setIsPingDebugOpen] = useState(false);
         const { hasPermission, isOwner } = usePermissions(server.id, null, {
             enabled: isActive,
         });
@@ -219,6 +227,16 @@ export const ServerItem = React.memo(
                 },
             },
         );
+
+        if (import.meta.env.DEV) {
+            contextMenuItems.push({
+                label: 'Show State (Debug)',
+                icon: Bug,
+                onClick: (): void => {
+                    setIsPingDebugOpen(true);
+                },
+            });
+        }
 
         if (!isOwner) {
             contextMenuItems.push(
@@ -396,6 +414,21 @@ export const ServerItem = React.memo(
                             serverName={server.name}
                             onClose={(): void => {
                                 setIsInviteModalOpen(false);
+                            }}
+                        />
+                    </React.Suspense>
+                ) : null}
+
+                {isPingDebugOpen ? (
+                    <React.Suspense fallback={null}>
+                        <PingDebugModal
+                            badgeCount={pingCount}
+                            isActive={isActive}
+                            isOpen={isPingDebugOpen}
+                            serverId={server.id}
+                            serverName={server.name}
+                            onClose={(): void => {
+                                setIsPingDebugOpen(false);
                             }}
                         />
                     </React.Suspense>

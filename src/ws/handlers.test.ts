@@ -160,7 +160,7 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
             expect(dispatch).toHaveBeenCalledTimes(1);
         });
 
-        it('does NOT add a duplicate ping when the same message arrives twice', (): void => {
+        it('does NOT add a duplicate ping or double-count the badge when the same message arrives twice', (): void => {
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
             emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
 
@@ -175,8 +175,90 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
                     JSON.stringify(call[0]) ===
                     JSON.stringify(incrementServerPing({ serverId })),
             );
-            expect(incrementCalls).toHaveLength(2);
+            expect(incrementCalls).toHaveLength(1);
             expect(cached?.pings).toHaveLength(1);
+        });
+
+        it('uses pingId as the cache id when the event carries one', (): void => {
+            emitWsEvent(mockWs, WsEvents.MENTION, {
+                ...mentionPayload,
+                pingId: '9876543210987654321',
+            });
+
+            const cached = queryClient.getQueryData<{
+                pings: PingNotification[];
+            }>(PINGS_KEY);
+
+            expect(cached?.pings).toHaveLength(1);
+            expect(cached?.pings[0]?.id).toBe('9876543210987654321');
+        });
+
+        it('stores only the trimmed mention message on the cached ping', (): void => {
+            emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
+
+            const cached = queryClient.getQueryData<{
+                pings: PingNotification[];
+            }>(PINGS_KEY);
+
+            expect(cached?.pings[0]).toMatchObject({
+                type: 'mention',
+                serverId,
+                channelId,
+                message: {
+                    messageId: 'msg-001',
+                    text: 'hey @you',
+                    createdAt: mentionPayload.message.createdAt,
+                },
+            });
+        });
+
+        it('deduplicates a WS mention against an already-fetched REST ping by messageId', (): void => {
+            queryClient.setQueryData<{ pings: PingNotification[] }>(PINGS_KEY, {
+                pings: [
+                    {
+                        id: '1111111111111111111',
+                        type: 'mention',
+                        sender: 'alice',
+                        senderId: 'user-1',
+                        serverId,
+                        channelId,
+                        message: {
+                            messageId: 'msg-001',
+                            text: 'hey @you',
+                            createdAt: mentionPayload.message.createdAt,
+                        },
+                        timestamp: Date.now(),
+                    },
+                ],
+            });
+
+            emitWsEvent(mockWs, WsEvents.MENTION, mentionPayload);
+
+            const cached = queryClient.getQueryData<{
+                pings: PingNotification[];
+            }>(PINGS_KEY);
+
+            expect(cached?.pings).toHaveLength(1);
+            expect(cached?.pings[0]?.id).toBe('1111111111111111111');
+            expect(dispatch).not.toHaveBeenCalledWith(
+                incrementServerPing({ serverId }),
+            );
+        });
+
+        it('ignores reaction events: no cache row and no badge increment', (): void => {
+            emitWsEvent(mockWs, WsEvents.MENTION, {
+                ...mentionPayload,
+                type: 'reaction',
+            });
+
+            const cached = queryClient.getQueryData<{
+                pings: PingNotification[];
+            }>(PINGS_KEY);
+
+            expect(cached).toBeUndefined();
+            expect(dispatch).not.toHaveBeenCalledWith(
+                incrementServerPing({ serverId }),
+            );
         });
 
         it('accumulates distinct pings from different messages', (): void => {
@@ -268,6 +350,37 @@ describe('setupGlobalWsHandlers - ping behaviour', (): void => {
     });
 
     describe('CHANNEL_UNREAD_UPDATED event', (): void => {
+        it('keeps the cached channel lastMessageAt when the event sends null', (): void => {
+            queryClient.setQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels('server-1'),
+                [
+                    {
+                        id: 'channel-1',
+                        name: 'general',
+                        serverId: 'server-1',
+                        type: 'text',
+                        position: 0,
+                        lastMessageAt: '2026-05-16T10:00:00.000Z',
+                        lastReadAt: null,
+                    },
+                ],
+            );
+
+            emitWsEvent(mockWs, WsEvents.CHANNEL_UNREAD_UPDATED, {
+                serverId: 'server-1',
+                channelId: 'channel-1',
+                lastMessageAt: null,
+                lastReadAt: '2026-05-20T10:00:00.000Z',
+                senderId: 'current-user',
+            });
+
+            const cached = queryClient.getQueryData<Channel[]>(
+                SERVERS_QUERY_KEYS.channels('server-1'),
+            );
+
+            expect(cached?.[0]?.lastMessageAt).toBe('2026-05-16T10:00:00.000Z');
+        });
+
         it('does not invalidate channel messages for a mark-read/open-channel update', (): void => {
             const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
 

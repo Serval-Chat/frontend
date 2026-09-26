@@ -4,20 +4,16 @@ import type { InfiniteData, QueryClient } from '@tanstack/react-query';
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
+import { frequentlyUsedEmojisKeys } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.queries';
+import type { FrequentlyUsedEmojiEntry } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.types';
 import {
     FRIENDS_QUERY_KEY,
     FRIEND_PROFILES_QUERY_KEY,
     FRIEND_REQUESTS_QUERY_KEY,
 } from '@/api/friends/friends.queries';
 import type { Friend } from '@/api/friends/friends.types';
-import { frequentlyUsedEmojisKeys } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.queries';
-import type { FrequentlyUsedEmojiEntry } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.types';
 import { COMMANDS_QUERY_KEYS } from '@/api/interactions/interactions.queries';
-import type {
-    PingExportMessage,
-    PingMentionMessage,
-    PingNotification,
-} from '@/api/pings/pings.types';
+import type { PingNotification } from '@/api/pings/pings.types';
 import { serversApi } from '@/api/servers/servers.api';
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import type {
@@ -59,11 +55,11 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { getValidMessageInteraction } from '@/ui/utils/chat';
 import { audioPipeline } from '@/utils/audio/AudioPipeline';
+import type { SoundChoice } from '@/utils/audio/NotificationSoundManager';
 import {
     getDefaultSoundNormalizationGain,
     getDefaultSoundUrl,
 } from '@/utils/audio/defaultNotificationSounds';
-import type { SoundChoice } from '@/utils/audio/NotificationSoundManager';
 import { cacheSound, pruneSoundCache } from '@/utils/soundCache';
 
 import { wsClient } from './client';
@@ -645,9 +641,9 @@ export const setupGlobalWsHandlers = (
                             userId: payload.user.id,
                             username: payload.user.username,
                             status: undefined,
-                            presenceStatus:
-                                queryClient.getQueryData<User>(['me'])
-                                    ?.presenceStatus,
+                            presenceStatus: queryClient.getQueryData<User>([
+                                'me',
+                            ])?.presenceStatus,
                         }),
                     );
                     dispatch(setBackendInstanceId(payload.instanceId));
@@ -728,8 +724,7 @@ export const setupGlobalWsHandlers = (
                                     ? {
                                           ...channel,
                                           lastMessageAt:
-                                              payload.lastMessageAt ===
-                                              undefined
+                                              payload.lastMessageAt == null
                                                   ? channel.lastMessageAt
                                                   : payload.lastMessageAt,
                                           lastReadAt:
@@ -850,8 +845,11 @@ export const setupGlobalWsHandlers = (
 
     cleanups.push(
         wsClient.on<IMentionEvent>(WsEvents.MENTION, (payload): void => {
+            if (payload.type !== 'mention') {
+                return;
+            }
+
             if (
-                payload.type === 'mention' &&
                 payload.senderId !== currentUser?.id &&
                 !isReadingChannel(payload.serverId, payload.channelId)
             ) {
@@ -887,39 +885,50 @@ export const setupGlobalWsHandlers = (
                 });
             }
 
-            if (payload.serverId) {
-                dispatch(incrementServerPing({ serverId: payload.serverId }));
-            }
+            const newPing: PingNotification = {
+                id: payload.pingId ?? payload.message.messageId,
+                type: 'mention',
+                sender: payload.sender,
+                senderId: payload.senderId,
+                serverId: payload.serverId,
+                channelId: payload.channelId,
+                message: {
+                    messageId: payload.message.messageId,
+                    text: payload.message.text,
+                    createdAt: payload.message.createdAt,
+                },
+                timestamp: Date.now(),
+            };
 
+            let inserted = false;
             queryClient.setQueryData<{ pings: PingNotification[] }>(
                 ['pings'],
                 (old): { pings: PingNotification[] } => {
-                    const newPing: PingNotification = {
-                        id: payload.message.messageId,
-                        type: (payload.type === 'reaction'
-                            ? 'system'
-                            : 'mention') as PingNotification['type'],
-                        sender: payload.sender,
-                        senderId: payload.senderId,
-                        serverId: payload.serverId,
-                        channelId: payload.channelId,
-                        message: payload.message as unknown as
-                            | PingMentionMessage
-                            | PingExportMessage,
-                        timestamp: Date.now(),
-                    };
+                    if (!old) {
+                        inserted = true;
+                        return { pings: [newPing] };
+                    }
 
-                    if (!old) return { pings: [newPing] };
+                    const isDuplicate = old.pings.some(
+                        (p): boolean =>
+                            p.id === newPing.id ||
+                            (p.type === 'mention' &&
+                                p.message.messageId ===
+                                    payload.message.messageId),
+                    );
+                    if (isDuplicate) return old;
 
-                    if (old.pings.some((p): boolean => p.id === newPing.id))
-                        return old;
-
+                    inserted = true;
                     return {
                         ...old,
                         pings: [newPing, ...old.pings],
                     };
                 },
             );
+
+            if (inserted && payload.serverId) {
+                dispatch(incrementServerPing({ serverId: payload.serverId }));
+            }
         }),
     );
 
@@ -1166,9 +1175,8 @@ export const setupGlobalWsHandlers = (
                         userId: currentUser.id,
                         username: currentUser.username,
                         status: undefined,
-                        presenceStatus:
-                            queryClient.getQueryData<User>(['me'])
-                                ?.presenceStatus,
+                        presenceStatus: queryClient.getQueryData<User>(['me'])
+                            ?.presenceStatus,
                     });
                 }
 
@@ -1979,7 +1987,10 @@ export const setupGlobalWsHandlers = (
     );
 
     // Emoji events
-    const handleEmojiChange = (payload: { serverId: string; senderId?: string }): void => {
+    const handleEmojiChange = (payload: {
+        serverId: string;
+        senderId?: string;
+    }): void => {
         void queryClient.invalidateQueries({
             queryKey: SERVERS_QUERY_KEYS.emojis(payload.serverId),
         });

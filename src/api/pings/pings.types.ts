@@ -1,27 +1,33 @@
 export interface PingMentionMessage {
-    id: string;
+    messageId: string;
     text: string;
-    senderId: string;
-    senderUsername: string;
+    createdAt: string;
 }
 
 export interface PingExportMessage {
-    type: 'export';
-    url: string;
-    format: string;
-    expiresAt: string;
+    id: string;
+    text: string;
+    type: 'success' | 'failure' | 'cancelled';
 }
 
-export interface PingNotification {
+interface PingBase {
     id: string;
-    type: 'mention' | 'reply' | 'system';
     sender: string;
     senderId: string;
     serverId?: string;
     channelId?: string;
-    message: PingMentionMessage | PingExportMessage;
     timestamp: number;
 }
+
+export type PingNotification =
+    | (PingBase & {
+          type: 'mention';
+          message: PingMentionMessage;
+      })
+    | (PingBase & {
+          type: 'export_status';
+          message: PingExportMessage;
+      });
 
 export interface GetPingsResponse {
     pings: PingNotification[];
