@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MessageAttachment } from '@/api/chat/chat.types';
 import { FileEmbed } from '@/ui/components/chat/FileEmbed';
+import { getMediaBoxStyle } from '@/ui/components/chat/mediaBoxStyle';
 
 const { useFileContentMock, useProxyContentMock } = vi.hoisted(() => ({
     useFileContentMock: vi.fn(
@@ -227,5 +228,46 @@ describe('FileEmbed', (): void => {
         expect(largeLineCount).toBeGreaterThan(smallLineCount);
 
         useFileContentMock.mockReturnValue({ data: null, isLoading: false });
+    });
+});
+
+describe('getMediaBoxStyle', (): void => {
+    const portraitAttachment: MessageAttachment = {
+        ...imageAttachment,
+        width: 643,
+        height: 718,
+    };
+
+    it('narrows the box by the height cap so the aspect ratio survives it', (): void => {
+        const style = getMediaBoxStyle(portraitAttachment);
+
+        expect(style.aspectRatio).toBe('643 / 718');
+        expect(style.maxWidth).toBe('550px');
+        expect(style.maxHeight).toBe('min(450px, 70vh)');
+        expect(style.width).toMatch(
+            /^min\(550px, 100%, calc\(min\(450px, 70vh\) \* 0\.8955/,
+        );
+    });
+
+    it('leaves the height cap non-binding for landscape images', (): void => {
+        const style = getMediaBoxStyle(imageAttachment);
+
+        expect(style.aspectRatio).toBe('640 / 480');
+        expect(style.maxWidth).toBe('550px');
+        expect(style.width).toMatch(
+            /^min\(550px, 100%, calc\(min\(450px, 70vh\) \* 1\.333/,
+        );
+    });
+
+    it('derives the width limit from the height cap for extremely tall images', (): void => {
+        const style = getMediaBoxStyle({
+            ...imageAttachment,
+            width: 100,
+            height: 5000,
+        });
+
+        expect(style.width).toMatch(
+            /^min\(100px, 100%, calc\(min\(450px, 70vh\) \* 0\.02\)/,
+        );
     });
 });

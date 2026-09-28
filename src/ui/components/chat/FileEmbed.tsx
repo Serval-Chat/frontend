@@ -13,6 +13,10 @@ import {
 import type { FileMetadata, ProxyMetadata } from '@/api/files/files.types';
 import { formatFileSize } from '@/lib/autosizer';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
+import {
+    getMediaBoxStyle,
+    getMediaDimensions,
+} from '@/ui/components/chat/mediaBoxStyle';
 import { Button } from '@/ui/components/common/Button';
 import { CodeBlock } from '@/ui/components/common/CodeBlock';
 import { ImageLightbox } from '@/ui/components/common/ImageLightbox';
@@ -31,41 +35,8 @@ interface FileEmbedProps {
     onResize?: () => void;
 }
 
-const FALLBACK_MEDIA_WIDTH = 320;
-const FALLBACK_MEDIA_HEIGHT = 180;
-const MAX_MEDIA_WIDTH = 550;
-
 const MAX_CODE_PREVIEW_BYTES = 50 * 1024;
 const CODE_PREVIEW_MAX_LINES = 30;
-
-const getMediaDimensions = (
-    attachment: MessageAttachment | undefined,
-): { width: number; height: number; hasMetadata: boolean } => {
-    if (attachment?.width && attachment.height) {
-        return {
-            width: attachment.width,
-            height: attachment.height,
-            hasMetadata: true,
-        };
-    }
-
-    return {
-        width: FALLBACK_MEDIA_WIDTH,
-        height: FALLBACK_MEDIA_HEIGHT,
-        hasMetadata: false,
-    };
-};
-
-const getMediaBoxStyle = (
-    attachment: MessageAttachment | undefined,
-): React.CSSProperties => {
-    const { width, height } = getMediaDimensions(attachment);
-    return {
-        aspectRatio: `${width} / ${height}`,
-        width: `min(${width}px, 100%)`,
-        maxWidth: `${Math.min(width, MAX_MEDIA_WIDTH)}px`,
-    };
-};
 
 export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
     const limitedAnimations = useLimitedAnimations();
@@ -139,7 +110,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
         return (
             <>
                 <Box
-                    className="group relative my-2 max-h-[min(450px,70vh)] cursor-pointer rounded-lg"
+                    className="group relative my-2 cursor-pointer rounded-lg"
                     style={mediaBoxStyle}
                     onClick={(): void => {
                         if (isSpoiler && !isRevealed) {
@@ -152,7 +123,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                     <PausedAnimatedImage
                         alt={displayName || 'File content'}
                         className={cn(
-                            'block h-full max-h-[min(450px,70vh)] w-full rounded-lg object-contain transition-opacity duration-300',
+                            'block h-full w-full rounded-lg object-contain transition-opacity duration-300',
                             isSpoiler && !isRevealed
                                 ? 'opacity-0'
                                 : 'opacity-100',
@@ -222,7 +193,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
 
         return (
             <Box
-                className="group relative my-2 max-h-[min(450px,70vh)] overflow-hidden rounded-lg"
+                className="group relative my-2 overflow-hidden rounded-lg"
                 style={mediaBoxStyle}
                 onClick={(): false | void =>
                     isSpoiler && !isRevealed && setIsRevealed(true)
@@ -253,7 +224,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                             controls
                             playsInline
                             aria-label="Embedded video"
-                            className="h-full max-h-[min(450px,70vh)] w-full object-contain"
+                            className="h-full w-full object-contain"
                             height={mediaDimensions.height}
                             preload="metadata"
                             src={displayUrl}
