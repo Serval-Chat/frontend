@@ -41,6 +41,13 @@ const HELP_DETAILS: Record<string, string[]> = {
     ],
     run: ['Runs a file or script in the console.', '', 'RUN [filename]'],
     snake: ['Plays snake game'],
+    meow: [
+        'Displays a random ASCII art cat.',
+        '',
+        'MEOW',
+        '',
+        'Meow',
+    ],
     ansitest: ['Displays all supported ANSI color and style codes.'],
     fastfetch: [
         'Displays a summary of system information.',
@@ -135,6 +142,7 @@ export const helpCommand: ConCommandReactor = {
                 '  UPLOAD   - Uploads a file from your device',
                 '  RUN      - Runs a file',
                 '  SNAKE    - Plays a snake game',
+                '  MEOW     - Displays a random ASCII art cat',
                 '  ANSITEST - Displays all supported ANSI codes',
                 '  USERCTL  - Queries user profiles and friend list',
                 '  FASTFETCH - Displays a summary of system information',
