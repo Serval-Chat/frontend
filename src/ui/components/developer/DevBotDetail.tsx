@@ -3,9 +3,7 @@ import React, { useMemo, useReducer, useRef, useState } from 'react';
 import {
     ArrowLeft,
     BadgeCheck,
-    Check,
     CheckCircle,
-    Copy,
     RefreshCw,
     Trash2,
 } from 'lucide-react';
@@ -24,12 +22,14 @@ import {
 } from '@/hooks/developer/useBots';
 import type { BotPermissionKey, BotPermissions } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
+import { CopyInput } from '@/ui/components/common/CopyInput';
 import { Input } from '@/ui/components/common/Input';
 import { Modal } from '@/ui/components/common/Modal';
 import { Text } from '@/ui/components/common/Text';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { UserProfileCard } from '@/ui/components/profile/UserProfileCard';
 import { ImageCropModal } from '@/ui/components/settings/ImageCropModal';
+import { colors } from '@/ui/theme';
 import {
     BOT_PERMISSION_GROUPS,
     BOT_PERMISSION_LABELS,
@@ -76,37 +76,6 @@ const Section = ({
         {children}
     </div>
 );
-
-const CopyButton = ({
-    text,
-    value,
-}: {
-    text: string;
-    value: string;
-}): React.ReactNode => {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = (): void => {
-        void navigator.clipboard.writeText(value);
-        setCopied(true);
-        setTimeout((): void => {
-            setCopied(false);
-        }, 2000);
-    };
-
-    return (
-        <Button
-            icon={copied ? Check : Copy}
-            size="sm"
-            variant="normal"
-            onClick={handleCopy}
-        >
-            <span className="hidden sm:inline">
-                {copied ? 'Copied!' : text}
-            </span>
-        </Button>
-    );
-};
 
 const BotAboutSection = ({
     name,
@@ -243,24 +212,28 @@ const BotConfigSections = ({
                     <Text as="p" size="sm" variant="muted">
                         Client ID
                     </Text>
-                    <div className="flex gap-2">
-                        <code className="flex-1 rounded-md bg-bg-subtle px-3 py-2 font-mono text-sm text-foreground">
-                            {clientId}
-                        </code>
-                        <CopyButton text="Copy" value={clientId} />
-                    </div>
+                    <CopyInput
+                        readOnly
+                        className="font-mono text-sm"
+                        copyLabel="Copy"
+                        value={clientId}
+                    />
                 </div>
                 {token ? (
                     <div className="flex flex-col gap-1">
                         <Text as="p" size="sm" variant="muted">
                             Bot Token - copy now, it won&apos;t be shown again
                         </Text>
-                        <div className="flex gap-2">
-                            <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
-                                {token}
-                            </code>
-                            <CopyButton text="Copy" value={token} />
-                        </div>
+                        <CopyInput
+                            readOnly
+                            className="font-mono text-sm"
+                            copyLabel="Copy"
+                            style={{
+                                backgroundColor: colors.cautionMuted,
+                                color: colors.cautionMutedText,
+                            }}
+                            value={token}
+                        />
                         <div className="flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-sm text-success">
                             <CheckCircle size={14} />
                             Previous token invalidated. Any active sessions have
@@ -287,20 +260,14 @@ const BotConfigSections = ({
                     <Text as="p" size="sm" variant="muted">
                         Invite Link
                     </Text>
-                    <div className="flex gap-2">
-                        <Input
-                            readOnly
-                            className="flex-1 font-mono text-sm"
-                            value={`${globalThis.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
-                            onClick={(e): void => {
-                                (e.target as HTMLInputElement).select();
-                            }}
-                        />
-                        <CopyButton
-                            text="Copy"
-                            value={`${globalThis.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
-                        />
-                    </div>
+                    <CopyInput
+                        readOnly
+                        className="font-mono text-sm"
+                        value={`${globalThis.location.origin}/authorize?client_id=${clientId}${permissions ? `&permissions=${permissionsToBitmask(permissions)}` : ''}`}
+                        onClick={(e): void => {
+                            (e.target as HTMLInputElement).select();
+                        }}
+                    />
                 </div>
             </div>
         </Section>

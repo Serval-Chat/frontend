@@ -22,7 +22,11 @@ import { useToast } from '@/ui/components/common/Toast';
 import { cn } from '@/utils/cn';
 import { extractApiError } from '@/utils/extractApiError';
 import { APP_LOCALE } from '@/utils/locale';
-import { getSafeUrl, isSafeVideoUrl, isSafeYoutubeEmbedUrl } from '@/utils/proxy';
+import {
+    getSafeUrl,
+    isSafeVideoUrl,
+    isSafeYoutubeEmbedUrl,
+} from '@/utils/proxy';
 import {
     type ParserOptions,
     ParserPresets,
@@ -439,7 +443,7 @@ const EmbedCard = memo(
             <div
                 className="mt-1 flex w-fit max-w-[520px] overflow-hidden rounded-r-sm"
                 style={{
-                    borderLeft: `4px solid ${barColor ?? 'var(--color-embed-border)'}`,
+                    borderLeft: `4px solid ${barColor ?? 'var(--color-primary)'}`,
                 }}
             >
                 <div

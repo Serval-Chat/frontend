@@ -12,6 +12,7 @@ export interface PasswordInputProps extends Omit<InputProps, 'type'> {
 
 export const PasswordInput = ({
     className,
+    style,
     wrapperClassName,
     ...props
 }: PasswordInputProps): React.ReactNode => {
@@ -20,8 +21,12 @@ export const PasswordInput = ({
     return (
         <div className={cn('relative', wrapperClassName)}>
             <Input
+                // eslint-disable-next-line react/jsx-props-no-spreading
                 {...props}
-                className={cn('pr-10', className)}
+                className={className}
+                // Inline because Input pads inline and inline beats any pr-* class;
+                // a caller reclaims the space via style.paddingRight, not className.
+                style={{ paddingRight: '2.5rem', ...style }}
                 type={visible ? 'text' : 'password'}
             />
             <button

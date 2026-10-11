@@ -101,3 +101,42 @@ describe('EmbedRenderer video/youtube embeds', (): void => {
         expect(container.querySelector('video')).toBeNull();
     });
 });
+
+describe('EmbedRenderer accent bar', (): void => {
+    it('renders a colorless embed bar in the theme primary', (): void => {
+        const container = renderPayload({
+            embeds: [
+                {
+                    type: 'rich',
+                    title: 'No color',
+                    description: 'x',
+                },
+            ],
+        });
+
+        const bar = container.querySelector('div[style*="border-left"]');
+        expect(bar).not.toBeNull();
+        expect(bar?.getAttribute('style')).toContain(
+            '4px solid var(--color-primary)',
+        );
+    });
+
+    it("renders the author's chosen color when one is set", (): void => {
+        const container = renderPayload({
+            embeds: [
+                {
+                    type: 'rich',
+                    color: 0xff0000,
+                    title: 'Red bar',
+                    description: 'x',
+                },
+            ],
+        });
+
+        const bar = container.querySelector('div[style*="border-left"]');
+        expect(bar).not.toBeNull();
+        expect(bar?.getAttribute('style')).toContain(
+            '4px solid rgb(255, 0, 0)',
+        );
+    });
+});

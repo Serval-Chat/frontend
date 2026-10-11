@@ -83,7 +83,6 @@
     --color-bg-subtle-hover: var(--bg-subtle-hover);
     --color-text-muted: var(--text-muted);
     --color-embed-bg: var(--embed-bg);
-    --color-embed-border: var(--embed-border);
 
     --tertiary-bg: var(--background);
     --secondary-bg: var(--background);
@@ -111,7 +110,6 @@
 
     --text-muted: var(--muted-foreground);
     --embed-bg: var(--bg-secondary);
-    --embed-border: var(--border-subtle);
 
     --syntax-comment: var(--muted-foreground);
     --syntax-keyword: var(--primary);
@@ -162,7 +160,6 @@
     --bg-subtle-hover: #e0b87d;
 
     --embed-bg: #f3cc94;
-    --embed-border: rgba(54, 37, 0, 0.15);
 
     --local-chat-bg: #f9e4c7;
     --local-primary-bg: #f1d8b6;

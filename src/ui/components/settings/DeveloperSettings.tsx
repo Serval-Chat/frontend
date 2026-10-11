@@ -1,7 +1,5 @@
-import { useState } from 'react';
-
 import * as Sentry from '@sentry/react';
-import { Bug, Check, Copy, KeyRound } from 'lucide-react';
+import { Bug, KeyRound } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -11,20 +9,13 @@ import {
 import { toggleFurTweaker } from '@/store/slices/furTweakerSlice';
 import { toggleThemeTweaker } from '@/store/slices/themeTweakerSlice';
 import { Button } from '@/ui/components/common/Button';
+import { CopyInput } from '@/ui/components/common/CopyInput';
 import { Heading } from '@/ui/components/common/Heading';
 import { Toggle } from '@/ui/components/common/Toggle';
+import { colors } from '@/ui/theme';
 import { getAuthToken } from '@/utils/authToken';
+import { censorToken } from '@/utils/censorToken';
 import { toggleWsDebugWindow, useWsDebugWindowOpen } from '@/ws/debug';
-
-const PREFIX = 'serchat_';
-
-const censorToken = (token: string): string => {
-    if (token.startsWith(PREFIX)) {
-        const rest = token.slice(PREFIX.length);
-        return PREFIX + rest.slice(0, 4) + '•'.repeat(Math.max(0, rest.length - 4));
-    }
-    return token.slice(0, 8) + '•'.repeat(Math.max(0, token.length - 8));
-};
 
 const crashFrontend = async (): Promise<void> => {
     const error = new Error(
@@ -56,16 +47,7 @@ export const DeveloperSettings = () => {
         (state): boolean => state.debugOptions?.isConsoleOpen ?? false,
     );
 
-    const [copied, setCopied] = useState(false);
     const token = getAuthToken();
-
-    const handleCopy = (): void => {
-        if (token === null) return;
-        void navigator.clipboard.writeText(token).then((): void => {
-            setCopied(true);
-            setTimeout((): void => setCopied(false), 2000);
-        });
-    };
 
     return (
         <div className="flex h-full flex-col gap-6">
@@ -90,23 +72,18 @@ export const DeveloperSettings = () => {
                             Your session token in case you use a custom client. Do not share this ANYWHERE and do not send it to anyone.
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <input
-                            readOnly
-                            aria-label="User token (censored)"
-                            className="min-w-0 flex-1 rounded-md border border-border-subtle bg-background px-3 py-2 font-mono text-xs text-foreground"
-                            value={token !== null ? censorToken(token) : '-'}
-                        />
-                        <Button
-                            className="aspect-square self-stretch"
-                            disabled={token === null}
-                            title={copied ? 'Copied!' : 'Copy token'}
-                            variant={copied ? 'primary' : 'normal'}
-                            onClick={handleCopy}
-                        >
-                            {copied ? <Check size={16} /> : <Copy size={16} />}
-                        </Button>
-                    </div>
+                    <CopyInput
+                        readOnly
+                        aria-label="User token (censored)"
+                        copyLabel="Copy token"
+                        copyValue={token}
+                        size="sm"
+                        style={{
+                            backgroundColor: colors.background,
+                            fontFamily: 'var(--font-mono)',
+                        }}
+                        value={token !== null ? censorToken(token) : '-'}
+                    />
                 </div>
 
                 <div className="flex items-center justify-between rounded-md border border-border-subtle bg-bg-subtle p-4">

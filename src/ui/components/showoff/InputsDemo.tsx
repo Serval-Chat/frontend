@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { CopyInput } from '@/ui/components/common/CopyInput';
 import { Input } from '@/ui/components/common/Input';
 import { PasswordInput } from '@/ui/components/common/PasswordInput';
 import { Stack } from '@/ui/components/layout/Stack';
@@ -19,6 +20,13 @@ export const InputsDemo = (): ReactNode => (
             </DemoItem>
             <DemoItem id="input-password" title="Password Input">
                 <PasswordInput placeholder="Enter your secret..." />
+            </DemoItem>
+            <DemoItem id="input-copy" title="Copy Input">
+                <CopyInput
+                    readOnly
+                    copyLabel="Copy Link"
+                    value="https://ser.chat/invite/serchat"
+                />
             </DemoItem>
             <DemoItem id="input-number" title="Number Input">
                 <Input placeholder="Enter a number..." type="number" />

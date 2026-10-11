@@ -1,4 +1,4 @@
-import React, { type ReactNode, useState } from 'react';
+import React, { type ReactNode, useEffect, useState } from 'react';
 
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 
@@ -9,18 +9,37 @@ import type {
     PollAnswer,
 } from '@/types/embed';
 import { Button } from '@/ui/components/common/Button';
+import { CopyTextArea } from '@/ui/components/common/CopyInput';
 import { Input } from '@/ui/components/common/Input';
 import { TextArea } from '@/ui/components/common/TextArea';
 import { Toggle } from '@/ui/components/common/Toggle';
 import { cn } from '@/utils/cn';
+import { cssTokenToHex } from '@/utils/cssColor';
 
 const hexToDecimal = (hex: string): number =>
     Number.parseInt(hex.replace('#', ''), 16);
 
-const decimalToHex = (n: number | undefined): string => {
-    if (n === undefined) return '#5865f2';
-    return `#${n.toString(16).padStart(6, '0')}`;
+const decimalToHex = (n: number): string =>
+    `#${n.toString(16).padStart(6, '0')}`;
+
+// Resolves --color-primary, the same token the embed bar renders with, so
+// swatch and bar can't disagree.
+const resolveInProbe = (token: string): string => {
+    const probe = document.createElement('span');
+    probe.style.color = token;
+    document.body.append(probe);
+    const computed = getComputedStyle(probe).color;
+    probe.remove();
+    return computed;
 };
+
+const themePrimaryHex = (): string =>
+    cssTokenToHex(
+        getComputedStyle(document.documentElement).getPropertyValue(
+            '--color-primary',
+        ),
+        resolveInProbe,
+    );
 
 const cloneEmbeds = (embeds: Embed[]): Embed[] => structuredClone(embeds);
 
@@ -183,6 +202,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
 interface EmbedEditorProps {
     embed: Embed;
     index: number;
+    primaryHex: string;
     total: number;
     onChange: (embed: Embed) => void;
     onRemove: () => void;
@@ -191,6 +211,7 @@ interface EmbedEditorProps {
 const EmbedEditor = ({
     embed,
     index,
+    primaryHex,
     total,
     onChange,
     onRemove,
@@ -245,7 +266,11 @@ const EmbedEditor = ({
                                     aria-label="Embed color"
                                     className="h-8 w-10 cursor-pointer rounded border border-border-subtle bg-transparent"
                                     type="color"
-                                    value={decimalToHex(embed.color)}
+                                    value={
+                                        embed.color === undefined
+                                            ? primaryHex
+                                            : decimalToHex(embed.color)
+                                    }
                                     onChange={(e): void => {
                                         set(
                                             'color',
@@ -518,6 +543,20 @@ export const EmbedCreator = ({
     value,
     onChange,
 }: EmbedCreatorProps): ReactNode => {
+    const [primaryHex, setPrimaryHex] = useState(themePrimaryHex);
+    useEffect((): (() => void) => {
+        // A theme switch always mutates <html> (theme class, custom-theme
+        // scope attr) and may rewrite the custom-theme <style> in head. The
+        // callback runs after those mutations, so it resolves the new theme;
+        // a render-phase read would still see the old one.
+        const observer = new MutationObserver((): void => {
+            setPrimaryHex(themePrimaryHex());
+        });
+        observer.observe(document.documentElement, { attributes: true });
+        observer.observe(document.head, { childList: true, subtree: true });
+        return (): void => observer.disconnect();
+    }, []);
+
     const set = <K extends keyof MessagePayload>(
         key: K,
         val: MessagePayload[K],
@@ -527,10 +566,7 @@ export const EmbedCreator = ({
 
     const addEmbed = (): void => {
         if ((value.embeds?.length ?? 0) >= 10) return;
-        set('embeds', [
-            ...(value.embeds ?? []),
-            { type: 'rich' as const, color: 0x58_65_f2 },
-        ]);
+        set('embeds', [...(value.embeds ?? []), { type: 'rich' as const }]);
     };
 
     const updateEmbed = (idx: number, embed: Embed): void => {
@@ -633,6 +669,7 @@ export const EmbedCreator = ({
                         index={idx}
                         // eslint-disable-next-line react/no-array-index-key
                         key={`embed-${idx}-${embed.title?.slice(0, 10)}`}
+                        primaryHex={primaryHex}
                         total={value.embeds?.length ?? 1}
                         onChange={(e): void => {
                             updateEmbed(idx, e);
@@ -729,27 +766,14 @@ export const EmbedCreator = ({
             </Section>
 
             <Section defaultOpen={false} title="JSON output">
-                <div className="relative">
-                    <textarea
-                        readOnly
-                        aria-label="JSON output"
-                        className="custom-scrollbar w-full resize-none rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground"
-                        rows={14}
-                        value={json}
-                    />
-                    <button
-                        className={cn(
-                            'absolute top-2 right-2 rounded border border-border-subtle bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground',
-                        )}
-                        title="Copy JSON"
-                        type="button"
-                        onClick={(): void => {
-                            void navigator.clipboard.writeText(json);
-                        }}
-                    >
-                        Copy
-                    </button>
-                </div>
+                <CopyTextArea
+                    readOnly
+                    aria-label="JSON output"
+                    className="custom-scrollbar w-full resize-none rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground"
+                    copyLabel="Copy JSON"
+                    rows={14}
+                    value={json}
+                />
             </Section>
         </div>
     );

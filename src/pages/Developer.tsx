@@ -10,10 +10,12 @@ import {
 } from 'react-router-dom';
 
 import { Text } from '@/ui/components/common/Text';
+import { DevBotCreator } from '@/ui/components/developer/DevBotCreator';
 import { DevBotDetail } from '@/ui/components/developer/DevBotDetail';
 import { DevBots } from '@/ui/components/developer/DevBots';
 import { DevLayout } from '@/ui/components/developer/DevLayout';
 import { DevSidebar } from '@/ui/components/developer/DevSidebar';
+import { DeveloperSettings } from '@/ui/components/settings/DeveloperSettings';
 
 const DevBotDetailWrapper = (): ReactNode => {
     const { clientId } = useParams<{ clientId: string }>();
@@ -35,6 +37,7 @@ export const Developer = (): ReactNode => {
         const path = location.pathname;
         if (path.startsWith('/developer/bots/')) return 'Bot Settings';
         if (path === '/developer/bots') return 'My Bots';
+        if (path === '/developer/bot-creator') return 'Create a Bot';
         if (path === '/developer/settings') return 'Developer Settings';
         return 'Developer Portal';
     };
@@ -46,6 +49,9 @@ export const Developer = (): ReactNode => {
                 <Route
                     element={
                         <DevBots
+                            onCreateBot={(): undefined =>
+                                void navigate('/developer/bot-creator')
+                            }
                             onViewBot={(clientId): undefined =>
                                 void navigate(`/developer/bots/${clientId}`)
                             }
@@ -57,6 +63,8 @@ export const Developer = (): ReactNode => {
                     element={<DevBotDetailWrapper />}
                     path="bots/:clientId"
                 />
+                <Route element={<DevBotCreator />} path="bot-creator" />
+                <Route element={<DeveloperSettings />} path="settings" />
 
                 <Route
                     element={

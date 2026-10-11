@@ -1,121 +1,15 @@
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 
-import { Check, Copy, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
-import { useBots, useCreateBot } from '@/hooks/developer/useBots';
+import { useBots } from '@/hooks/developer/useBots';
 import type { Bot } from '@/types/bot';
 import { Button } from '@/ui/components/common/Button';
-import { Input } from '@/ui/components/common/Input';
-import { Modal } from '@/ui/components/common/Modal';
-import { Text } from '@/ui/components/common/Text';
 
 interface DevBotsProps {
+    onCreateBot: () => void;
     onViewBot: (clientId: string) => void;
 }
-
-const CopyTokenButton = ({ value }: { value: string }): ReactNode => {
-    const [copied, setCopied] = useState(false);
-    const handleCopy = (): void => {
-        void navigator.clipboard.writeText(value);
-        setCopied(true);
-        setTimeout((): void => {
-            setCopied(false);
-        }, 2000);
-    };
-    return (
-        <Button
-            icon={copied ? Check : Copy}
-            size="sm"
-            variant="normal"
-            onClick={handleCopy}
-        >
-            <span className="hidden sm:inline">
-                {copied ? 'Copied!' : 'Copy'}
-            </span>
-        </Button>
-    );
-};
-
-const CreateBotModal = ({ onClose }: { onClose: () => void }): ReactNode => {
-    const [name, setName] = useState('');
-    const [newToken, setNewToken] = useState<string | null>(null);
-    const createBot = useCreateBot();
-
-    const handleSubmit = (): void => {
-        if (!name.trim()) return;
-        createBot.mutate(
-            { name: name.trim() },
-            {
-                onSuccess: (data): void => {
-                    setNewToken(data.token);
-                },
-            },
-        );
-    };
-
-    if (newToken !== null) {
-        return (
-            <Modal isOpen title="Bot Created" onClose={onClose}>
-                <div className="flex flex-col gap-4 p-4">
-                    <Text as="p" size="sm" variant="muted">
-                        Your bot token is shown below. Copy it now - it
-                        won&apos;t be shown again. You can reset it later from
-                        the bot settings.
-                    </Text>
-                    <div className="flex gap-2">
-                        <code className="flex-1 rounded-md bg-caution/10 px-3 py-2 font-mono text-sm break-all text-caution">
-                            {newToken}
-                        </code>
-                        <CopyTokenButton value={newToken} />
-                    </div>
-                    <div className="flex justify-end">
-                        <Button variant="primary" onClick={onClose}>
-                            Done
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
-        );
-    }
-
-    return (
-        <Modal isOpen title="Create a Bot" onClose={onClose}>
-            <div className="flex flex-col gap-4 p-4">
-                <div className="flex flex-col gap-1">
-                    <label
-                        className="text-sm font-medium text-foreground"
-                        htmlFor="bot-name"
-                    >
-                        Bot Name
-                    </label>
-                    <Input
-                        id="bot-name"
-                        placeholder="My Awesome Bot"
-                        value={name}
-                        onChange={(e): void => {
-                            setName(e.target.value);
-                        }}
-                        onKeyDown={(e): void => {
-                            if (e.key === 'Enter') handleSubmit();
-                        }}
-                    />
-                </div>
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        loading={createBot.isPending}
-                        variant="primary"
-                        onClick={handleSubmit}
-                    >
-                        Create
-                    </Button>
-                </div>
-            </div>
-        </Modal>
-    );
-};
 
 const BotCard = ({
     bot,
@@ -146,7 +40,7 @@ const BotCard = ({
             <div className="flex-1 overflow-hidden">
                 <p className="truncate font-semibold text-foreground">{name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                    ID: {bot.clientId}
+                    Client ID: {bot.clientId}
                 </p>
             </div>
             <Button size="sm" variant="normal" onClick={onView}>
@@ -156,31 +50,25 @@ const BotCard = ({
     );
 };
 
-export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
-    const { data: bots, isLoading } = useBots();
-    const [showCreate, setShowCreate] = useState(false);
+export const DevBots = ({
+    onCreateBot,
+    onViewBot,
+}: DevBotsProps): ReactNode => {
+    const { data: bots, isError, isLoading } = useBots();
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                    {bots?.length ?? 0} bot{bots?.length === 1 ? '' : 's'}{' '}
-                    registered
-                </p>
-                <Button
-                    icon={Plus}
-                    size="sm"
-                    variant="primary"
-                    onClick={(): void => {
-                        setShowCreate(true);
-                    }}
-                >
-                    New Bot
-                </Button>
-            </div>
-
-            {isLoading ? (
-                <div className="flex flex-col gap-2">
+            {isError ? (
+                <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-border-subtle text-center">
+                    <p className="font-medium text-foreground">
+                        Couldn&apos;t load your bots
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        Refresh the page to try again.
+                    </p>
+                </div>
+            ) : isLoading ? (
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                     {['skeleton-1', 'skeleton-2', 'skeleton-3'].map((key) => (
                         <div
                             className="h-20 animate-pulse rounded-xl bg-bg-secondary"
@@ -189,7 +77,7 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                     ))}
                 </div>
             ) : bots?.length ? (
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                     {bots.map((bot) => (
                         <BotCard
                             bot={bot}
@@ -206,15 +94,23 @@ export const DevBots = ({ onViewBot }: DevBotsProps): ReactNode => {
                     <p className="text-sm text-muted-foreground">
                         Create your first bot to get started.
                     </p>
+                    <Button
+                        className="mt-3"
+                        icon={Plus}
+                        size="sm"
+                        variant="normal"
+                        onClick={onCreateBot}
+                    >
+                        New Bot
+                    </Button>
                 </div>
             )}
 
-            {showCreate ? (
-                <CreateBotModal
-                    onClose={(): void => {
-                        setShowCreate(false);
-                    }}
-                />
+            {!isLoading && !isError ? (
+                <p className="text-sm text-muted-foreground">
+                    {bots?.length ?? 0} bot{bots?.length === 1 ? '' : 's'}{' '}
+                    registered
+                </p>
             ) : null}
         </div>
     );

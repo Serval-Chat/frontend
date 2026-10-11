@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
 
-import { Book, Bot, ExternalLink } from 'lucide-react';
+import { Book, Bot, ExternalLink, Plus } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 import { Text } from '@/ui/components/common/Text';
 import { cn } from '@/utils/cn';
 
-const navItems = [{ to: '/developer/bots', label: 'My Bots', icon: Bot }];
+const navItems = [
+    { to: '/developer/bots', label: 'My Bots', icon: Bot },
+    { to: '/developer/bot-creator', label: 'New Bot', icon: Plus },
+];
 
 export const DevSidebar = (): ReactNode => (
     <div className="sticky top-0 flex h-screen w-56 flex-shrink-0 flex-col border-r border-border-subtle bg-bg-secondary">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Check, Copy, Plus, Trash2 } from 'lucide-react';
+import { Copy, Plus, Trash2 } from 'lucide-react';
 
 import {
     useCreateInvite,
@@ -14,6 +14,7 @@ import {
 } from '@/api/vanity/vanity.queries';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/components/common/Button';
+import { CopyInput } from '@/ui/components/common/CopyInput';
 import { Heading } from '@/ui/components/common/Heading';
 import { Input } from '@/ui/components/common/Input';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
@@ -52,7 +53,6 @@ const VanityLinkSection = ({ serverId }: { serverId: string }) => {
         useDeleteVanityLink(serverId);
 
     const [code, setCode] = useState('');
-    const [copied, setCopied] = useState(false);
 
     const currentCode = vanityLink?.code ?? null;
 
@@ -83,15 +83,6 @@ const VanityLinkSection = ({ serverId }: { serverId: string }) => {
         });
     };
 
-    const handleCopy = (): void => {
-        if (!currentCode) return;
-        void navigator.clipboard.writeText(buildInviteUrl(currentCode));
-        setCopied(true);
-        globalThis.setTimeout((): void => {
-            setCopied(false);
-        }, 1500);
-    };
-
     if (isLoading) {
         return null;
     }
@@ -108,23 +99,12 @@ const VanityLinkSection = ({ serverId }: { serverId: string }) => {
 
             {currentCode ? (
                 <div className="flex items-center gap-2">
-                    <Input
+                    <CopyInput
                         readOnly
                         className="font-mono"
+                        copyLabel="Copy Link"
                         value={buildInviteUrl(currentCode)}
                     />
-                    <Button
-                        size="sm"
-                        title="Copy Link"
-                        variant="ghost"
-                        onClick={handleCopy}
-                    >
-                        {copied ? (
-                            <Check className="h-4 w-4" />
-                        ) : (
-                            <Copy className="h-4 w-4" />
-                        )}
-                    </Button>
                     {isOwner ? (
                         <Button
                             disabled={isDeleting}
