@@ -11,7 +11,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
 interface ServerIconProps {
-    server: Omit<Server, 'id' | 'ownerId'> | Server;
+    server: Pick<Server, 'name'> & Partial<Pick<Server, 'icon'>>;
     isActive?: boolean;
     isInServer?: boolean;
     animateOnlyInServerOrHover?: boolean;
@@ -28,8 +28,9 @@ const SIZE_CLASSES = {
     sm: 'w-9 h-9 text-[10px]',
     md: 'w-12 h-12 text-sm',
     lg: 'w-16 h-16 text-lg',
+    xl: 'w-20 h-20 text-xl',
     xxl: 'w-20 h-20 text-xl',
-};
+} as const;
 
 const ROUNDED_CLASSES = {
     xxs: 'rounded-sm',
@@ -38,7 +39,8 @@ const ROUNDED_CLASSES = {
     md: 'rounded-[1.2rem]',
     lg: 'rounded-[1.5rem]',
     xl: 'rounded-[1.8rem]',
-};
+    xxl: 'rounded-[1.8rem]',
+} as const;
 
 const ACTIVE_ROUNDED_CLASSES = {
     xxs: 'rounded-sm',
@@ -47,6 +49,16 @@ const ACTIVE_ROUNDED_CLASSES = {
     md: 'rounded-[0.75rem]',
     lg: 'rounded-xl',
     xl: 'rounded-2xl',
+    xxl: 'rounded-2xl',
+} as const;
+
+const getInitials = (name?: string): string => {
+    if (!name) return '';
+    const words = name.trim().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return '';
+    // i hate utf16
+    const letters = words.map((word) => Array.from(word)[0] ?? '').join('');
+    return Array.from(letters).slice(0, 3).join('').toUpperCase();
 };
 
 export const ServerIcon = React.memo(
@@ -66,12 +78,7 @@ export const ServerIcon = React.memo(
         const iconUrl = resolveApiUrl(server.icon);
         const shouldShowIcon = !!iconUrl;
 
-        const initials = server.name
-            .split(' ')
-            .map((word: string): string => word[0] ?? '')
-            .join('')
-            .slice(0, 3)
-            .toUpperCase();
+        const initials = getInitials(server.name);
 
         const isAnimated = isAnimatedImageUrl(iconUrl);
         const canAnimate = Boolean(isInServer) || isHovered;
@@ -81,23 +88,26 @@ export const ServerIcon = React.memo(
               ? isAnimated && !canAnimate
               : false;
 
+        const effectiveSize = SIZE_CLASSES[size] || SIZE_CLASSES.md;
+        const roundedClass = ROUNDED_CLASSES[size] || ROUNDED_CLASSES.md;
+        const activeRoundedClass =
+            ACTIVE_ROUNDED_CLASSES[size] || ACTIVE_ROUNDED_CLASSES.md;
+
         return (
             <m.div
+                aria-label={server.name}
                 className={cn(
-                    'group relative flex cursor-pointer items-center justify-center transition-all duration-200 select-none',
-                    isActive
-                        ? `bg-[--color-primary] text-foreground-inverse`
-                        : `text-foreground-muted bg-[--color-bg-subtle] hover:bg-[--color-primary] hover:text-foreground-inverse`,
-                    SIZE_CLASSES[size as keyof typeof SIZE_CLASSES] ||
-                        SIZE_CLASSES.md,
+                    'group relative flex items-center justify-center transition-all duration-200 select-none',
+                    onClick ? 'cursor-pointer' : 'cursor-default',
+                    effectiveSize,
                     className,
                 )}
                 role="button"
                 style={style}
                 tabIndex={0}
-                title={server.name}
                 onKeyDown={(e): void => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
                         onClick();
                     }
                 }}
@@ -107,12 +117,15 @@ export const ServerIcon = React.memo(
             >
                 <div
                     className={cn(
-                        'flex h-full w-full items-center justify-center overflow-hidden bg-bg-secondary transition-all duration-200',
+                        'flex h-full w-full items-center justify-center overflow-hidden transition-all duration-200',
+                        shouldShowIcon
+                            ? 'bg-transparent'
+                            : isActive
+                              ? 'bg-primary text-foreground-inverse'
+                              : 'bg-bg-secondary text-foreground group-hover:bg-primary group-hover:text-foreground-inverse',
                         isActive
-                            ? ACTIVE_ROUNDED_CLASSES[size]
-                            : `${ROUNDED_CLASSES[size]} group-hover:${
-                                  ACTIVE_ROUNDED_CLASSES[size]
-                              }`,
+                            ? activeRoundedClass
+                            : `${roundedClass} group-hover:${activeRoundedClass}`,
                     )}
                 >
                     {shouldShowIcon ? (
