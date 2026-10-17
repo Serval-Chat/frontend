@@ -28,7 +28,7 @@ export const ParsedUnicodeEmoji = ({
         <span
             aria-label={emojiData.short_name}
             className={cn(
-                'relative top-[0.1em] inline-block shrink-0 overflow-hidden align-middle',
+                'inline-block shrink-0 overflow-hidden align-text-bottom',
                 isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                 className,
             )}

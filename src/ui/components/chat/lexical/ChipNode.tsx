@@ -161,16 +161,7 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
 
             case 'emoji': {
                 return (
-                    <ParsedEmoji
-                        emojiId={this.__payload.id}
-                        style={{
-                            width: '1.5em',
-                            height: '1.5em',
-                            verticalAlign: 'middle',
-                            position: 'relative',
-                            top: '0.1em',
-                        }}
-                    />
+                    <ParsedEmoji nonInteractive emojiId={this.__payload.id} />
                 );
             }
 
