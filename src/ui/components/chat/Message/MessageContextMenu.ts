@@ -102,6 +102,8 @@ function buildContextMenuItems({
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
 
+    const isWebhookMessage = !!message.isWebhook;
+
     if (onRetryMessage || onDiscardMessage) {
         if (onRetryMessage) {
             items.push({
@@ -155,7 +157,7 @@ function buildContextMenuItems({
         },
     });
 
-    if (!isMessageSender) {
+    if (!isMessageSender && !isWebhookMessage) {
         const isFriend = friends?.some(
             (f): boolean => f.id === message.senderId,
         );
@@ -248,6 +250,7 @@ function buildContextMenuItems({
 
     if (
         !isMessageSender &&
+        !isWebhookMessage &&
         message.serverId &&
         isHigherHierarchy &&
         (canBan || canKick || canTimeout)
@@ -285,7 +288,8 @@ function buildContextMenuItems({
         canManageRoles &&
         onAddRole &&
         onRemoveRole &&
-        message.serverId
+        message.serverId &&
+        !isWebhookMessage
     ) {
         items.push({ type: 'divider' });
 
