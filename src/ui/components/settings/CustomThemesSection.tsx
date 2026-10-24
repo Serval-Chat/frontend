@@ -124,6 +124,7 @@ export const CustomThemesSection = ({
                                 Use
                             </Button>
                             <Button
+                                aria-label={`Download ${customTheme.name} theme`}
                                 className="min-w-0 px-2"
                                 size="sm"
                                 variant="ghost"
@@ -137,6 +138,7 @@ export const CustomThemesSection = ({
                                 <Download size={16} />
                             </Button>
                             <Button
+                                aria-label={`Delete ${customTheme.name} theme`}
                                 className="min-w-0 px-2"
                                 size="sm"
                                 variant="ghost"

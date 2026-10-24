@@ -24,6 +24,15 @@ globalThis.addEventListener('auth-change', (): void => {
     }
 });
 
+if (
+    import.meta.env.DEV &&
+    import.meta.env.VITE_ENABLE_WCAG_PROFILER === 'true'
+) {
+    void import('@/dev/wcagProfiler').then((m): void => {
+        m.startWcagProfiler(import.meta.env);
+    });
+}
+
 createRoot(document.querySelector('#root')!).render(
     <StrictMode>
         <LazyMotion features={domAnimation}>

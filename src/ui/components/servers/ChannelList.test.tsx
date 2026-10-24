@@ -19,6 +19,7 @@ vi.mock('@/store/hooks', () => ({
 
 vi.mock('@/hooks/usePermissions', () => ({
     usePermissions: vi.fn(),
+    usePermissionsForActiveServer: vi.fn(),
 }));
 
 vi.mock('@/api/servers/servers.queries', () => ({
@@ -219,6 +220,14 @@ describe('ChannelList state cluster', (): void => {
         );
 
         vi.mocked(Permissions.usePermissions).mockReturnValue({
+            hasPermission: (): boolean => true,
+            permissions: {} as never,
+            isOwner: true,
+            isLoading: false,
+            isTimedOut: false,
+            remainingTimeoutMs: 0,
+        });
+        vi.mocked(Permissions.usePermissionsForActiveServer).mockReturnValue({
             hasPermission: (): boolean => true,
             permissions: {} as never,
             isOwner: true,

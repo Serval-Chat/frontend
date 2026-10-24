@@ -40,6 +40,7 @@ export const buttonVariantStyles: Record<ButtonVariant, ButtonStyleSet> = {
             backgroundColor: colors.background,
             color: colors.foreground,
             border: `1px solid ${colors.borderSubtle}`,
+            borderColor: colors.borderSubtle,
         },
         hover: {
             backgroundColor: colors.bgSecondary,
@@ -85,14 +86,14 @@ export const buttonVariantStyles: Record<ButtonVariant, ButtonStyleSet> = {
         base: {
             width: '3rem',
             height: '3rem',
-            borderRadius: '1.2rem',
+            borderRadius: radius.lg,
             backgroundColor: colors.bgSecondary,
             color: colors.foreground,
             padding: 0,
             transition: 'border-radius 0.2s, background-color 0.2s, color 0.2s',
         },
         hover: {
-            borderRadius: radius.lg,
+            borderRadius: radius.md,
             backgroundColor: colors.primary,
             color: colors.foregroundInverse,
         },

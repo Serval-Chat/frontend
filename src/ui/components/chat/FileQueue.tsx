@@ -93,10 +93,7 @@ const FileQueueItem = ({
                         />
                     ) : null}
                     <Tooltip fullWidth content={file.file.name} position="top">
-                        <Text
-                            className="w-full truncate text-[10px]"
-                            size="xs"
-                        >
+                        <Text className="w-full truncate text-[10px]" size="xs">
                             {file.file.name}
                         </Text>
                     </Tooltip>
@@ -109,6 +106,7 @@ const FileQueueItem = ({
             {file.status === 'idle' && isImage ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button
+                        aria-label={`${file.isSpoiler ? 'Hide' : 'Show'} spoiler for ${file.file.name}`}
                         className="h-8 w-8 border-none bg-black/60 p-0 hover:bg-black/80"
                         size="sm"
                         variant="ghost"
@@ -129,6 +127,7 @@ const FileQueueItem = ({
             {file.status === 'idle' ? (
                 <div className="absolute top-1 right-1">
                     <Button
+                        aria-label={`Remove ${file.file.name}`}
                         className="h-6 w-6 rounded-full border-none bg-black/60 p-0 text-white hover:bg-black/80"
                         size="sm"
                         variant="ghost"

@@ -159,7 +159,7 @@ export const MarkdownBlockadeSettings = ({
                         className="space-y-4 rounded-lg border border-border-subtle p-4"
                         key={rule.draftId}
                     >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-center gap-3">
                             <DropdownWithSearch
                                 allowClear={false}
                                 options={targetOptions}
@@ -175,6 +175,8 @@ export const MarkdownBlockadeSettings = ({
                             />
                             <Button
                                 aria-label="Remove disallowed markdown feature rule"
+                                className="h-8 w-8 min-w-0 shrink-0 p-0"
+                                size="sm"
                                 type="button"
                                 variant="ghost"
                                 onClick={(): void => {
@@ -194,12 +196,18 @@ export const MarkdownBlockadeSettings = ({
 
                         <div className="grid gap-3 sm:grid-cols-2">
                             {MARKDOWN_FEATURE_OPTIONS.map((feature) => (
-                                <label
+                                <div
                                     className="flex items-center justify-between gap-3 rounded-md bg-bg-secondary px-3 py-2"
                                     key={feature.id}
                                 >
-                                    <Text size="sm">{feature.label}</Text>
+                                    <Text
+                                        id={`markdown-feature-${rule.draftId}-${feature.id}`}
+                                        size="sm"
+                                    >
+                                        {feature.label}
+                                    </Text>
                                     <Toggle
+                                        aria-labelledby={`markdown-feature-${rule.draftId}-${feature.id}`}
                                         checked={rule.features.includes(
                                             feature.id,
                                         )}
@@ -219,7 +227,7 @@ export const MarkdownBlockadeSettings = ({
                                             }));
                                         }}
                                     />
-                                </label>
+                                </div>
                             ))}
                         </div>
 

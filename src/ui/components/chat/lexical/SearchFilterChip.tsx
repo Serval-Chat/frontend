@@ -130,6 +130,7 @@ export function SearchFilterChip({
                 {data.display}
             </button>
             <button
+                aria-label={`Remove ${data.label} filter`}
                 contentEditable={false}
                 style={chipRemoveButtonStyle}
                 tabIndex={-1}

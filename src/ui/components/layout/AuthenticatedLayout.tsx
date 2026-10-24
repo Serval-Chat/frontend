@@ -37,20 +37,12 @@ export const AuthenticatedLayout = (): ReactNode => {
     const { data: user, isLoading: isUserLoading, error: meError } = useMe();
     const { isLoading: isServersLoading } = useServers();
     const { isLoading: isUnreadLoading } = useUnreadStatus();
-    const { isLoading: isPingsLoading } = usePings();
+    usePings();
     const isHomeRoute = location.pathname.includes('/@me');
-    const { isLoading: isFriendsLoading } = useFriends({
-        enabled: isHomeRoute,
-    });
-    const { isLoading: isFriendProfilesLoading } = useFriendProfiles({
-        enabled: isHomeRoute,
-    });
-    const { isLoading: isBlocksLoading } = useBlockProfiles({
-        enabled: isHomeRoute,
-    });
-    const { isLoading: isRelationshipsLoading } = useBlocks({
-        enabled: isHomeRoute,
-    });
+    useFriends({ enabled: isHomeRoute });
+    useFriendProfiles({ enabled: isHomeRoute });
+    useBlockProfiles({ enabled: isHomeRoute });
+    useBlocks({ enabled: isHomeRoute });
 
     const serverIdMatch = /@server\/([^/]+)/.exec(location.pathname);
     const serverId = serverIdMatch ? (serverIdMatch[1] ?? null) : null;
@@ -63,14 +55,7 @@ export const AuthenticatedLayout = (): ReactNode => {
     const { status } = useConnectivity();
 
     const isInitialDataLoading =
-        isUserLoading ||
-        isServersLoading ||
-        isUnreadLoading ||
-        isPingsLoading ||
-        (isHomeRoute && isFriendsLoading) ||
-        (isHomeRoute && isBlocksLoading) ||
-        (isHomeRoute && isRelationshipsLoading) ||
-        (isHomeRoute && isFriendProfilesLoading);
+        isUserLoading || isServersLoading || isUnreadLoading;
     const [showReconnecting, setShowReconnecting] = React.useState(false);
     const isDebugWindowOpen = useWsDebugWindowOpen();
     const isConnecting = status === 'reconnecting' || status === 'connecting';

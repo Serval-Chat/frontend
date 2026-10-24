@@ -1,100 +1,122 @@
-import path from 'path';
-
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, loadEnv } from 'vite';
+import path from 'path';
+import { type Plugin, defineConfig, loadEnv } from 'vite';
 
 // https://vite.dev/config/
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  const apiTarget = env.VITE_API_BASE_URL || 'http://127.0.0.1:3000';
-  const hasPackage = (id: string, packageName: string): boolean =>
-    id.includes(`/node_modules/${packageName}/`);
+    const env = loadEnv(mode, process.cwd(), '');
+    const apiTarget = env.VITE_API_BASE_URL || 'http://127.0.0.1:3000';
+    const hasPackage = (id: string, packageName: string): boolean =>
+        id.includes(`/node_modules/${packageName}/`);
+    const reactScanDev: Plugin = {
+        name: 'react-scan-dev',
+        apply: 'serve',
+        transformIndexHtml: {
+            order: 'pre',
+            handler: () => [
+                {
+                    tag: 'script',
+                    attrs: {
+                        type: 'module',
+                        src: '/src/dev/reactScan.ts',
+                    },
+                    injectTo: 'head-prepend',
+                },
+            ],
+        },
+    };
 
-  return {
-    plugins: [react(), tailwindcss()],
-    server: {
-      host: '0.0.0.0',
-      proxy: {
-        '/api': {
-          target: apiTarget,
-          changeOrigin: true,
-          rewrite: (p) => p,
+    return {
+        plugins: [reactScanDev, react(), tailwindcss()],
+        server: {
+            host: '0.0.0.0',
+            proxy: {
+                '/api': {
+                    target: apiTarget,
+                    changeOrigin: true,
+                    rewrite: (p) => p,
+                },
+            },
         },
-      },
-    },
-    resolve: {
-      dedupe: [
-        'lexical',
-        '@lexical/react',
-        '@lexical/utils',
-        '@lexical/selection',
-        '@lexical/text',
-        '@lexical/link',
-        '@lexical/list',
-        '@lexical/rich-text',
-        '@lexical/clipboard',
-      ],
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-        '@/ui': path.resolve(__dirname, './src/ui'),
-        '@/pages': path.resolve(__dirname, './src/pages'),
-        '@/hooks': path.resolve(__dirname, './src/hooks'),
-        '@/styles': path.resolve(__dirname, './src/styles'),
-        '@/providers': path.resolve(__dirname, './src/providers'),
-        '@/utils': path.resolve(__dirname, './src/utils'),
-        'decode-named-character-reference': path.resolve(
-          __dirname,
-          'node_modules/decode-named-character-reference/index.js',
-        ),
-      },
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (
-                id.includes('react-syntax-highlighter') ||
-                id.includes('refractor') ||
-                id.includes('highlight.js')
-              ) {
-                return 'syntax-highlighting';
-              }
-              if (id.includes('lucide-react') || id.includes('framer-motion')) {
-                return 'ui-libs';
-              }
-              if (id.includes('redux') || id.includes('@tanstack/react-query')) {
-                return 'state-management';
-              }
-              if (
-                hasPackage(id, 'react') ||
-                hasPackage(id, 'react-dom') ||
-                hasPackage(id, 'react-router') ||
-                hasPackage(id, 'react-router-dom') ||
-                hasPackage(id, '@lexical/react')
-              ) {
-                return 'vendor';
-              }
-              if (id.includes('emoji-datasource')) {
-                return 'emoji-data';
-              }
-              if (id.includes('@tanstack')) {
-                return 'tanstack';
-              }
-              if (id.includes('katex')) {
-                return 'katex';
-              }
-              if (id.includes('lexical')) {
-                return 'lexical';
-              }
-            }
-          },
+        resolve: {
+            dedupe: [
+                'lexical',
+                '@lexical/react',
+                '@lexical/utils',
+                '@lexical/selection',
+                '@lexical/text',
+                '@lexical/link',
+                '@lexical/list',
+                '@lexical/rich-text',
+                '@lexical/clipboard',
+            ],
+            alias: {
+                '@': path.resolve(__dirname, './src'),
+                '@/ui': path.resolve(__dirname, './src/ui'),
+                '@/pages': path.resolve(__dirname, './src/pages'),
+                '@/hooks': path.resolve(__dirname, './src/hooks'),
+                '@/styles': path.resolve(__dirname, './src/styles'),
+                '@/providers': path.resolve(__dirname, './src/providers'),
+                '@/utils': path.resolve(__dirname, './src/utils'),
+                'decode-named-character-reference': path.resolve(
+                    __dirname,
+                    'node_modules/decode-named-character-reference/index.js',
+                ),
+            },
         },
-      },
-      sourcemap: true,
-      chunkSizeWarningLimit: 1500,
-    },
-  };
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks(id) {
+                        if (id.includes('node_modules')) {
+                            if (
+                                id.includes('react-syntax-highlighter') ||
+                                id.includes('refractor') ||
+                                id.includes('highlight.js')
+                            ) {
+                                return 'syntax-highlighting';
+                            }
+                            if (
+                                id.includes('lucide-react') ||
+                                id.includes('framer-motion')
+                            ) {
+                                return 'ui-libs';
+                            }
+                            if (
+                                id.includes('redux') ||
+                                id.includes('@tanstack/react-query')
+                            ) {
+                                return 'state-management';
+                            }
+                            if (
+                                hasPackage(id, 'react') ||
+                                hasPackage(id, 'react-dom') ||
+                                hasPackage(id, 'react-router') ||
+                                hasPackage(id, 'react-router-dom') ||
+                                hasPackage(id, '@lexical/react')
+                            ) {
+                                return 'vendor';
+                            }
+                            if (id.includes('emoji-datasource')) {
+                                return 'emoji-data';
+                            }
+                            if (id.includes('@tanstack')) {
+                                return 'tanstack';
+                            }
+                            if (id.includes('katex')) {
+                                return 'katex';
+                            }
+                            if (id.includes('lexical')) {
+                                return 'lexical';
+                            }
+                        }
+                    },
+                },
+            },
+            sourcemap: true,
+            chunkSizeWarningLimit: 1500,
+        },
+    };
 });

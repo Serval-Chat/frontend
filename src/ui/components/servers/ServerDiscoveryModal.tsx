@@ -208,6 +208,7 @@ export const ServerDiscoveryModal = ({
                             />
                             {search === '' ? null : (
                                 <button
+                                    aria-label="Clear search"
                                     className="absolute top-1/2 right-3 rounded p-1 text-muted-foreground hover:bg-bg-secondary hover:text-foreground"
                                     type="button"
                                     onClick={(): void => {

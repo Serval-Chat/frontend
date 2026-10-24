@@ -17,6 +17,7 @@ export const GifStarButton = ({
     className,
 }: GifStarButtonProps) => (
     <Button
+        aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
         className={cn(
             'h-8 w-8 rounded-full bg-black/70 p-0 transition-all hover:scale-110 hover:bg-black/90 active:scale-95',
             isFavorited ? 'text-yellow-400' : 'text-white',

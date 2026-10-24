@@ -49,7 +49,9 @@ function entryToRole(
     };
 }
 
-function getModPermissionsSummary(permissions?: Partial<RolePermissions>): string[] {
+function getModPermissionsSummary(
+    permissions?: Partial<RolePermissions>,
+): string[] {
     if (!permissions) return [];
     const keys: { key: keyof RolePermissions; label: string }[] = [
         { key: 'banMembers', label: 'Ban members' },
@@ -89,14 +91,20 @@ function RoleEntryPreview({
                 {entry.name}
             </span>
             {entry.separateFromOtherRoles && (
-                <Tooltip content="Display role members separately from online members" position="top">
+                <Tooltip
+                    content="Display role members separately from online members"
+                    position="top"
+                >
                     <span className="shrink-0 rounded-md bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-blue-400">
                         HOISTED
                     </span>
                 </Tooltip>
             )}
             {entry.permissions?.administrator && (
-                <Tooltip content="Grants all permissions and bypasses channel restrictions" position="top">
+                <Tooltip
+                    content="Grants all permissions and bypasses channel restrictions"
+                    position="top"
+                >
                     <span className="shrink-0 rounded-md bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-red-400">
                         ADMIN
                     </span>
@@ -118,6 +126,7 @@ function RoleEntryPreview({
             {onRemove && (
                 <Tooltip content="Remove from import" position="top">
                     <button
+                        aria-label="Remove from import"
                         className="rounded p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400"
                         type="button"
                         onClick={onRemove}
@@ -251,7 +260,11 @@ export const RoleImportModal = ({
                                         <RoleEntryPreview
                                             entry={entry}
                                             index={i}
-                                            key={entry.name ? `${entry.name}-${i}` : `role-${i}`}
+                                            key={
+                                                entry.name
+                                                    ? `${entry.name}-${i}`
+                                                    : `role-${i}`
+                                            }
                                             onRemove={(): void =>
                                                 handleRemoveRole(i)
                                             }

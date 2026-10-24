@@ -183,6 +183,7 @@ const ServerInvitesCard = ({
                                 </span>
                             </div>
                             <Button
+                                aria-label="Revoke invite"
                                 className="h-6 w-6 p-0 text-danger hover:bg-danger/10"
                                 disabled={isDeletingInvite}
                                 variant="ghost"

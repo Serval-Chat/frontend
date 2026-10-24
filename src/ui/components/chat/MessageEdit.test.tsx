@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { MessageEdit } from './MessageEdit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { MessageEdit } from './MessageEdit';
 
 vi.mock('@/api/chat/chat.queries', () => ({
     useEditChannelMessage: () => ({ mutate: vi.fn(), isPending: false }),
@@ -60,11 +61,13 @@ describe('MessageEdit', () => {
                     serverId="srv1"
                     onCancel={() => {}}
                 />
-            </QueryClientProvider>
+            </QueryClientProvider>,
         );
 
-        const contentEditable = await screen.findByRole('textbox');
-        
+        const contentEditable = await screen.findByRole('textbox', {
+            name: 'Edit message',
+        });
+
         await waitFor(() => {
             expect(document.activeElement).toBe(contentEditable);
         });

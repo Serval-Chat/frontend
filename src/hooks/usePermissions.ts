@@ -52,19 +52,11 @@ const subscribeTime = (callback: () => void): (() => void) => {
 const getTimeSnapshot = (): number => globalNow;
 const getServerTimeSnapshot = (): number => 0;
 
-export const usePermissions = (
+const usePermissionData = (
     serverId: string | null,
-    channelId?: string | null,
-    options?: { enabled?: boolean },
+    channelId: string | null | undefined,
+    isEnabled: boolean,
 ): UsePermissionsReturn => {
-    const location = useLocation();
-    const params = useParams();
-    const isServerRoute = location.pathname.includes('/@server/');
-    const isEnabled =
-        (options?.enabled ?? true) &&
-        isServerRoute &&
-        serverId === params.serverId;
-
     const { data: currentUser } = useMe();
     const { data: members } = useMembers(serverId, { enabled: isEnabled });
     const { data: roles } = useRoles(serverId, { enabled: isEnabled });
@@ -269,8 +261,7 @@ export const usePermissions = (
                 everyoneRole?.permissions?.[permKey],
             ];
             if (roleValues.some((v): boolean => v === true)) return true;
-            if (roleValues.some((v): boolean => v !== undefined))
-                return false;
+            if (roleValues.some((v): boolean => v !== undefined)) return false;
 
             if (
                 permKey === 'viewCategories' ||
@@ -380,3 +371,24 @@ export const usePermissions = (
         ],
     );
 };
+
+export const usePermissions = (
+    serverId: string | null,
+    channelId?: string | null,
+    options?: { enabled?: boolean },
+): UsePermissionsReturn => {
+    const location = useLocation();
+    const params = useParams();
+    const isServerRoute = location.pathname.includes('/@server/');
+    const isEnabled =
+        (options?.enabled ?? true) &&
+        isServerRoute &&
+        serverId === params.serverId;
+
+    return usePermissionData(serverId, channelId, isEnabled);
+};
+
+export const usePermissionsForActiveServer = (
+    serverId: string | null,
+    channelId: string,
+): UsePermissionsReturn => usePermissionData(serverId, channelId, !!serverId);

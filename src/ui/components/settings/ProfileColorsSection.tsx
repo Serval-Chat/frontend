@@ -84,6 +84,7 @@ export const ProfileColorsSection = ({
                                 />
                                 {value ? (
                                     <Button
+                                        aria-label={`Clear ${label.toLowerCase()} color`}
                                         size="sm"
                                         variant="ghost"
                                         onClick={(): void => {

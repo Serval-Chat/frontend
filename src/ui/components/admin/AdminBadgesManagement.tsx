@@ -94,6 +94,7 @@ export const AdminBadgesManagement = ({
                     Badges Management
                 </Heading>
                 <Button
+                    aria-label="Add badge"
                     size="sm"
                     variant="ghost"
                     onClick={(): void => {

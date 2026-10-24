@@ -155,9 +155,9 @@ export const useChannelListReorder = ({
         [items, collapsedCategories, existingCategoryIds],
     );
 
-    const toggleCategory = (categoryId: string): void => {
+    const toggleCategory = useCallback((categoryId: string): void => {
         dispatchList({ type: 'toggleCategory', categoryId });
-    };
+    }, []);
 
     const handleReorder = (newVisibleItems: ListItem[]): void => {
         const activeItem = items.find((i): boolean => i.id === activeItemId);

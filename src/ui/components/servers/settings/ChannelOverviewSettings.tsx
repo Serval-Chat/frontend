@@ -183,6 +183,7 @@ const ChannelSlowModeControl = ({
                 </span>
                 <div className="flex items-center gap-1.5">
                     <Input
+                        aria-label="Slow mode duration in seconds"
                         className="h-7 w-20 px-2 text-center text-xs"
                         max={21_600}
                         min={0}

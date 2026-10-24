@@ -60,7 +60,11 @@ export const CodeBlock = ({
         (e: React.MouseEvent): void => {
             e.stopPropagation();
             if (!godboltLanguageId) return;
-            window.open(buildGodboltUrl(content, godboltLanguageId), '_blank', 'noopener,noreferrer');
+            window.open(
+                buildGodboltUrl(content, godboltLanguageId),
+                '_blank',
+                'noopener,noreferrer',
+            );
         },
         [content, godboltLanguageId],
     );
@@ -219,7 +223,6 @@ export const CodeBlock = ({
                     </div>
                 </div>
                 <button
-                    aria-label="View code block"
                     className="custom-scrollbar block w-full cursor-pointer overflow-hidden border-0 bg-bg-secondary/50 p-0 text-left font-mono text-sm"
                     type="button"
                     onClick={handleContainerClick}

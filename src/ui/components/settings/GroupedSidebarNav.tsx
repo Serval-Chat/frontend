@@ -59,6 +59,7 @@ export const GroupedSidebarNav = ({
                         {title}
                     </Heading>
                     <IconButton
+                        aria-label="Close settings navigation"
                         className="border border-border-subtle text-muted-foreground hover:bg-danger-muted hover:text-danger"
                         icon={X}
                         iconSize={20}

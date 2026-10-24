@@ -121,4 +121,11 @@ export default tseslint.config(
       'no-restricted-syntax': 'off',
     },
   },
+  {
+    // The dev-only WCAG profiler's entire output surface is the console.
+    files: ['src/dev/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
 );

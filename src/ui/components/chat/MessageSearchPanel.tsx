@@ -66,6 +66,7 @@ const searchContentEditableStyle: React.CSSProperties = {
 
 const SEARCH_CONTENT_EDITABLE = (
     <ContentEditable
+        aria-label="Search messages and filters"
         className="outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
         style={searchContentEditableStyle}
         onKeyDown={handleSearchKeyDown}
@@ -842,6 +843,7 @@ export function MessageSearchPanel({
                     }}
                 >
                     <button
+                        aria-label="Previous page"
                         disabled={!canGoPrev}
                         style={navButtonStyle(canGoPrev)}
                         type="button"
@@ -858,6 +860,7 @@ export function MessageSearchPanel({
                         {page + 1} / {totalPages}
                     </Text>
                     <button
+                        aria-label="Next page"
                         disabled={!canGoNext}
                         style={navButtonStyle(canGoNext)}
                         type="button"

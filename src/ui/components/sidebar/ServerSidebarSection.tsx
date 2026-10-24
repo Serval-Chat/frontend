@@ -6,7 +6,10 @@ import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 import { useAppSelector } from '@/store/hooks';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
-import { UserItem } from '@/ui/components/common/UserItem';
+import {
+    UserItem,
+    UserItemServerDataProvider,
+} from '@/ui/components/common/UserItem';
 
 import { type MemberGroup, buildMemberGroups } from './memberGrouping';
 
@@ -93,6 +96,27 @@ export const ServerSidebarSection = ({
         overscan: 15,
     });
     const virtualRows = rowVirtualizer.getVirtualItems();
+    const renderedRows =
+        virtualRows.length > 0 || virtualItems.length === 0
+            ? virtualRows
+            : virtualItems.map((_, index) => ({
+                  index,
+                  start: virtualItems
+                      .slice(0, index)
+                      .reduce(
+                          (height, row) =>
+                              height + (row.type === 'header' ? 36 : 46),
+                          0,
+                      ),
+                  key: index,
+              }));
+    const totalSize =
+        virtualRows.length > 0
+            ? rowVirtualizer.getTotalSize()
+            : virtualItems.reduce(
+                  (height, row) => height + (row.type === 'header' ? 36 : 46),
+                  0,
+              );
 
     const roleListCache = React.useRef<Map<string, Role[]> | null>(null);
     if (roleListCache.current === null) roleListCache.current = new Map();
@@ -134,128 +158,82 @@ export const ServerSidebarSection = ({
         );
     }
 
-    if (virtualItems.length > 0 && virtualRows.length === 0) {
-        return (
-            <div className="relative w-full">
-                {virtualItems.map((item) =>
-                    item.type === 'header' ? (
-                        <div
-                            className="flex min-w-0 items-center justify-between px-3 pt-3 pb-2 first:pt-0"
-                            key={`header-${item.id}`}
-                        >
-                            <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
-                                {item.name} - {item.count}
-                            </div>
-                        </div>
-                    ) : (
-                        <div
-                            className="pb-0.5"
-                            key={`member-${item.member.userId}`}
-                        >
-                            <UserItem
-                                noFetch
-                                allRoles={allRolesMap.get(item.member.userId)}
-                                disableCustomFonts={
-                                    serverDetails?.disableCustomFonts
-                                }
-                                disableGlowAndColors={
-                                    serverDetails?.disableUsernameGlowAndCustomColor
-                                }
-                                iconRole={memberIconRoleMap.get(
-                                    item.member.userId,
-                                )}
-                                initialPresenceStatus={
-                                    item.groupId === 'offline'
-                                        ? 'offline'
-                                        : 'online'
-                                }
-                                joinedAt={item.member.joinedAt}
-                                nickname={item.member.nickname}
-                                role={memberRoleMap.get(item.member.userId)}
-                                serverId={String(serverDetails?.id || '')}
-                                serverRoles={roles}
-                                user={item.member.user}
-                                userId={String(item.member.userId)}
-                            />
-                        </div>
-                    ),
-                )}
-            </div>
-        );
-    }
-
     return (
-        <div
-            className="relative w-full"
-            style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-            }}
-        >
-            {virtualRows.map((virtualRow) => {
-                const item = virtualItems[virtualRow.index];
-                if (!item) return null;
-                const prevItem =
-                    virtualRow.index > 0
-                        ? virtualItems[virtualRow.index - 1]
-                        : undefined;
+        <UserItemServerDataProvider serverId={String(serverDetails?.id || '')}>
+            <div
+                className="relative w-full"
+                style={{
+                    height: `${totalSize}px`,
+                }}
+            >
+                {renderedRows.map((virtualRow) => {
+                    const item = virtualItems[virtualRow.index];
+                    if (!item) return null;
+                    const prevItem =
+                        virtualRow.index > 0
+                            ? virtualItems[virtualRow.index - 1]
+                            : undefined;
 
-                return (
-                    <div
-                        data-index={virtualRow.index}
-                        key={virtualRow.key}
-                        ref={rowVirtualizer.measureElement}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            transform: `translateY(${virtualRow.start}px)`,
-                            paddingBottom:
-                                item.type === 'header' ? '4px' : '2px',
-                            paddingTop:
-                                prevItem?.type === 'member' &&
-                                item.type === 'header'
-                                    ? '12px'
-                                    : '0px',
-                        }}
-                    >
-                        {item.type === 'header' ? (
-                            <div className="flex min-w-0 items-center justify-between px-3">
-                                <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
-                                    {item.name} - {item.count}
+                    return (
+                        <div
+                            data-index={virtualRow.index}
+                            key={virtualRow.key}
+                            ref={rowVirtualizer.measureElement}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                transform: `translateY(${virtualRow.start}px)`,
+                                paddingBottom:
+                                    item.type === 'header' ? '4px' : '2px',
+                                paddingTop:
+                                    prevItem?.type === 'member' &&
+                                    item.type === 'header'
+                                        ? '12px'
+                                        : '0px',
+                            }}
+                        >
+                            {item.type === 'header' ? (
+                                <div className="flex min-w-0 items-center justify-between px-3">
+                                    <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
+                                        {item.name} - {item.count}
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <UserItem
-                                noFetch
-                                allRoles={allRolesMap.get(item.member.userId)}
-                                disableCustomFonts={
-                                    serverDetails?.disableCustomFonts
-                                }
-                                disableGlowAndColors={
-                                    serverDetails?.disableUsernameGlowAndCustomColor
-                                }
-                                iconRole={memberIconRoleMap.get(
-                                    item.member.userId,
-                                )}
-                                initialPresenceStatus={
-                                    item.groupId === 'offline'
-                                        ? 'offline'
-                                        : 'online'
-                                }
-                                joinedAt={item.member.joinedAt}
-                                key={String(item.member.userId)}
-                                nickname={item.member.nickname}
-                                role={memberRoleMap.get(item.member.userId)}
-                                serverId={String(serverDetails?.id || '')}
-                                serverRoles={roles}
-                                user={item.member.user}
-                                userId={String(item.member.userId)}
-                            />
-                        )}
-                    </div>
-                );
-            })}
-        </div>
+                            ) : (
+                                <UserItem
+                                    noFetch
+                                    allRoles={allRolesMap.get(
+                                        item.member.userId,
+                                    )}
+                                    disableCustomFonts={
+                                        serverDetails?.disableCustomFonts
+                                    }
+                                    disableGlowAndColors={
+                                        serverDetails?.disableUsernameGlowAndCustomColor
+                                    }
+                                    iconRole={memberIconRoleMap.get(
+                                        item.member.userId,
+                                    )}
+                                    initialPresenceStatus={
+                                        item.groupId === 'offline'
+                                            ? 'offline'
+                                            : 'online'
+                                    }
+                                    joinedAt={item.member.joinedAt}
+                                    key={String(item.member.userId)}
+                                    nickname={item.member.nickname}
+                                    role={memberRoleMap.get(item.member.userId)}
+                                    serverId={String(serverDetails?.id || '')}
+                                    serverRoles={roles}
+                                    user={item.member.user}
+                                    userId={String(item.member.userId)}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </UserItemServerDataProvider>
     );
 };

@@ -62,6 +62,7 @@ export const AddFriendForm = ({
                     }
                 />
                 <IconButton
+                    aria-label="Add friend"
                     className={cn(
                         'shrink-0 border border-bg-subtle bg-bg-secondary p-0 transition-all duration-200 hover:border-primary/50 hover:bg-primary hover:text-foreground-inverse',
                         isSmall ? 'h-8 w-8' : 'h-10 w-10',

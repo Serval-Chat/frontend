@@ -60,6 +60,15 @@ export const DeveloperSettings = () => {
                 </p>
             </div>
 
+            {import.meta.env.DEV && (
+                <a
+                    className="rounded-md border border-border-subtle bg-bg-subtle p-4 text-sm font-semibold text-primary hover:bg-bg-secondary"
+                    href="/wcag-reporter"
+                >
+                    Open WCAG Reporter
+                </a>
+            )}
+
             <div className="flex flex-col gap-4">
                 {/* User Token */}
                 <div className="flex flex-col gap-3 rounded-md border border-border-subtle bg-bg-subtle p-4">
@@ -69,7 +78,9 @@ export const DeveloperSettings = () => {
                             User Token
                         </div>
                         <span className="text-sm text-muted-foreground">
-                            Your session token in case you use a custom client. Do not share this ANYWHERE and do not send it to anyone.
+                            Your session token in case you use a custom client.
+                            Do not share this ANYWHERE and do not send it to
+                            anyone.
                         </span>
                     </div>
                     <CopyInput
@@ -198,7 +209,8 @@ export const DeveloperSettings = () => {
                         </div>
                         <span className="text-sm text-muted-foreground">
                             Unsafely throws an uncaught browser error for
-                            telemetry testing (oh btw the said teletry isnt connected anywhere).
+                            telemetry testing (oh btw the said teletry isnt
+                            connected anywhere).
                         </span>
                     </div>
                     <Button
@@ -214,5 +226,3 @@ export const DeveloperSettings = () => {
         </div>
     );
 };
-
-

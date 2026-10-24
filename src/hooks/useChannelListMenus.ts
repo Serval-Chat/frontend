@@ -21,7 +21,6 @@ import type { Category, Channel } from '@/api/servers/servers.types';
 import { useAppDispatch } from '@/store/hooks';
 import { setSplitViewPane } from '@/store/slices/navSlice';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
-
 import type { ListItem } from '@/ui/components/servers/channelListModel';
 
 interface UseChannelListMenusArgs {
@@ -75,6 +74,8 @@ export const useChannelListMenus = ({
         channelsRef.current = channels;
         categoriesRef.current = categories;
     }, [channels, categories]);
+
+    const moveItemForMenu = isMobile ? handleMoveItemMobile : null;
 
     const getChannelMenuItems = useCallback(
         (channel: Channel): ContextMenuItem[] => {
@@ -169,7 +170,7 @@ export const useChannelListMenus = ({
                             label: 'Move Up',
                             icon: ArrowUp,
                             onClick: (): undefined =>
-                                void handleMoveItemMobile(
+                                void moveItemForMenu?.(
                                     {
                                         type: 'channel',
                                         id: channel.id,
@@ -184,7 +185,7 @@ export const useChannelListMenus = ({
                             label: 'Move Down',
                             icon: ArrowDown,
                             onClick: (): undefined =>
-                                void handleMoveItemMobile(
+                                void moveItemForMenu?.(
                                     {
                                         type: 'channel',
                                         id: channel.id,
@@ -243,9 +244,9 @@ export const useChannelListMenus = ({
             canManageChannels,
             dispatch,
             isMobile,
-            handleMoveItemMobile,
             handleMoveToCategory,
             onEditChannel,
+            moveItemForMenu,
         ],
     );
 
@@ -283,7 +284,7 @@ export const useChannelListMenus = ({
                             label: 'Move Up',
                             icon: ArrowUp,
                             onClick: (): undefined =>
-                                void handleMoveItemMobile(
+                                void moveItemForMenu?.(
                                     {
                                         type: 'category',
                                         id: category.id,
@@ -298,7 +299,7 @@ export const useChannelListMenus = ({
                             label: 'Move Down',
                             icon: ArrowDown,
                             onClick: (): undefined =>
-                                void handleMoveItemMobile(
+                                void moveItemForMenu?.(
                                     {
                                         type: 'category',
                                         id: category.id,
@@ -317,7 +318,7 @@ export const useChannelListMenus = ({
 
             return items;
         },
-        [canManageChannels, isMobile, handleMoveItemMobile, onEditCategory],
+        [canManageChannels, isMobile, onEditCategory, moveItemForMenu],
     );
 
     const getGlobalMenuItems = useCallback((): ContextMenuItem[] => {

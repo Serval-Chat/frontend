@@ -46,6 +46,7 @@ describe('ServerIcon', () => {
                 animateOnlyInServerOrHover
                 isInServer={false}
                 server={mockServer}
+                onClick={(): void => {}}
             />,
         );
         const img = screen.getByTestId('paused-animated-image');
@@ -70,6 +71,7 @@ describe('ServerIcon', () => {
                 animateOnlyInServerOrHover
                 isInServer={false}
                 server={mockServer}
+                onClick={(): void => {}}
             />,
         );
         const button = screen.getByRole('button');
@@ -94,7 +96,13 @@ describe('ServerIcon', () => {
     });
 
     it('applies the xl size class properly instead of falling back to md', () => {
-        render(<ServerIcon server={{ name: 'Large Server' }} size="xl" />);
+        render(
+            <ServerIcon
+                server={{ name: 'Large Server' }}
+                size="xl"
+                onClick={(): void => {}}
+            />,
+        );
         const button = screen.getByRole('button');
         expect(button.className).toContain('w-20');
         expect(button.className).toContain('h-20');
@@ -173,6 +181,7 @@ describe('ServerIcon – Limited Animations accessibility setting', () => {
                 animateOnlyInServerOrHover={props.animateOnlyInServerOrHover}
                 isInServer={props.isInServer}
                 server={props.server}
+                onClick={props.onClick}
             />,
         );
         return { screen: s, fireEvent: fe };
@@ -193,6 +202,7 @@ describe('ServerIcon – Limited Animations accessibility setting', () => {
             server: mockServer,
             isInServer: false,
             animateOnlyInServerOrHover: true,
+            onClick: (): void => {},
         });
         const button = s.getByRole('button');
         fe.mouseEnter(button);

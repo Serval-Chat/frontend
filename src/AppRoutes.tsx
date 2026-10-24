@@ -58,6 +58,9 @@ const TauriGateway = lazy(
         ),
 );
 const Tos = lazy(() => import('@/pages/Tos').then((m) => ({ default: m.Tos })));
+const WcagReporter = lazy(() =>
+    import('@/pages/WcagIssues').then((m) => ({ default: m.WcagIssues })),
+);
 
 const WebOnly = ({
     children,
@@ -167,6 +170,9 @@ export const AppRoutes = (): React.ReactNode => (
                 path="/showoff"
             />
             <Route element={<EmbedBuilder />} path="/embed-builder" />
+            {import.meta.env.DEV && (
+                <Route element={<WcagReporter />} path="/wcag-reporter" />
+            )}
         </Route>
         <Route element={<AdminRoute />}>
             <Route

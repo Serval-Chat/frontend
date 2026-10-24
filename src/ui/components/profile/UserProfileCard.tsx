@@ -256,6 +256,7 @@ const InlineEditableField = ({
     if (isEditing && multiline) {
         return (
             <textarea
+                aria-label={title}
                 className={inputClassName}
                 placeholder={placeholder}
                 ref={textareaRef}
@@ -279,6 +280,7 @@ const InlineEditableField = ({
     if (isEditing) {
         return (
             <input
+                aria-label={title}
                 className={inputClassName}
                 ref={inputRef}
                 value={value}
@@ -858,6 +860,7 @@ const ProfileCardActions = ({
             ) : null}
             {friendStatus === 'friend' ? (
                 <Button
+                    aria-label="Remove friend"
                     className="gap-2"
                     size="sm"
                     variant="danger"
@@ -957,11 +960,13 @@ export const UserProfileCard = ({
         userId ? state.presence.users[userId] : undefined,
     );
 
-    const finalStatus = (userId && userId === currentUser?.id
-        ? selfStatus
-        : presence?.status === 'online'
-          ? (presence.presenceStatus ?? 'online')
-          : (presence?.status ?? propPresenceStatus ?? 'offline')) as UserStatus;
+    const finalStatus = (
+        userId && userId === currentUser?.id
+            ? selfStatus
+            : presence?.status === 'online'
+              ? (presence.presenceStatus ?? 'online')
+              : (presence?.status ?? propPresenceStatus ?? 'offline')
+    ) as UserStatus;
     const finalCustomText =
         customStatus?.text ??
         presence?.customStatus?.text ??
@@ -1020,7 +1025,8 @@ export const UserProfileCard = ({
         <StyledUserName
             className="min-w-0 truncate text-xl leading-tight font-bold"
             disableColors={
-                disableColors || currentUser?.settings?.disableCustomUsernameColors
+                disableColors ||
+                currentUser?.settings?.disableCustomUsernameColors
             }
             disableCustomFonts={
                 disableCustomFonts ||
@@ -1140,9 +1146,7 @@ export const UserProfileCard = ({
                                 inputClassName="min-w-0 flex-1 rounded-md border border-primary bg-bg-subtle px-1.5 py-0.5 text-xl leading-tight font-bold text-foreground focus:outline-none"
                                 title="Edit display name"
                                 value={
-                                    displayNameValue ??
-                                    user?.displayName ??
-                                    ''
+                                    displayNameValue ?? user?.displayName ?? ''
                                 }
                                 onChange={onDisplayNameChange}
                             >

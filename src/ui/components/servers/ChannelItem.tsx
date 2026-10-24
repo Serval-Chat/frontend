@@ -66,7 +66,7 @@ export const ChannelItem = React.memo(
         onMouseEnter,
     }: ChannelItemProps) => {
         const channelClasses = cn(
-            'group flex w-full items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-colors',
+            'group flex min-w-0 items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-colors',
             disabled
                 ? 'cursor-not-allowed opacity-50'
                 : 'cursor-pointer hover:bg-white/5',
@@ -78,24 +78,17 @@ export const ChannelItem = React.memo(
         );
 
         return (
-            <div className="mb-[1px] flex flex-col">
-                <m.div
+            <div className="group relative mb-[1px] flex items-center">
+                <m.button
                     className={cn(
-                        'relative select-none',
+                        'relative min-h-6 min-w-0 flex-1 select-none',
                         buttonVariants({ variant: 'ghost' }),
                         channelClasses,
                     )}
-                    role="button"
-                    tabIndex={disabled ? -1 : 0}
-                    onKeyDown={(e): void => {
-                        if (disabled) return;
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            onClick?.();
-                        }
-                    }}
+                    disabled={disabled}
+                    type="button"
+                    onClick={disabled ? undefined : onClick}
                     onMouseEnter={disabled ? undefined : onMouseEnter}
-                    onTap={disabled ? undefined : onClick}
                 >
                     <div className="flex w-full items-center justify-between">
                         <div className="flex min-w-0 flex-1 items-center">
@@ -131,21 +124,26 @@ export const ChannelItem = React.memo(
                                   )
                                 : null}
                         </div>
-                        {onSettingsClick ? (
-                            <IconButton
-                                className="ml-1 shrink-0 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-                                icon={Settings}
-                                iconSize={14}
-                                title="Edit Channel"
-                                variant="ghost"
-                                onClick={(e): void => {
-                                    e.stopPropagation();
-                                    onSettingsClick(e);
-                                }}
-                            />
-                        ) : null}
                     </div>
-                </m.div>
+                </m.button>
+                {onSettingsClick ? (
+                    <div className="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+                        <IconButton
+                            className="h-6 w-6 shrink-0"
+                            icon={Settings}
+                            iconSize={16}
+                            style={{
+                                height: 24,
+                                minWidth: 24,
+                                padding: 0,
+                                width: 24,
+                            }}
+                            title="Edit Channel"
+                            variant="ghost"
+                            onClick={onSettingsClick}
+                        />
+                    </div>
+                ) : null}
                 {type === 'voice' &&
                 connectedUserIds &&
                 connectedUserIds.length > 0 ? (

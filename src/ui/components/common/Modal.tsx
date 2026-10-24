@@ -148,6 +148,7 @@ export const Modal = ({
                                 ) : null}
                                 {showCloseButton ? (
                                     <Button
+                                        aria-label="Close dialog"
                                         className="h-8 w-8 min-w-0 rounded-md border-none p-1 text-muted-foreground shadow-none transition-colors hover:bg-white/10 hover:text-foreground"
                                         size="sm"
                                         variant="ghost"

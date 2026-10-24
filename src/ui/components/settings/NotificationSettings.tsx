@@ -79,12 +79,14 @@ const NotificationSoundItem = ({
             </Box>
             <Box className="flex items-center gap-2">
                 <IconButton
+                    aria-label={`${isPlaying ? 'Stop' : 'Play'} ${sound.name} preview`}
                     icon={isPlaying ? Square : Play}
                     size="sm"
                     variant="ghost"
                     onClick={onPlay}
                 />
                 <IconButton
+                    aria-label={`Delete ${sound.name}`}
                     className="text-danger hover:bg-danger/10"
                     icon={Trash2}
                     size="sm"
@@ -254,9 +256,15 @@ export const NotificationSettings = () => {
         );
     };
 
-    const handleSoundVolumeChange = (id: string, volumePercent: number): void => {
+    const handleSoundVolumeChange = (
+        id: string,
+        volumePercent: number,
+    ): void => {
         setLocalSoundVolumes(
-            (prev): Record<string, number> => ({ ...prev, [id]: volumePercent }),
+            (prev): Record<string, number> => ({
+                ...prev,
+                [id]: volumePercent,
+            }),
         );
 
         const existingTimer = volumeSaveTimersRef.current[id];

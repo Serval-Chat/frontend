@@ -31,7 +31,7 @@ import { Timestamp } from '@/ui/components/common/Timestamp';
 import { useToast } from '@/ui/components/common/Toast';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { extractApiError } from '@/utils/extractApiError';
-import { parseUserAgent, type DeviceKind } from '@/utils/parseUserAgent';
+import { type DeviceKind, parseUserAgent } from '@/utils/parseUserAgent';
 
 const SESSION_DURATION_LABELS: Record<SessionDuration, string> = {
     '1d': '1 day',
@@ -61,8 +61,7 @@ export const ActiveSessionsSettings = () => {
     const isDevelopment = useIsDevelopment();
 
     const { mutate: updateSettings } = useUpdateSettings();
-    const { mutate: revokeSession, variables: revokingId } =
-        useRevokeSession();
+    const { mutate: revokeSession, variables: revokingId } = useRevokeSession();
     const { mutate: revokeOthers, isPending: isRevokingOthers } =
         useRevokeOtherSessions();
     const { mutate: logout, isPending: isLoggingOut } = useLogout();
@@ -179,6 +178,7 @@ export const ActiveSessionsSettings = () => {
                     </Text>
                 </div>
                 <select
+                    aria-label="Session duration"
                     className="rounded-md border border-border-subtle bg-background px-2 py-1 text-sm text-foreground outline-none focus:border-primary"
                     value={sessionDuration}
                     onChange={(event): void => {
@@ -227,8 +227,7 @@ export const ActiveSessionsSettings = () => {
                                             >
                                                 {parsed.label}
                                             </Text>
-                                            {session.location !==
-                                                undefined && (
+                                            {session.location !== undefined && (
                                                 <span className="inline-flex min-w-0 items-center gap-1">
                                                     <Text
                                                         className="truncate"
@@ -252,13 +251,11 @@ export const ActiveSessionsSettings = () => {
                                                     </Tooltip>
                                                 </span>
                                             )}
-                                            {session.ipRisk !==
-                                                undefined && (
+                                            {session.ipRisk !== undefined && (
                                                 <Tooltip
                                                     multiline
                                                     content={
-                                                        session.ipRisk ===
-                                                        'vpn'
+                                                        session.ipRisk === 'vpn'
                                                             ? "This session's IP belongs to a known VPN provider."
                                                             : "This session's IP belongs to a datacenter or hosting provider, not a typical home network."
                                                     }
@@ -266,9 +263,11 @@ export const ActiveSessionsSettings = () => {
                                                     triggerClassName="inline-flex items-center"
                                                 >
                                                     <Pill variant="caution">
-                                                        {IP_RISK_LABELS[
-                                                            session.ipRisk
-                                                        ]}
+                                                        {
+                                                            IP_RISK_LABELS[
+                                                                session.ipRisk
+                                                            ]
+                                                        }
                                                     </Pill>
                                                 </Tooltip>
                                             )}
@@ -279,10 +278,10 @@ export const ActiveSessionsSettings = () => {
                                             )}
                                         </div>
                                         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                                            {editingSessionId ===
-                                            session.id ? (
+                                            {editingSessionId === session.id ? (
                                                 <span className="inline-flex items-center gap-1">
                                                     <input
+                                                        aria-label="Session IP address"
                                                         className="h-5 w-28 rounded border border-border-subtle bg-background px-1 text-[11px] text-foreground outline-none focus:border-primary"
                                                         value={editIpValue}
                                                         onChange={(
@@ -313,10 +312,9 @@ export const ActiveSessionsSettings = () => {
                                                         }}
                                                     />
                                                     <button
+                                                        aria-label="Save IP edit"
                                                         className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-success/10 hover:text-success disabled:cursor-not-allowed disabled:opacity-50"
-                                                        disabled={
-                                                            isUpdatingIp
-                                                        }
+                                                        disabled={isUpdatingIp}
                                                         type="button"
                                                         onClick={(): void => {
                                                             confirmEditingIp(
@@ -327,6 +325,7 @@ export const ActiveSessionsSettings = () => {
                                                         <Check size={10} />
                                                     </button>
                                                     <button
+                                                        aria-label="Cancel IP edit"
                                                         className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                                                         type="button"
                                                         onClick={
@@ -341,6 +340,7 @@ export const ActiveSessionsSettings = () => {
                                                     {session.ip}
                                                     {isDevelopment && (
                                                         <button
+                                                            aria-label="Edit session IP"
                                                             className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
                                                             type="button"
                                                             onClick={(): void => {
@@ -350,9 +350,7 @@ export const ActiveSessionsSettings = () => {
                                                                 );
                                                             }}
                                                         >
-                                                            <Pencil
-                                                                size={10}
-                                                            />
+                                                            <Pencil size={10} />
                                                         </button>
                                                     )}
                                                 </span>

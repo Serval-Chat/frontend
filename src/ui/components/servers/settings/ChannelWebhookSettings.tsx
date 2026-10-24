@@ -214,6 +214,12 @@ export const ChannelWebhookSettings = ({
                                                 </span>
                                             </div>
                                             <Button
+                                                aria-label={
+                                                    copiedWebhookId ===
+                                                    webhook.id
+                                                        ? 'Webhook URL copied'
+                                                        : 'Copy webhook URL'
+                                                }
                                                 size="sm"
                                                 variant="ghost"
                                                 onClick={(): void => {

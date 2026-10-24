@@ -109,6 +109,7 @@ export const UsernameGradientSection = ({
                                             </span>
                                         </Button>
                                         <Button
+                                            aria-label={`Remove gradient color ${index + 1}`}
                                             className="absolute -top-1 -right-1 h-4 w-4 min-w-0 rounded-full border-none bg-danger p-0.5 text-white opacity-0 shadow-none transition-opacity group-hover:opacity-100"
                                             size="sm"
                                             variant="primary"
@@ -142,6 +143,7 @@ export const UsernameGradientSection = ({
                             })}
                             {gradientColors.length < 20 ? (
                                 <Button
+                                    aria-label="Add gradient color"
                                     className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
                                     variant="ghost"
                                     onClick={addGradientColor}

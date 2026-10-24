@@ -180,6 +180,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
             {/* Copy server link button */}
             <div className="relative">
                 <button
+                    aria-label="Copy invite link"
                     className="hover:bg-bg-tertiary absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition-all hover:opacity-100"
                     type="button"
                     onClick={handleCopy}

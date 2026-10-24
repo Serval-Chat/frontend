@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { UsersRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIncomingRequests } from '@/api/friends/friends.queries';
@@ -45,6 +46,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
                 void navigate('/chat/@me');
             }}
         >
+            <UsersRound aria-hidden="true" className="h-4 w-4 shrink-0" />
             <Text className="flex-1 text-left font-medium" size="sm">
                 Friends
             </Text>
@@ -64,7 +66,12 @@ export const FriendsSection = () => (
             <FriendRequestNavItem />
             <Divider fullWidth className="my-2" />
         </Box>
-        <Box className="custom-scrollbar flex-1 overflow-y-auto">
+        <Box
+            aria-label="Friends list"
+            className="custom-scrollbar flex-1 overflow-y-auto"
+            role="region"
+            tabIndex={0}
+        >
             <FriendList />
         </Box>
     </Box>

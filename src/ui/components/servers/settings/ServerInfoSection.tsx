@@ -155,6 +155,7 @@ export const ServerInfoSection = ({
                         />
                         <Button
                             square
+                            aria-label="Add tag"
                             disabled={!tagInput.trim() || tags.length >= 8}
                             variant="primary"
                             onClick={onAddTag}
@@ -172,6 +173,7 @@ export const ServerInfoSection = ({
                                 <Tag className="opacity-60" size={12} />
                                 {tag}
                                 <button
+                                    aria-label={`Remove tag ${tag}`}
                                     className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"
                                     type="button"
                                     onClick={(): void => {

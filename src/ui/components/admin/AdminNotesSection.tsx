@@ -106,10 +106,16 @@ const AdminNoteItem = ({
 
                 {isDeleted ? null : (
                     <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button size="sm" variant="ghost" onClick={onEdit}>
+                        <Button
+                            aria-label="Edit note"
+                            size="sm"
+                            variant="ghost"
+                            onClick={onEdit}
+                        >
                             <Edit2 size={12} />
                         </Button>
                         <Button
+                            aria-label="Delete note"
                             className="text-danger hover:bg-danger/10 hover:text-danger"
                             size="sm"
                             variant="ghost"

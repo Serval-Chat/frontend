@@ -114,9 +114,7 @@ export const DropdownWithSearch = ({
                 justify="between"
                 style={{
                     backgroundColor: colors.bgSubtle,
-                    borderColor: isOpen
-                        ? colors.primary
-                        : colors.borderSubtle,
+                    borderColor: isOpen ? colors.primary : colors.borderSubtle,
                 }}
                 type="button"
                 variant="normal"
@@ -146,6 +144,7 @@ export const DropdownWithSearch = ({
                 <div className="ml-2 flex flex-shrink-0 items-center gap-1">
                     {allowClear && value ? (
                         <button
+                            aria-label="Clear selection"
                             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle"
                             type="button"
                             onClick={handleClear}

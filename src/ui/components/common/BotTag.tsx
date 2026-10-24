@@ -29,7 +29,7 @@ export const BotTag = React.memo(
                         : 'var(--bot-tag-bg, var(--primary))',
                     color: isWebhook
                         ? 'var(--webhook-tag-text, #ffffff)'
-                        : 'var(--bot-tag-text, #ffffff)',
+                        : 'var(--bot-tag-text, var(--foreground-inverse, #18181b))',
                 }}
             >
                 {verified && !isWebhook ? (

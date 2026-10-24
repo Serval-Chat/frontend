@@ -152,6 +152,7 @@ export const RoleColorSection = ({
                                     />
                                     {customColorItems.length > 2 ? (
                                         <IconButton
+                                            aria-label={`Remove color ${i + 1}`}
                                             className="h-8 w-8 p-0 text-danger"
                                             icon={Trash2}
                                             iconSize={18}

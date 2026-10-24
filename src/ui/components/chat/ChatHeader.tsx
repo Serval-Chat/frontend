@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
-import { AtSign, Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
+import { Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { usePinnedMessages } from '@/api/chat/chat.queries';
@@ -18,6 +18,7 @@ import {
     toggleMobileMemberList,
 } from '@/store/slices/navSlice';
 import { Text } from '@/ui/components/common/Text';
+import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
@@ -149,7 +150,13 @@ export const ChatHeader = ({
                 <Box className="flex min-w-0 items-center gap-2">
                     <Box className="text-foreground-muted flex h-5 w-5 shrink-0 items-center justify-center">
                         {selectedFriendId ? (
-                            <AtSign className="h-5 w-5" />
+                            <UserProfilePicture
+                                noIndicator
+                                className="h-5 w-5"
+                                size="xs"
+                                src={friendUser?.profilePicture}
+                                username={friendUser?.username ?? 'User'}
+                            />
                         ) : (
                             (() => {
                                 const CustomIcon = selectedChannel?.icon
@@ -208,9 +215,24 @@ export const ChatHeader = ({
                     </m.button>
                 ) : null}
                 {hasStatus ? (
-                    <Text className="text-foreground-muted truncate text-xs">
-                        {friendUser?.customStatus?.text}
-                    </Text>
+                    <Box className="flex min-w-0 items-center">
+                        <svg
+                            aria-hidden="true"
+                            className="-mt-0.5 ml-[9px] h-4 w-[19px] shrink-0 self-start overflow-visible"
+                            fill="none"
+                            viewBox="0 0 19 16"
+                        >
+                            <path
+                                d="M1 0v4c0 3.314 2.686 6 6 6h12"
+                                stroke="var(--border-subtle)"
+                                strokeLinecap="round"
+                                strokeWidth="2"
+                            />
+                        </svg>
+                        <Text className="text-foreground-muted truncate text-xs">
+                            {friendUser?.customStatus?.text}
+                        </Text>
+                    </Box>
                 ) : null}
             </Box>
 

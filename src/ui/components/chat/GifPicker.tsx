@@ -69,7 +69,9 @@ const toggleTagInExpression = (expression: string, tagName: string): string => {
         return trimmed === '' ? tagName : `${trimmed} & ${tagName}`;
     }
 
-    const tokens = trimmed.split(/\s*(&{1,2}|\|{1,2}|\^)\s*/).filter((t) => t !== '');
+    const tokens = trimmed
+        .split(/\s*(&{1,2}|\|{1,2}|\^)\s*/)
+        .filter((t) => t !== '');
     const termIndex = tokens.findIndex(
         (t, i) =>
             i % 2 === 0 &&
@@ -589,7 +591,12 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                             Stickers
                         </Button>
                     </Box>
-                    <Button size="sm" variant="ghost" onClick={onClose}>
+                    <Button
+                        aria-label="Close GIF picker"
+                        size="sm"
+                        variant="ghost"
+                        onClick={onClose}
+                    >
                         <X className="h-4 w-4" />
                     </Button>
                 </Box>
@@ -765,10 +772,10 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 </Box>
 
                 <Box className="flex shrink-0 flex-col items-center justify-center gap-1 border-t border-border-subtle py-2">
-                    <span className="text-[8px] font-bold tracking-[0.2em] text-muted-foreground/40 uppercase">
+                    <span className="text-[8px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
                         Powered by
                     </span>
-                    <span className="text-[10px] font-black tracking-[0.1em] text-muted-foreground/60 uppercase">
+                    <span className="text-[10px] font-black tracking-[0.1em] text-muted-foreground uppercase">
                         Klipy
                     </span>
                 </Box>

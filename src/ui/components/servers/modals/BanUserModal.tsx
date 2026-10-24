@@ -12,10 +12,7 @@ import { Box } from '@/ui/components/layout/Box';
 interface BanUserModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (
-        reason: string,
-        deleteMessageDuration?: string,
-    ) => void;
+    onConfirm: (reason: string, deleteMessageDuration?: string) => void;
     username: string;
     userAvatar?: string | null;
 }
@@ -57,10 +54,7 @@ export const BanUserModal = ({
     const [deleteIndex, setDeleteIndex] = useState(0);
 
     const handleConfirm = (): void => {
-        onConfirm(
-            reason,
-            DELETE_DURATION_VALUES[deleteIndex] || undefined,
-        );
+        onConfirm(reason, DELETE_DURATION_VALUES[deleteIndex] || undefined);
         setReason('');
         setDeleteIndex(0);
         onClose();
@@ -92,6 +86,7 @@ export const BanUserModal = ({
                     </Text>
                     <Box className="space-y-2">
                         <Slider
+                            aria-label="Delete message history"
                             max={9}
                             min={0}
                             value={deleteIndex}

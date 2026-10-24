@@ -96,6 +96,7 @@ export const NTSlider = ({
             </div>
         ) : null}
         <input
+            aria-label={props['aria-label'] ?? label}
             className="nt-slider"
             max={max}
             min={min}

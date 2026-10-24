@@ -194,7 +194,7 @@ export const ReplyPreview = React.memo(
         const hasAttachments = (attachments?.length ?? 0) > 0;
         return (
             <Box
-                className="group/reply ml-[24px] flex h-5 max-h-5 cursor-pointer items-center gap-2 overflow-hidden opacity-60 transition-opacity select-none hover:opacity-100"
+                className="group/reply ml-[24px] flex h-5 max-h-5 cursor-pointer items-center gap-2 overflow-hidden select-none"
                 onClick={(): void | '' | undefined =>
                     replyToId && onClick?.(replyToId)
                 }
@@ -236,7 +236,7 @@ export const ReplyPreview = React.memo(
                     ) : null}
                     <Text
                         as="span"
-                        className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-text-muted"
+                        className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-foreground"
                     >
                         {command && !text ? (
                             <span className="mr-1 opacity-70">

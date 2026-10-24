@@ -361,10 +361,12 @@ const itemStyle: CSSProperties = {
 function TimeSpinner({
     value,
     max,
+    label,
     onChange,
 }: {
     value: number;
     max: number;
+    label: string;
     onChange: (n: number) => void;
 }) {
     const dec = () => {
@@ -384,6 +386,7 @@ function TimeSpinner({
             }}
         >
             <button
+                aria-label={`Decrease ${label}`}
                 style={spinBtnStyle}
                 type="button"
                 onClick={dec}
@@ -405,6 +408,7 @@ function TimeSpinner({
                 {String(value).padStart(2, '0')}
             </span>
             <button
+                aria-label={`Increase ${label}`}
                 style={spinBtnStyle}
                 type="button"
                 onClick={inc}
@@ -499,6 +503,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                 }}
             >
                 <button
+                    aria-label="Previous month"
                     style={navBtnStyle}
                     type="button"
                     onClick={prevMonth}
@@ -518,6 +523,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     {MONTH_NAMES[viewMonth]} {viewYear}
                 </span>
                 <button
+                    aria-label="Next month"
                     style={navBtnStyle}
                     type="button"
                     onClick={nextMonth}
@@ -624,11 +630,26 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                 >
                     Time
                 </span>
-                <TimeSpinner max={23} value={hour} onChange={setHour} />
+                <TimeSpinner
+                    label="hour"
+                    max={23}
+                    value={hour}
+                    onChange={setHour}
+                />
                 <span style={{ color: 'var(--muted-foreground)' }}>:</span>
-                <TimeSpinner max={59} value={minute} onChange={setMinute} />
+                <TimeSpinner
+                    label="minute"
+                    max={59}
+                    value={minute}
+                    onChange={setMinute}
+                />
                 <span style={{ color: 'var(--muted-foreground)' }}>:</span>
-                <TimeSpinner max={59} value={second} onChange={setSecond} />
+                <TimeSpinner
+                    label="second"
+                    max={59}
+                    value={second}
+                    onChange={setSecond}
+                />
             </div>
 
             {/* confirm */}

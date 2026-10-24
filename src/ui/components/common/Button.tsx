@@ -54,6 +54,8 @@ const ButtonComponent = ({
     iconSize = 16,
     iconPosition = 'left',
     style,
+    onMouseEnter,
+    onMouseLeave,
     ...props
 }: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -140,11 +142,13 @@ const ButtonComponent = ({
             ref={buttonRef}
             style={computedStyle}
             type="button"
-            onMouseEnter={() => {
+            onMouseEnter={(event): void => {
                 setHovered(true);
+                onMouseEnter?.(event);
             }}
-            onMouseLeave={() => {
+            onMouseLeave={(event): void => {
                 setHovered(false);
+                onMouseLeave?.(event);
             }}
             {...props}
         >

@@ -528,6 +528,7 @@ export const ServerOnboardingSettings = ({
                                     />
                                 </div>
                                 <Button
+                                    aria-label={`Remove rule ${idx + 1}`}
                                     className="h-8 w-8 min-w-0 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                                     type="button"
                                     variant="ghost"

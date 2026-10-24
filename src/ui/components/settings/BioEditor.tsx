@@ -16,7 +16,10 @@ import { $getRawMessageText } from '@/ui/components/chat/lexical/lexicalUtils';
 import { Text } from '@/ui/components/common/Text';
 
 const bioContentEditable = (
-    <ContentEditable className="custom-scrollbar h-full max-h-[300px] min-h-[100px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none" />
+    <ContentEditable
+        aria-labelledby="bio-label"
+        className="custom-scrollbar h-full max-h-[300px] min-h-[100px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
+    />
 );
 
 interface BioEditorProps {
@@ -40,12 +43,13 @@ export const BioEditor = ({
 
     return (
         <div className="space-y-2">
-            <label
+            <Text
+                as="p"
                 className="text-sm font-bold text-muted-foreground uppercase"
-                htmlFor="bio"
+                id="bio-label"
             >
                 About Me
-            </label>
+            </Text>
             <div className="relative flex min-h-[100px] items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer
                     initialConfig={{

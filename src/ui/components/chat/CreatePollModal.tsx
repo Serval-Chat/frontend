@@ -98,6 +98,7 @@ const PollOptionsEditor = ({
             {options.map((opt, index) => (
                 <Box className="relative flex items-center gap-2" key={opt.id}>
                     <Button
+                        aria-label={`Choose emoji for option ${index + 1}`}
                         className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-white/5 hover:text-foreground"
                         ref={(el): void => {
                             triggerRefs.current[opt.id] = el;
@@ -138,6 +139,7 @@ const PollOptionsEditor = ({
                     />
                     {options.length > 2 ? (
                         <Button
+                            aria-label={`Remove option ${index + 1}`}
                             className="h-10 w-10 shrink-0 p-0 text-muted-foreground hover:bg-danger/20 hover:text-danger"
                             size="sm"
                             variant="ghost"
@@ -254,6 +256,7 @@ const PollDurationSection = ({
         </Box>
         <Box className="flex items-center gap-2">
             <Input
+                aria-label="Poll duration value"
                 className="w-24"
                 max={maxDurationValue}
                 min={1}
@@ -264,6 +267,7 @@ const PollDurationSection = ({
                 }}
             />
             <select
+                aria-label="Poll duration unit"
                 className="bg-bg-tertiary h-10 cursor-pointer rounded-md border border-border-subtle px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 value={durationUnit}
                 onChange={(e): void => {
@@ -279,6 +283,7 @@ const PollDurationSection = ({
         </Box>
         <Box className="mt-2">
             <Slider
+                aria-label="Poll duration"
                 max={maxDurationValue}
                 min={durationUnit === 'minutes' ? 5 : 1}
                 value={durationValue}

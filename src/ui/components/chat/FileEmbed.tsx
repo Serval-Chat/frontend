@@ -161,6 +161,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                     ) : null}
                     {isSpoiler && isRevealed ? (
                         <Button
+                            aria-label="Hide spoiler"
                             className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                             size="sm"
                             variant="ghost"
@@ -237,6 +238,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                         </video>
                         {isSpoiler && isRevealed ? (
                             <Button
+                                aria-label="Hide spoiler"
                                 className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/40 p-0 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                                 size="sm"
                                 variant="ghost"
@@ -260,7 +262,11 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
         (isLocal && (meta as FileMetadata).isBinary === false) ||
         mimeType?.startsWith('text/') ||
         mimeType === 'application/json';
-    if (isText && meta.size !== undefined && meta.size < MAX_CODE_PREVIEW_BYTES) {
+    if (
+        isText &&
+        meta.size !== undefined &&
+        meta.size < MAX_CODE_PREVIEW_BYTES
+    ) {
         return (
             <CodeEmbed
                 content={attachment?.content}
@@ -307,6 +313,7 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                 </Text>
             </div>
             <Button
+                aria-label={`Download ${displayName || 'file'}`}
                 size="sm"
                 variant="ghost"
                 onClick={(): Window | null =>

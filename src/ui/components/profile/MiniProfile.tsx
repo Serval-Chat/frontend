@@ -8,8 +8,8 @@ import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
-
 import { isCustomEmojiId } from '@/utils/validation';
+
 import { StatusModal } from './StatusModal';
 import { StatusPicker } from './StatusPicker';
 
@@ -102,7 +102,7 @@ export const MiniProfile = () => {
                     </Box>
                     {backendInstanceId ? (
                         <Box
-                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-40 hover:opacity-100"
+                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-70 hover:opacity-100"
                             title={`Backend Instance: ${backendInstanceId}`}
                         >
                             Instance: {backendInstanceId}

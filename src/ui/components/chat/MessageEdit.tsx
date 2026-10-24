@@ -9,21 +9,14 @@ import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { $getRoot, $getSelection, $isRangeSelection, type LexicalEditor } from 'lexical';
+import {
+    $getRoot,
+    $getSelection,
+    $isRangeSelection,
+    type LexicalEditor,
+} from 'lexical';
 import { Check, Smile, X } from 'lucide-react';
 import { useClickAway } from 'react-use';
-
-const LexicalEditorRefPlugin = ({
-    onEditor,
-}: {
-    onEditor: (editor: LexicalEditor) => void;
-}): null => {
-    const [editor] = useLexicalComposerContext();
-    React.useEffect((): void => {
-        onEditor(editor);
-    }, [editor, onEditor]);
-    return null;
-};
 
 import {
     useEditChannelMessage,
@@ -56,6 +49,18 @@ import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
 import { LexicalMarkdownFormattingPlugin } from './lexical/LexicalMarkdownFormattingPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
+
+const LexicalEditorRefPlugin = ({
+    onEditor,
+}: {
+    onEditor: (editor: LexicalEditor) => void;
+}): null => {
+    const [editor] = useLexicalComposerContext();
+    React.useEffect((): void => {
+        onEditor(editor);
+    }, [editor, onEditor]);
+    return null;
+};
 
 const EmojiPicker = React.lazy(() =>
     import('@/ui/components/emoji/EmojiPicker').then((m) => ({
@@ -276,24 +281,27 @@ export const MessageEdit = ({
         setShowEmojiPicker(false);
     });
 
-    const handleEmojiSelect = useCallback((emoji: string): void => {
-        if (editorInstanceRef.current) {
-            editorInstanceRef.current.update((): void => {
-                let selection = $getSelection();
-                if (!$isRangeSelection(selection)) {
-                    selection = $getRoot().selectEnd();
-                }
-                if ($isRangeSelection(selection)) {
-                    selection.insertNodes([
-                        $createChipNode('unicode-emoji', { id: emoji }),
-                    ]);
-                }
-            });
-            editorInstanceRef.current.focus();
-        }
-        setShowEmojiPicker(false);
-        recordUsage({ emoji, emojiType: 'unicode' });
-    }, [recordUsage]);
+    const handleEmojiSelect = useCallback(
+        (emoji: string): void => {
+            if (editorInstanceRef.current) {
+                editorInstanceRef.current.update((): void => {
+                    let selection = $getSelection();
+                    if (!$isRangeSelection(selection)) {
+                        selection = $getRoot().selectEnd();
+                    }
+                    if ($isRangeSelection(selection)) {
+                        selection.insertNodes([
+                            $createChipNode('unicode-emoji', { id: emoji }),
+                        ]);
+                    }
+                });
+                editorInstanceRef.current.focus();
+            }
+            setShowEmojiPicker(false);
+            recordUsage({ emoji, emojiType: 'unicode' });
+        },
+        [recordUsage],
+    );
 
     const handleCustomEmojiSelect = useCallback(
         (emoji: { id: string; name: string }): void => {
@@ -364,6 +372,7 @@ export const MessageEdit = ({
     const contentEditableElement = useMemo(
         () => (
             <ContentEditable
+                aria-label="Edit message"
                 className="custom-scrollbar h-full max-h-[200px] min-h-[60px] w-full resize-none overflow-y-auto px-3 py-2 pb-8 text-sm text-foreground outline-none"
                 onKeyDown={(e): void => {
                     if (e.key === 'Escape') {

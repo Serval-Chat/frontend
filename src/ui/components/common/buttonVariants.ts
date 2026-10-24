@@ -20,7 +20,7 @@ export const buttonVariants = cva(
                     'bg-caution text-foreground-inverse hover:bg-caution-hover',
                 success:
                     'bg-success text-foreground-inverse hover:bg-success-hover',
-                nav: 'h-12 w-12 rounded-[1.2rem] bg-bg-secondary p-0 text-foreground transition-all duration-200 hover:rounded-[0.75rem] hover:bg-primary hover:text-foreground-inverse',
+                nav: 'h-12 w-12 rounded-xl bg-bg-secondary p-0 text-foreground transition-all duration-200 hover:rounded-lg hover:bg-primary hover:text-foreground-inverse',
                 ghost: 'border-none bg-transparent text-foreground shadow-none hover:bg-bg-subtle',
             },
             size: {

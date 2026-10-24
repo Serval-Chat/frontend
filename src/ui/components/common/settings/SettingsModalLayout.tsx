@@ -77,6 +77,7 @@ export const SettingsModalLayout = ({
                 >
                     <div className="flex flex-col items-center gap-2">
                         <IconButton
+                            aria-label="Close"
                             className="rounded-full border-2 border-border-subtle p-2 text-muted-foreground transition-all duration-200 hover:bg-bg-subtle hover:text-foreground"
                             icon={X}
                             iconSize={24}

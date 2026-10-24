@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 import { useFriends } from '@/api/friends/friends.queries';
@@ -16,10 +18,12 @@ export const FriendList = () => {
     );
 
     const navigate = useNavigate();
-
-    const handleFriendClick = (friendId: string): void => {
-        void navigate(`/chat/@user/${friendId}`);
-    };
+    const handleFriendClick = useCallback(
+        (friendId: string): void => {
+            void navigate(`/chat/@user/${friendId}`);
+        },
+        [navigate],
+    );
 
     const sortedFriends = friends?.slice().sort((a, b): 1 | -1 | 0 => {
         const aPinned = a.isPinned ?? false;
@@ -66,9 +70,7 @@ export const FriendList = () => {
                         isActive={selectedFriendId === String(friend.id)}
                         key={String(friend.id)}
                         userId={String(friend.id)}
-                        onClick={(): void => {
-                            handleFriendClick(String(friend.id));
-                        }}
+                        onClick={handleFriendClick}
                     />
                 ))
             )}

@@ -59,6 +59,7 @@ export const MessageComposerActions = ({
     return (
         <>
             <Button
+                aria-label="Open emoji picker"
                 className={cn(
                     'h-8 w-8 shrink-0 p-0',
                     showEmojiPicker && 'text-primary',
@@ -79,6 +80,7 @@ export const MessageComposerActions = ({
 
             {!hideUtilityActions ? (
                 <Button
+                    aria-label="Open sticker picker"
                     className={cn(
                         'h-8 w-8 shrink-0 p-0',
                         showStickerPicker && 'text-primary',
@@ -96,6 +98,7 @@ export const MessageComposerActions = ({
             {!hideUtilityActions ? (
                 <Box className="relative">
                     <Button
+                        aria-label="Open GIF picker"
                         className={cn(
                             'h-8 w-8 shrink-0 p-0',
                             showGifPicker && 'text-primary',
@@ -141,6 +144,7 @@ export const MessageComposerActions = ({
 
             {!hideUtilityActions ? (
                 <Button
+                    aria-label="Create poll"
                     className={cn(
                         'h-8 w-8 shrink-0 p-0',
                         showPollModal && 'text-primary',
@@ -155,6 +159,7 @@ export const MessageComposerActions = ({
 
             {(hasText || hasFiles) && isMobile ? (
                 <Button
+                    aria-label="Send message"
                     className="h-8 w-8 shrink-0 p-0 text-primary"
                     disabled={isUploading}
                     size="sm"

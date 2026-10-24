@@ -251,6 +251,7 @@ export const PinsDrawer = ({
                         </Text>
                     </Box>
                     <button
+                        aria-label="Close pinned messages"
                         className="p-1 text-muted-foreground transition-colors hover:text-foreground"
                         type="button"
                         onClick={onClose}

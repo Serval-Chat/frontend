@@ -63,7 +63,6 @@ import type {
 } from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/components/layout/Box';
-import { isCustomEmojiId } from '@/utils/validation';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
 import { NicknameModal } from '@/ui/components/profile/modals/NicknameModal';
@@ -74,6 +73,7 @@ import { TimeoutUserModal } from '@/ui/components/servers/modals/TimeoutUserModa
 import { cn } from '@/utils/cn';
 import { resolveDisplayName } from '@/utils/displayName';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
+import { isCustomEmojiId } from '@/utils/validation';
 import { wsMessages } from '@/ws/messages';
 
 import { BotTag } from './BotTag';
@@ -100,7 +100,7 @@ interface UserItemProps {
     };
     nickname?: string;
     isActive?: boolean;
-    onClick?: () => void;
+    onClick?: (userId: string) => void;
     className?: string;
     noFetch?: boolean;
     role?: Role; // Highest role for display
@@ -179,6 +179,52 @@ const ServerDataInjector = React.memo(
 );
 
 ServerDataInjector.displayName = 'ServerDataInjector';
+
+const ServerDataContext = React.createContext<{
+    serverId: string;
+    data: ServerData;
+} | null>(null);
+
+const ServerDataContextProvider = ({
+    serverId,
+    data,
+    children,
+}: {
+    serverId: string;
+    data: ServerData;
+    children: React.ReactNode;
+}): ReactNode => {
+    const value = useMemo(() => ({ serverId, data }), [serverId, data]);
+    return (
+        <ServerDataContext.Provider value={value}>
+            {children}
+        </ServerDataContext.Provider>
+    );
+};
+
+export const UserItemServerDataProvider = React.memo(
+    ({
+        serverId,
+        children,
+    }: {
+        serverId: string;
+        children: React.ReactNode;
+    }): ReactNode => {
+        if (!serverId) return children;
+
+        return (
+            <ServerDataInjector serverId={serverId}>
+                {(data): ReactNode => (
+                    <ServerDataContextProvider data={data} serverId={serverId}>
+                        {children}
+                    </ServerDataContextProvider>
+                )}
+            </ServerDataInjector>
+        );
+    },
+);
+
+UserItemServerDataProvider.displayName = 'UserItemServerDataProvider';
 
 /**
  * @description Renders a user item with avatar, styled username, and custom status.
@@ -361,9 +407,7 @@ const UserItemInner = React.memo(
             (state): number | undefined => state.voice.userVolumes[userId],
         );
         const userVoiceState = useAppSelector(
-            (
-                state,
-            ): { isMuted: boolean; isDeafened: boolean } | undefined =>
+            (state): { isMuted: boolean; isDeafened: boolean } | undefined =>
                 state.voice.voiceUserStates[userId],
             shallowEqual,
         );
@@ -934,11 +978,11 @@ const UserItemInner = React.memo(
 
         const handleItemClick = useCallback((): void => {
             if (onClick) {
-                onClick();
+                onClick(userId);
             } else {
                 setShowProfile(true);
             }
-        }, [onClick]);
+        }, [onClick, userId]);
 
         const handleAvatarClick = useCallback((e: React.MouseEvent): void => {
             e.stopPropagation();
@@ -967,7 +1011,10 @@ const UserItemInner = React.memo(
                             size="sm"
                             src={profilePicture}
                             status={presenceStatus}
-                            username={resolveDisplayName(displayName, username) ?? username}
+                            username={
+                                resolveDisplayName(displayName, username) ??
+                                username
+                            }
                             onClick={handleAvatarClick}
                         />
 
@@ -1127,7 +1174,11 @@ const UserItemInner = React.memo(
                             setIsBanModalOpen(false);
                         }}
                         onConfirm={(reason, deleteMessageDuration): void => {
-                            banMember({ userId, reason, deleteMessageDuration });
+                            banMember({
+                                userId,
+                                reason,
+                                deleteMessageDuration,
+                            });
                         }}
                     />
                 ) : null}
@@ -1173,7 +1224,10 @@ const UserItemInner = React.memo(
                     <InviteToServerModal
                         isOpen={isInviteToServerModalOpen}
                         userId={userId}
-                        username={resolveDisplayName(displayName, username) ?? username}
+                        username={
+                            resolveDisplayName(displayName, username) ??
+                            username
+                        }
                         onClose={(): void => {
                             setIsInviteToServerModalOpen(false);
                         }}
@@ -1199,6 +1253,7 @@ const UserItemInner = React.memo(
 UserItemInner.displayName = 'UserItemInner';
 
 export const UserItem = React.memo((props: UserItemProps): ReactNode => {
+    const sharedServerData = React.useContext(ServerDataContext);
     const isServerContext = !!props.serverId;
     const serverId =
         props.serverId ||
@@ -1208,6 +1263,35 @@ export const UserItem = React.memo((props: UserItemProps): ReactNode => {
     const sid = serverId || null;
 
     if (isServerContext && sid) {
+        if (sharedServerData?.serverId === sid) {
+            return (
+                <UserItemInner
+                    allRoles={props.allRoles}
+                    className={props.className}
+                    disableColors={props.disableColors}
+                    disableCustomFonts={props.disableCustomFonts}
+                    disableGlow={props.disableGlow}
+                    disableGlowAndColors={props.disableGlowAndColors}
+                    hideUnread={props.hideUnread}
+                    iconRole={props.iconRole}
+                    initialData={props.initialData}
+                    initialPresenceStatus={props.initialPresenceStatus}
+                    isActive={props.isActive}
+                    joinedAt={props.joinedAt}
+                    nickname={props.nickname}
+                    noFetch={props.noFetch}
+                    role={props.role}
+                    serverData={sharedServerData.data}
+                    serverId={props.serverId}
+                    serverRoles={props.serverRoles}
+                    showPinIcon={props.showPinIcon}
+                    user={props.user}
+                    userId={props.userId}
+                    onClick={props.onClick}
+                />
+            );
+        }
+
         return (
             <ServerDataInjector serverId={sid}>
                 {(serverData): ReactNode => (

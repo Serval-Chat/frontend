@@ -8,7 +8,7 @@ import { ChevronDown, Plus, Settings } from 'lucide-react';
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS, LIMIT } from '@/api/chat/chat.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissionsForActiveServer } from '@/hooks/usePermissions';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
@@ -20,7 +20,7 @@ import type { ListItem } from './channelListModel';
 interface ChannelRowProps {
     channel: Channel;
     selectedServerId: string | null;
-    selectedChannelId: string | null;
+    isActive: boolean;
     connectedUserIds: string[] | undefined;
     channelPings: Record<string, number>;
     canManageChannels: boolean;
@@ -33,7 +33,7 @@ const ChannelRow = React.memo(
     ({
         channel,
         selectedServerId,
-        selectedChannelId,
+        isActive,
         connectedUserIds,
         channelPings,
         canManageChannels,
@@ -42,10 +42,8 @@ const ChannelRow = React.memo(
         getChannelMenuItems,
     }: ChannelRowProps) => {
         const queryClient = useQueryClient();
-        const { hasPermission, isLoading, permissions } = usePermissions(
-            selectedServerId,
-            channel.id,
-        );
+        const { hasPermission, isLoading, permissions } =
+            usePermissionsForActiveServer(selectedServerId, channel.id);
         const canView = hasPermission('viewChannels');
         const canConnect = hasPermission('connect');
 
@@ -84,7 +82,7 @@ const ChannelRow = React.memo(
         }
 
         const isUnread =
-            selectedChannelId !== channel.id &&
+            !isActive &&
             channel.type !== 'link' &&
             channel.lastMessageAt &&
             (!channel.lastReadAt ||
@@ -104,7 +102,7 @@ const ChannelRow = React.memo(
                     emoji={channel.emoji}
                     emojiType={channel.emojiType}
                     icon={channel.icon}
-                    isActive={selectedChannelId === channel.id}
+                    isActive={isActive}
                     isUnread={!!isUnread}
                     name={channel.name}
                     pingCount={channelPings[channel.id]}
@@ -208,35 +206,120 @@ interface ChannelListRowProps {
     onDragStart: (id: string) => void;
 }
 
-export const ChannelListRow = ({
-    item,
-    virtualRow,
-    measureElement,
-    canManageChannels,
-    isMobile,
-    isReordering,
-    collapsedCategories,
-    draggingCategoryId,
-    existingCategoryIds,
-    selectedChannelId,
-    selectedServerId,
-    channelPings,
-    voiceParticipants,
-    getCategoryMenuItems,
-    getChannelMenuItems,
-    onToggleCategory,
-    onEditCategory,
-    onCreateChannelInCategory,
-    onEditChannel,
-    onChannelClick,
-    onDragEnd,
-    onDragStart,
-}: ChannelListRowProps): React.ReactNode => {
-    const dragEnabled = canManageChannels && !isMobile;
+export const ChannelListRow = React.memo(
+    ({
+        item,
+        virtualRow,
+        measureElement,
+        canManageChannels,
+        isMobile,
+        isReordering,
+        collapsedCategories,
+        draggingCategoryId,
+        existingCategoryIds,
+        selectedChannelId,
+        selectedServerId,
+        channelPings,
+        voiceParticipants,
+        getCategoryMenuItems,
+        getChannelMenuItems,
+        onToggleCategory,
+        onEditCategory,
+        onCreateChannelInCategory,
+        onEditChannel,
+        onChannelClick,
+        onDragEnd,
+        onDragStart,
+    }: ChannelListRowProps): React.ReactNode => {
+        const dragEnabled = canManageChannels && !isMobile;
 
-    if (item.type === 'category') {
-        const category = item.data;
-        const isCollapsed = collapsedCategories[category.id];
+        if (item.type === 'category') {
+            const category = item.data;
+            const isCollapsed = collapsedCategories[category.id];
+
+            return (
+                <ReorderRow
+                    dragEnabled={dragEnabled}
+                    item={item}
+                    measureElement={measureElement}
+                    virtualRow={virtualRow}
+                    onDragEnd={onDragEnd}
+                    onDragStart={onDragStart}
+                >
+                    <ContextMenu
+                        className="m-0 w-full p-0 pt-3"
+                        items={getCategoryMenuItems(category)}
+                    >
+                        <div className="group flex items-center px-1 select-none">
+                            <button
+                                className="flex min-h-6 min-w-0 flex-1 cursor-pointer items-center overflow-hidden border-0 bg-transparent p-0 text-left"
+                                type="button"
+                                onClick={(e): void => {
+                                    e.stopPropagation();
+                                    onToggleCategory(category.id);
+                                }}
+                            >
+                                <ChevronDown
+                                    className={cn(
+                                        'mr-0.5 h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200',
+                                        isCollapsed ? '-rotate-90' : '',
+                                    )}
+                                />
+                                <span className="truncate text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
+                                    {category.name}
+                                </span>
+                            </button>
+                            {canManageChannels ? (
+                                <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
+                                    <IconButton
+                                        icon={Settings}
+                                        iconSize={16}
+                                        style={{
+                                            paddingInline: '3px',
+                                            paddingBlock: '3px',
+                                        }}
+                                        title="Edit Category"
+                                        variant="ghost"
+                                        onClick={(e): void => {
+                                            e.stopPropagation();
+                                            onEditCategory(category);
+                                        }}
+                                    />
+                                    <IconButton
+                                        icon={Plus}
+                                        iconSize={16}
+                                        style={{
+                                            paddingInline: '3px',
+                                            paddingBlock: '3px',
+                                        }}
+                                        title="Create Channel"
+                                        variant="ghost"
+                                        onClick={(e): void => {
+                                            e.stopPropagation();
+                                            onCreateChannelInCategory(
+                                                category.id,
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            ) : null}
+                        </div>
+                    </ContextMenu>
+                </ReorderRow>
+            );
+        }
+
+        const channel = item.data;
+        const isCollapsed =
+            channel.categoryId && existingCategoryIds.has(channel.categoryId)
+                ? collapsedCategories[channel.categoryId]
+                : false;
+
+        if (isCollapsed && !isReordering) return null;
+
+        const dimmed =
+            draggingCategoryId !== null &&
+            channel.categoryId !== draggingCategoryId;
 
         return (
             <ReorderRow
@@ -247,104 +330,31 @@ export const ChannelListRow = ({
                 onDragEnd={onDragEnd}
                 onDragStart={onDragStart}
             >
-                <ContextMenu
-                    className="m-0 w-full p-0 pt-3"
-                    items={getCategoryMenuItems(category)}
+                <div
+                    className={cn(
+                        'transition-all duration-150',
+                        dimmed && 'opacity-40 grayscale',
+                    )}
                 >
-                    <div className="group flex items-center px-1 select-none">
-                        <button
-                            className="flex min-w-0 flex-1 cursor-pointer items-center overflow-hidden border-0 bg-transparent p-0 text-left"
-                            type="button"
-                            onClick={(e): void => {
-                                e.stopPropagation();
-                                onToggleCategory(category.id);
-                            }}
-                        >
-                            <ChevronDown
-                                className={cn(
-                                    'mr-0.5 h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200',
-                                    isCollapsed ? '-rotate-90' : '',
-                                )}
-                            />
-                            <span className="truncate text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
-                                {category.name}
-                            </span>
-                        </button>
-                        {canManageChannels ? (
-                            <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
-                                <IconButton
-                                    className="p-0.5"
-                                    icon={Settings}
-                                    iconSize={14}
-                                    title="Edit Category"
-                                    variant="ghost"
-                                    onClick={(e): void => {
-                                        e.stopPropagation();
-                                        onEditCategory(category);
-                                    }}
-                                />
-                                <IconButton
-                                    className="p-0.5"
-                                    icon={Plus}
-                                    iconSize={14}
-                                    title="Create Channel"
-                                    variant="ghost"
-                                    onClick={(e): void => {
-                                        e.stopPropagation();
-                                        onCreateChannelInCategory(category.id);
-                                    }}
-                                />
-                            </div>
-                        ) : null}
-                    </div>
-                </ContextMenu>
+                    <ChannelRow
+                        canManageChannels={canManageChannels}
+                        channel={channel}
+                        channelPings={channelPings}
+                        connectedUserIds={
+                            channel.type === 'voice'
+                                ? voiceParticipants[channel.id]
+                                : undefined
+                        }
+                        getChannelMenuItems={getChannelMenuItems}
+                        handleChannelClick={onChannelClick}
+                        isActive={selectedChannelId === channel.id}
+                        selectedServerId={selectedServerId}
+                        setSettingsChannel={onEditChannel}
+                    />
+                </div>
             </ReorderRow>
         );
-    }
+    },
+);
 
-    const channel = item.data;
-    const isCollapsed =
-        channel.categoryId && existingCategoryIds.has(channel.categoryId)
-            ? collapsedCategories[channel.categoryId]
-            : false;
-
-    if (isCollapsed && !isReordering) return null;
-
-    const dimmed =
-        draggingCategoryId !== null &&
-        channel.categoryId !== draggingCategoryId;
-
-    return (
-        <ReorderRow
-            dragEnabled={dragEnabled}
-            item={item}
-            measureElement={measureElement}
-            virtualRow={virtualRow}
-            onDragEnd={onDragEnd}
-            onDragStart={onDragStart}
-        >
-            <div
-                className={cn(
-                    'transition-all duration-150',
-                    dimmed && 'opacity-40 grayscale',
-                )}
-            >
-                <ChannelRow
-                    canManageChannels={canManageChannels}
-                    channel={channel}
-                    channelPings={channelPings}
-                    connectedUserIds={
-                        channel.type === 'voice'
-                            ? voiceParticipants[channel.id]
-                            : undefined
-                    }
-                    getChannelMenuItems={getChannelMenuItems}
-                    handleChannelClick={onChannelClick}
-                    selectedChannelId={selectedChannelId}
-                    selectedServerId={selectedServerId}
-                    setSettingsChannel={onEditChannel}
-                />
-            </div>
-        </ReorderRow>
-    );
-};
+ChannelListRow.displayName = 'ChannelListRow';

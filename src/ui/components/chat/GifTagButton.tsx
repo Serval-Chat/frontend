@@ -114,6 +114,7 @@ export const GifTagButton = ({
                         }}
                     />
                     <Button
+                        aria-label="Add tag"
                         className="shrink-0 px-2"
                         disabled={newTagName.trim() === ''}
                         size="sm"

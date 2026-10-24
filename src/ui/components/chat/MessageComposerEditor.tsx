@@ -2,10 +2,10 @@ import React, { useMemo, useRef } from 'react';
 
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import type { LexicalEditor } from 'lexical';
@@ -100,6 +100,7 @@ const MessageInputContentEditable = React.memo(
         lastMessage: LastMyMessage | null;
     }) => (
         <ContentEditable
+            aria-label="Message"
             className="custom-scrollbar h-full max-h-[200px] w-full resize-none overflow-y-auto px-3 py-2 text-sm text-foreground outline-none"
             onKeyDown={(e): void => {
                 if (e.key === 'ArrowUp' && !hasText && lastMessage) {
@@ -208,25 +209,25 @@ export const MessageComposerEditor = ({
             <div className="flex items-center gap-1.5 overflow-hidden">
                 <span className="shrink-0">Type a message...</span>
                 <span className="flex shrink items-center gap-1 text-[11px] font-medium whitespace-nowrap">
-                    <span className="ml-1 opacity-70">(</span>
+                    <span className="ml-1">(</span>
                     <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
                         Shift
                     </kbd>
-                    <span className="opacity-70">+</span>
+                    <span>+</span>
                     <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
                         Enter
                     </kbd>
-                    <span className="opacity-70">new line</span>
+                    <span>new line</span>
                     {hasLastMessage ? (
                         <>
                             <span className="mx-0.5 h-3 w-px bg-white/10" />
                             <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1 shadow-sm">
                                 <ArrowUp size={10} strokeWidth={3} />
                             </kbd>
-                            <span className="opacity-70">edit</span>
+                            <span>edit</span>
                         </>
                     ) : null}
-                    <span className="opacity-70">)</span>
+                    <span>)</span>
                 </span>
             </div>
         );

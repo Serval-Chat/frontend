@@ -77,10 +77,9 @@ const FriendProfileRow = React.memo(
                             <Box className="flex min-w-0 items-center gap-1">
                                 {customEmoji ? (
                                     <span className="flex shrink-0 items-center">
-                                        {isCustomEmojiId(
-                                            customEmoji,
-                                        ) ? (
+                                        {isCustomEmojiId(customEmoji) ? (
                                             <ParsedEmoji
+                                                nonInteractive
                                                 className="h-3.5 w-3.5"
                                                 emojiId={customEmoji}
                                             />
@@ -102,6 +101,7 @@ const FriendProfileRow = React.memo(
                     </Box>
                 </button>
                 <button
+                    aria-label="Open direct message"
                     className="text-foreground-muted flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary transition-colors hover:bg-bg-subtle hover:text-foreground"
                     type="button"
                     onClick={handleOpenDm}

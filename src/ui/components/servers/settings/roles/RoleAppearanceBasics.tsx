@@ -45,6 +45,7 @@ export const RoleAppearanceBasics = ({
                         />
                     )}
                     <button
+                        aria-label="Upload role icon"
                         className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center border-none bg-black/50 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                         type="button"
                         onClick={(): void | undefined =>

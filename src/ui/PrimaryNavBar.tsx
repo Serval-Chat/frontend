@@ -153,6 +153,7 @@ export const PrimaryNavBar = () => {
             <Box>
                 <Tooltip content="Direct Messages">
                     <IconButton
+                        aria-label="Direct Messages"
                         badgeCount={totalUnreadDms}
                         icon={Home}
                         isActive={navMode === 'friends'}
@@ -168,6 +169,7 @@ export const PrimaryNavBar = () => {
             <Box>
                 <Tooltip content="Add a Server">
                     <IconButton
+                        aria-label="Add a Server"
                         className="bg-bg-subtle text-green-500 hover:bg-bg-subtle-hover hover:text-green-400"
                         icon={Plus}
                         onClick={(): void => {
@@ -180,6 +182,7 @@ export const PrimaryNavBar = () => {
             <Box>
                 <Tooltip content="Join Server">
                     <IconButton
+                        aria-label="Join Server"
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Compass}
                         onClick={(): void => {
@@ -192,6 +195,7 @@ export const PrimaryNavBar = () => {
             <Box>
                 <Tooltip content="Server Discovery">
                     <IconButton
+                        aria-label="Server Discovery"
                         className="bg-bg-subtle text-text-subtle hover:bg-bg-subtle-hover hover:text-text-normal"
                         icon={Telescope}
                         isActive={showDiscovery}
@@ -206,7 +210,11 @@ export const PrimaryNavBar = () => {
 
             <Box>
                 <Tooltip content="User Settings">
-                    <IconButton icon={Settings} onClick={handleSettingsClick} />
+                    <IconButton
+                        aria-label="User Settings"
+                        icon={Settings}
+                        onClick={handleSettingsClick}
+                    />
                 </Tooltip>
             </Box>
 

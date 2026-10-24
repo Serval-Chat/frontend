@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { VirtualItem } from '@tanstack/react-virtual';
 import { Reorder, motion } from 'framer-motion';
 
 import { usePings } from '@/api/pings/pings.queries';
@@ -21,7 +20,6 @@ import { wsMessages } from '@/ws/messages';
 
 import { ChannelListModals } from './ChannelListModals';
 import { ChannelListRow } from './ChannelListRow';
-import type { ListItem, VirtualListItem } from './channelListModel';
 
 interface ChannelListProps {
     channels: Channel[];
@@ -152,6 +150,32 @@ export const ChannelList = ({
         return active?.type === 'category' ? active.id : null;
     }, [isReordering, activeItemId, visibleItems]);
 
+    const handleEditChannel = useCallback((channel: Channel): void => {
+        patchUi({ settingsChannel: channel });
+    }, []);
+
+    const handleEditCategory = useCallback((category: Category): void => {
+        patchUi({ settingsCategory: category });
+    }, []);
+
+    const handleCreateChannel = useCallback(
+        (categoryId: string | null): void => {
+            patchUi({
+                createCategoryId: categoryId,
+                createModalOpen: true,
+            });
+        },
+        [],
+    );
+
+    const handleCreateCategory = useCallback((): void => {
+        patchUi({ createCategoryModalOpen: true });
+    }, []);
+
+    const handleLeaveServer = useCallback((): void => {
+        patchUi({ isLeaveModalOpen: true });
+    }, []);
+
     const { getChannelMenuItems, getCategoryMenuItems, getGlobalMenuItems } =
         useChannelListMenus({
             channels,
@@ -162,24 +186,11 @@ export const ChannelList = ({
             selectedServerId,
             handleMoveItemMobile,
             handleMoveToCategory,
-            onEditChannel: (channel): void => {
-                patchUi({ settingsChannel: channel });
-            },
-            onEditCategory: (category): void => {
-                patchUi({ settingsCategory: category });
-            },
-            onCreateChannel: (categoryId): void => {
-                patchUi({
-                    createCategoryId: categoryId,
-                    createModalOpen: true,
-                });
-            },
-            onCreateCategory: (): void => {
-                patchUi({ createCategoryModalOpen: true });
-            },
-            onLeaveServer: (): void => {
-                patchUi({ isLeaveModalOpen: true });
-            },
+            onEditChannel: handleEditChannel,
+            onEditCategory: handleEditCategory,
+            onCreateChannel: handleCreateChannel,
+            onCreateCategory: handleCreateCategory,
+            onLeaveServer: handleLeaveServer,
         });
 
     // eslint-disable-next-line react-hooks/incompatible-library
@@ -232,15 +243,38 @@ export const ChannelList = ({
         }
     }, [selectedChannelId, selectedServerId, channels]);
 
+    const handleSelectLinkChannel = useCallback((channel: Channel): void => {
+        patchUi({ selectedLinkChannel: channel });
+    }, []);
+
+    const handleCreateChannelInCategory = useCallback(
+        (categoryId: string): void => {
+            patchUi({
+                createCategoryId: categoryId,
+                createModalOpen: true,
+            });
+        },
+        [],
+    );
+
     const handleChannelClick = useChannelClick({
         activeItemId,
         isReordering,
         syncLock,
         selectedServerId,
-        onSelectLinkChannel: (channel): void => {
-            patchUi({ selectedLinkChannel: channel });
-        },
+        onSelectLinkChannel: handleSelectLinkChannel,
     });
+
+    const handleRowDragEnd = useCallback((): void => {
+        void handleDragEnd();
+    }, [handleDragEnd]);
+
+    const renderedItems = isReordering
+        ? visibleItems.map((item) => ({ item, virtualRow: null }))
+        : rowVirtualizer.getVirtualItems().flatMap((virtualRow) => {
+              const item = visibleItems[virtualRow.index];
+              return item ? [{ item, virtualRow }] : [];
+          });
 
     return (
         <ContextMenu className="flex-1" items={getGlobalMenuItems()}>
@@ -256,76 +290,57 @@ export const ChannelList = ({
                     values={visibleItems}
                     onReorder={handleReorder}
                 >
-                    {(isReordering
-                        ? visibleItems
-                        : rowVirtualizer.getVirtualItems().map(
-                              (v): VirtualListItem =>
-                                  ({
-                                      ...visibleItems[v.index],
-                                      virtualRow: v,
-                                  }) as VirtualListItem,
-                          )
-                    ).map((itemOrVirtual, index): React.ReactNode => {
-                        const item: ListItem =
-                            'virtualRow' in itemOrVirtual
-                                ? (itemOrVirtual as VirtualListItem)
-                                : itemOrVirtual;
-                        const virtualRow: VirtualItem | null =
-                            'virtualRow' in itemOrVirtual
-                                ? (itemOrVirtual as VirtualListItem).virtualRow
-                                : null;
-
-                        return (
-                            <React.Fragment key={item.id}>
-                                {dropIndicatorIndex === index ? (
-                                    <motion.div
-                                        layout
-                                        className="mx-2 h-0.5 shrink-0 rounded-full bg-success"
-                                        data-testid="drop-indicator"
+                    {renderedItems.map(
+                        ({ item, virtualRow }, index): React.ReactNode => {
+                            return (
+                                <React.Fragment key={item.id}>
+                                    {dropIndicatorIndex === index ? (
+                                        <motion.div
+                                            layout
+                                            className="mx-2 h-0.5 shrink-0 rounded-full bg-success"
+                                            data-testid="drop-indicator"
+                                        />
+                                    ) : null}
+                                    <ChannelListRow
+                                        canManageChannels={canManageChannels}
+                                        channelPings={channelPings}
+                                        collapsedCategories={
+                                            collapsedCategories
+                                        }
+                                        draggingCategoryId={draggingCategoryId}
+                                        existingCategoryIds={
+                                            existingCategoryIds
+                                        }
+                                        getCategoryMenuItems={
+                                            getCategoryMenuItems
+                                        }
+                                        getChannelMenuItems={
+                                            getChannelMenuItems
+                                        }
+                                        isMobile={isMobile}
+                                        isReordering={isReordering}
+                                        item={item}
+                                        measureElement={
+                                            rowVirtualizer.measureElement
+                                        }
+                                        selectedChannelId={selectedChannelId}
+                                        selectedServerId={selectedServerId}
+                                        virtualRow={virtualRow}
+                                        voiceParticipants={voiceParticipants}
+                                        onChannelClick={handleChannelClick}
+                                        onCreateChannelInCategory={
+                                            handleCreateChannelInCategory
+                                        }
+                                        onDragEnd={handleRowDragEnd}
+                                        onDragStart={handleDragStartItem}
+                                        onEditCategory={handleEditCategory}
+                                        onEditChannel={handleEditChannel}
+                                        onToggleCategory={toggleCategory}
                                     />
-                                ) : null}
-                                <ChannelListRow
-                                    canManageChannels={canManageChannels}
-                                    channelPings={channelPings}
-                                    collapsedCategories={collapsedCategories}
-                                    draggingCategoryId={draggingCategoryId}
-                                    existingCategoryIds={existingCategoryIds}
-                                    getCategoryMenuItems={getCategoryMenuItems}
-                                    getChannelMenuItems={getChannelMenuItems}
-                                    isMobile={isMobile}
-                                    isReordering={isReordering}
-                                    item={item}
-                                    measureElement={
-                                        rowVirtualizer.measureElement
-                                    }
-                                    selectedChannelId={selectedChannelId}
-                                    selectedServerId={selectedServerId}
-                                    virtualRow={virtualRow}
-                                    voiceParticipants={voiceParticipants}
-                                    onChannelClick={handleChannelClick}
-                                    onCreateChannelInCategory={(
-                                        categoryId,
-                                    ): void => {
-                                        patchUi({
-                                            createCategoryId: categoryId,
-                                            createModalOpen: true,
-                                        });
-                                    }}
-                                    onDragEnd={(): void => {
-                                        void handleDragEnd();
-                                    }}
-                                    onDragStart={handleDragStartItem}
-                                    onEditCategory={(category): void => {
-                                        patchUi({ settingsCategory: category });
-                                    }}
-                                    onEditChannel={(channel): void => {
-                                        patchUi({ settingsChannel: channel });
-                                    }}
-                                    onToggleCategory={toggleCategory}
-                                />
-                            </React.Fragment>
-                        );
-                    })}
+                                </React.Fragment>
+                            );
+                        },
+                    )}
                 </Reorder.Group>
 
                 <ChannelListModals

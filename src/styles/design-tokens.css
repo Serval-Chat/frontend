@@ -265,7 +265,7 @@
     --border-subtle: rgba(255, 255, 255, 0.1);
     --bg-subtle: rgba(255, 255, 255, 0.05);
     --bg-secondary: rgba(255, 255, 255, 0.08);
-    --placeholder: rgba(255, 255, 255, 0.2);
+    --placeholder: var(--muted-foreground);
     --divider: rgba(255, 255, 255, 0.1);
 
     --local-chat-bg: color-mix(in srgb, black 30%, var(--background));

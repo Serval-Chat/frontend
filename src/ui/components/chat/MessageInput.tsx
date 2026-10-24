@@ -365,6 +365,7 @@ export const MessageInput = ({
                     onChange={handleFileChange}
                 />
                 <Button
+                    aria-label="Add attachment"
                     className="h-8 w-8 shrink-0 p-0"
                     disabled={cooldown > 0 ? !canBypassSlowMode : undefined}
                     size="sm"

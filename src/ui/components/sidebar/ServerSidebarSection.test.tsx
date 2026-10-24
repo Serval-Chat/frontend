@@ -25,6 +25,11 @@ vi.mock('@/ui/components/common/LoadingSpinner', () => ({
 vi.mock('@/ui/components/common/UserItem', async () => {
     const { useState } = (await vi.importActual('react')) as any;
     return {
+        UserItemServerDataProvider: ({
+            children,
+        }: {
+            children: React.ReactNode;
+        }) => children,
         UserItem: ({
             userId,
             user,

@@ -220,6 +220,7 @@ const BlockProfilesView = ({
                                             }}
                                         />
                                         <IconButton
+                                            aria-label="Save profile name"
                                             icon={Check}
                                             size="sm"
                                             variant="primary"
@@ -228,6 +229,7 @@ const BlockProfilesView = ({
                                             }}
                                         />
                                         <IconButton
+                                            aria-label="Cancel rename"
                                             icon={X}
                                             size="sm"
                                             variant="ghost"
@@ -452,6 +454,7 @@ export const BlockingSettings = () => {
                         />
                         {searchQuery === '' ? null : (
                             <button
+                                aria-label="Clear search"
                                 className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
                                 type="button"
                                 onClick={(): void => {
@@ -513,6 +516,7 @@ export const BlockingSettings = () => {
                                         />
                                         <Box className="flex items-center gap-3">
                                             <select
+                                                aria-label={`Assigned block profile for ${block.targetUsername}`}
                                                 className="rounded-md border border-[var(--settings-edit-control-border)] bg-[var(--settings-edit-control-bg)] px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
                                                 title="Assigned Block Profile"
                                                 value={block.profileId}

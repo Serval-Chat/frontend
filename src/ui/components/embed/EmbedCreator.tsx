@@ -146,6 +146,7 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                             Field {idx + 1}
                         </span>
                         <button
+                            aria-label={`Remove field ${idx + 1}`}
                             className="text-muted-foreground transition-colors hover:text-danger"
                             type="button"
                             onClick={(): void => {
@@ -510,6 +511,7 @@ const PollAnswersEditor = ({
                         }}
                     />
                     <button
+                        aria-label={`Remove answer ${idx + 1}`}
                         className="shrink-0 text-muted-foreground transition-colors hover:text-danger"
                         type="button"
                         onClick={(): void => {

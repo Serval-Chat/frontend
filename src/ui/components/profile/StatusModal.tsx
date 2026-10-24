@@ -138,6 +138,7 @@ export const StatusModal = ({
                 <Box className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-subtle p-2 transition-colors focus-within:border-primary">
                     <Box className="shrink-0">
                         <Button
+                            aria-label="Choose status emoji"
                             className="h-8 w-8 min-w-0 p-1"
                             ref={triggerRef}
                             variant="ghost"
@@ -190,6 +191,7 @@ export const StatusModal = ({
                     />
                     {statusText !== '' || statusEmoji !== '' ? (
                         <Button
+                            aria-label="Clear status"
                             className="h-8 w-8 min-w-0 p-1 text-muted-foreground hover:text-foreground"
                             variant="ghost"
                             onClick={(): void => {

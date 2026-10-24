@@ -42,6 +42,7 @@ export const SentFriendRequestItem = ({
             </Box>
             <Box className="flex items-center gap-2">
                 <Button
+                    aria-label="Cancel friend request"
                     className="h-8 w-8 rounded-full border-transparent p-0 text-red-500 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600"
                     loading={isCancelling}
                     variant="normal"

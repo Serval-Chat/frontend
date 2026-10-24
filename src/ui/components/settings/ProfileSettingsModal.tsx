@@ -14,7 +14,7 @@ import { cn } from '@/utils/cn';
 import { AccountSettings } from './AccountSettings';
 import { AvatarDecorationPicker } from './AvatarDecorationPicker';
 import { AvatarDecorationsSettings } from './AvatarDecorationsSettings';
-import { GroupedSidebarNav, type GroupedNavSection } from './GroupedSidebarNav';
+import { type GroupedNavSection, GroupedSidebarNav } from './GroupedSidebarNav';
 import { ProfileColorsPicker } from './ProfileColorsPicker';
 import { UsernameStylePicker } from './UsernameStylePicker';
 import { WebsiteConnectionsSettings } from './WebsiteConnectionsSettings';
@@ -65,9 +65,7 @@ const ProfileSettingsContent = ({
                 </div>
             </div>
         ) : null}
-        {activeSection === 'decorations' ? (
-            <AvatarDecorationsSettings />
-        ) : null}
+        {activeSection === 'decorations' ? <AvatarDecorationsSettings /> : null}
         {activeSection === 'connections' ? (
             <WebsiteConnectionsSettings />
         ) : null}
@@ -124,6 +122,7 @@ export const ProfileSettingsModal = ({
                         <div className="flex items-center gap-2">
                             <div className="md:hidden">
                                 <IconButton
+                                    aria-label="Back to settings sections"
                                     className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}

@@ -45,6 +45,7 @@ export const FriendRequestItem = ({
             </Box>
             <Box className="flex items-center gap-2 transition-opacity">
                 <Button
+                    aria-label="Accept friend request"
                     className="h-8 w-8 rounded-full border-transparent p-0 text-green-500 hover:border-green-500/50 hover:bg-green-500/10 hover:text-green-600"
                     disabled={isRejecting}
                     loading={isAccepting}
@@ -56,6 +57,7 @@ export const FriendRequestItem = ({
                     <Check className="h-4 w-4" />
                 </Button>
                 <Button
+                    aria-label="Reject friend request"
                     className="h-8 w-8 rounded-full border-transparent p-0 text-red-500 hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-600"
                     disabled={isAccepting}
                     loading={isRejecting}

@@ -95,16 +95,22 @@ export const ServerIcon = React.memo(
 
         return (
             <m.div
-                aria-label={server.name}
+                aria-label={
+                    onClick
+                        ? shouldShowIcon
+                            ? server.name
+                            : `${server.name} ${initials}`
+                        : undefined
+                }
                 className={cn(
                     'group relative flex items-center justify-center transition-all duration-200 select-none',
                     onClick ? 'cursor-pointer' : 'cursor-default',
                     effectiveSize,
                     className,
                 )}
-                role="button"
+                role={onClick ? 'button' : undefined}
                 style={style}
-                tabIndex={0}
+                tabIndex={onClick ? 0 : undefined}
                 onKeyDown={(e): void => {
                     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                         e.preventDefault();

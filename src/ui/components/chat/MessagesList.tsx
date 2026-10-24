@@ -274,7 +274,6 @@ export const MessagesList = React.memo(
             (!activeHighlightId ||
                 messages.some((m): boolean => m.id === activeHighlightId));
 
-
         const maxScrollTop = (el: HTMLElement): number =>
             Math.max(0, el.scrollHeight - el.clientHeight);
 
@@ -334,7 +333,6 @@ export const MessagesList = React.memo(
 
             writeScrollTop(el, Math.max(0, target));
         }, [writeScrollTop]);
-
 
         const loadMorePausedRef = useRef(false);
         const prevMessageCountRef = useRef(messages.length);
@@ -432,7 +430,6 @@ export const MessagesList = React.memo(
             syncScrollState();
         }, [syncScrollState]);
 
-
         useLayoutEffect((): void => {
             restorePosition();
         });
@@ -502,7 +499,6 @@ export const MessagesList = React.memo(
                 setHasSettled(false);
             }
         }, [isReady]);
-
 
         const springWrite = useCallback(
             (value: number): void => {
@@ -627,7 +623,6 @@ export const MessagesList = React.memo(
             },
             [springTo],
         );
-
 
         const renderItem = (item: VirtualItemData): React.ReactNode => {
             if (item.type === 'channel-start') {
@@ -791,14 +786,17 @@ export const MessagesList = React.memo(
 
         return (
             <Box className="relative flex min-h-0 flex-1 flex-col">
-                <div
+                <Box
+                    aria-label="Message history"
                     className="custom-scrollbar min-h-0 flex-1 overflow-y-auto pt-4"
                     data-testid="messages-scroller"
                     ref={scrollerElRef}
+                    role="region"
                     style={{
                         overflowAnchor: 'none',
                         opacity: hasSettled ? 1 : 0,
                     }}
+                    tabIndex={0}
                     onScroll={handleScroll}
                 >
                     {isReady
@@ -811,7 +809,7 @@ export const MessagesList = React.memo(
                           )
                         : null}
                     <VerticalSpacer verticalSpace={22} />
-                </div>
+                </Box>
                 {hasSettled ? null : (
                     <Box className="pointer-events-none absolute inset-0 overflow-hidden">
                         <ChatSkeleton />

@@ -118,6 +118,7 @@ export const SettingsModal = ({
                         <div className="flex items-center gap-2">
                             <div className="md:hidden">
                                 <IconButton
+                                    aria-label="Back to settings sections"
                                     className="text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                                     icon={ChevronLeft}
                                     iconSize={24}

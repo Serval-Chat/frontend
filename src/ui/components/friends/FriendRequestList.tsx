@@ -149,7 +149,7 @@ export const FriendRequestList = () => {
                         >
                             Sent
                             {sentRequests && sentRequests.length > 0 ? (
-                                <Box className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full border border-bg-secondary bg-primary px-1 text-[10px] font-bold text-white shadow-sm">
+                                <Box className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full border border-primary/40 bg-primary-muted px-1 text-[10px] font-bold text-primary-muted-text shadow-sm">
                                     {sentRequests.length}
                                 </Box>
                             ) : null}
@@ -174,8 +174,8 @@ export const FriendRequestList = () => {
                             className={cn(
                                 'ml-2 rounded px-3 py-1 text-sm font-bold transition-all duration-200',
                                 view === 'add'
-                                    ? 'bg-success text-white'
-                                    : 'bg-success/20 text-success hover:bg-success hover:text-white',
+                                    ? 'bg-success text-black'
+                                    : 'bg-success/20 text-success hover:bg-success hover:text-black',
                             )}
                             type="button"
                             onClick={(): void => {
@@ -188,7 +188,12 @@ export const FriendRequestList = () => {
                 </Box>
             </Box>
 
-            <Box className="flex-1 overflow-y-auto">
+            <Box
+                aria-label="Friends content"
+                className="flex-1 overflow-y-auto"
+                role="region"
+                tabIndex={0}
+            >
                 {view === 'add' ? (
                     <Box className="animate-in fade-in slide-in-from-top-4 flex h-full flex-col p-8">
                         <Box className="mb-8">

@@ -110,6 +110,7 @@ const ToastItem = ({
             {toast.message}
         </Text>
         <Button
+            aria-label="Dismiss notification"
             className="h-6 w-6 shrink-0 border-none p-0 hover:bg-white/5"
             size="sm"
             variant="ghost"

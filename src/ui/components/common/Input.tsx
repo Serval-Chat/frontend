@@ -206,6 +206,7 @@ const Input = ({
                     }}
                 >
                     <button
+                        aria-label="Increase value"
                         style={stepperBtnStyle}
                         type="button"
                         onClick={handleIncrement}
@@ -213,6 +214,7 @@ const Input = ({
                         <ChevronUp size={14} />
                     </button>
                     <button
+                        aria-label="Decrease value"
                         style={stepperBtnStyle}
                         type="button"
                         onClick={handleDecrement}

@@ -32,6 +32,7 @@ export const ParsedUnicodeEmoji = ({
                 isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
                 className,
             )}
+            role="img"
             style={style}
             title={emojiData.short_name}
         >
