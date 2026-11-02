@@ -378,7 +378,6 @@ export const MessageInput = ({
                 </Button>
 
                 <MessageComposerEditor
-                    canBypassSlowMode={canBypassSlowMode}
                     channels={channels}
                     currentInputText={currentInputText}
                     editor={editor}
@@ -395,7 +394,6 @@ export const MessageInput = ({
                     selectedServerId={selectedServerId}
                     serverCommands={serverCommands}
                     serverEmojis={allServerEmojis}
-                    slowMode={currentChannel?.slowMode}
                     onEditorChange={handleEditorChange}
                     onHasTextChange={(value): void => {
                         patchUi({ hasText: value });

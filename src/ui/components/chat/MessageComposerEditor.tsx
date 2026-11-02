@@ -127,8 +127,6 @@ interface MessageComposerEditorProps {
     currentInputText: string;
     isUploading: boolean;
     isSlowModeError: boolean;
-    slowMode: number | undefined;
-    canBypassSlowMode: boolean;
     lastMessage: LastMyMessage | null;
     selectedFriendId: string | null;
     selectedServerId: string | null;
@@ -159,8 +157,6 @@ export const MessageComposerEditor = ({
     currentInputText,
     isUploading,
     isSlowModeError,
-    slowMode,
-    canBypassSlowMode,
     lastMessage,
     selectedFriendId,
     selectedServerId,
@@ -196,13 +192,6 @@ export const MessageComposerEditor = ({
 
     const getPlaceholder = (): React.ReactNode => {
         if (isUploading) return 'Uploading...';
-
-        if (slowMode && slowMode > 0) {
-            if (canBypassSlowMode) {
-                return "Slowmode enabled. Huh? It doesn't affect YOU!";
-            }
-            return 'Slowmode enabled.';
-        }
 
         const hasLastMessage = lastMessage !== null;
         return (
