@@ -20,7 +20,7 @@ export const useCustomEmojis = (options?: {
     const { hasPermission } = usePermissions(
         options?.serverId ?? null,
         options?.channelId,
-        { enabled: !!options?.serverId },
+        { enabled: (options?.enabled ?? true) && !!options?.serverId },
     );
     const hasExternalEmojiPermission =
         !options?.serverId || hasPermission('useExternalEmojisAndStickers');

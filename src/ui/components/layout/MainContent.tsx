@@ -15,6 +15,7 @@ import {
     type SplitViewConversation,
     type SplitViewSide,
     closeSplitView,
+    closeSplitViewToConversation,
     toggleMobileMemberListForSplitView,
 } from '@/store/slices/navSlice';
 import { useMobileSwipeContext } from '@/ui/MobileSwipeContext';
@@ -92,13 +93,36 @@ const ProxyProvider = ({
     children: React.ReactNode;
 }) => {
     const store = useStore<RootState>();
+    const overridesRef = React.useRef({
+        overrideServerId,
+        overrideChannelId,
+        overrideFriendId,
+        overrideTargetMessageId,
+    });
 
+    React.useLayoutEffect((): void => {
+        overridesRef.current = {
+            overrideServerId,
+            overrideChannelId,
+            overrideFriendId,
+            overrideTargetMessageId,
+        };
+    }, [
+        overrideServerId,
+        overrideChannelId,
+        overrideFriendId,
+        overrideTargetMessageId,
+    ]);
+
+    // A split pane becoming the main chat should not replace the Provider store.
     const proxiedStore = React.useMemo(() => {
         const cache: {
             lastOriginalState: RootState | null;
+            lastOverrides: typeof overridesRef.current | null;
             lastProxiedState: RootState | null;
         } = {
             lastOriginalState: null,
+            lastOverrides: null,
             lastProxiedState: null,
         };
 
@@ -106,12 +130,12 @@ const ProxyProvider = ({
             ...store,
             getState: () => {
                 const state = store.getState();
+                const overrides = overridesRef.current;
 
-                // If the underlying Redux state hasn't changed since our last call,
-                // return the exact same cached object. Otherwise useSyncExternalStore
-                // will infinite loop due to referential inequality.
+                // useSyncExternalStore needs the same object until either source changes.
                 if (
                     cache.lastOriginalState === state &&
+                    cache.lastOverrides === overrides &&
                     cache.lastProxiedState
                 ) {
                     return cache.lastProxiedState;
@@ -120,24 +144,27 @@ const ProxyProvider = ({
                 const navOverrides: Partial<RootState['nav']> = {};
                 let hasOverrides = false;
 
-                if (overrideServerId !== undefined) {
-                    navOverrides.selectedServerId = overrideServerId;
+                if (overrides.overrideServerId !== undefined) {
+                    navOverrides.selectedServerId = overrides.overrideServerId;
                     hasOverrides = true;
                 }
-                if (overrideChannelId !== undefined) {
-                    navOverrides.selectedChannelId = overrideChannelId;
+                if (overrides.overrideChannelId !== undefined) {
+                    navOverrides.selectedChannelId =
+                        overrides.overrideChannelId;
                     hasOverrides = true;
                 }
-                if (overrideFriendId !== undefined) {
-                    navOverrides.selectedFriendId = overrideFriendId;
+                if (overrides.overrideFriendId !== undefined) {
+                    navOverrides.selectedFriendId = overrides.overrideFriendId;
                     hasOverrides = true;
                 }
-                if (overrideTargetMessageId !== undefined) {
-                    navOverrides.targetMessageId = overrideTargetMessageId;
+                if (overrides.overrideTargetMessageId !== undefined) {
+                    navOverrides.targetMessageId =
+                        overrides.overrideTargetMessageId;
                     hasOverrides = true;
                 }
 
                 cache.lastOriginalState = state;
+                cache.lastOverrides = overrides;
 
                 if (!hasOverrides) {
                     cache.lastProxiedState = state;
@@ -155,13 +182,7 @@ const ProxyProvider = ({
                 return cache.lastProxiedState;
             },
         };
-    }, [
-        store,
-        overrideServerId,
-        overrideChannelId,
-        overrideFriendId,
-        overrideTargetMessageId,
-    ]);
+    }, [store]);
 
     return <Provider store={proxiedStore}>{children}</Provider>;
 };
@@ -177,9 +198,11 @@ const getConversationKey = (
 const SplitViewPane = ({
     side,
     conversation,
+    isSplitViewPane = true,
 }: {
     side: SplitViewSide;
     conversation: SplitViewConversation | null;
+    isSplitViewPane?: boolean;
 }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -207,51 +230,86 @@ const SplitViewPane = ({
     return (
         <Box className="chat-background flex min-w-0 flex-1 flex-col overflow-hidden">
             <ProxyProvider
-                overrideChannelId={isDm ? null : conversation.channelId}
-                overrideFriendId={isDm ? conversation.friendId : null}
-                overrideServerId={isDm ? null : conversation.serverId}
-                overrideTargetMessageId={null}
+                overrideChannelId={
+                    isSplitViewPane
+                        ? isDm
+                            ? null
+                            : conversation.channelId
+                        : undefined
+                }
+                overrideFriendId={
+                    isSplitViewPane
+                        ? isDm
+                            ? conversation.friendId
+                            : null
+                        : undefined
+                }
+                overrideServerId={
+                    isSplitViewPane
+                        ? isDm
+                            ? null
+                            : conversation.serverId
+                        : undefined
+                }
+                overrideTargetMessageId={isSplitViewPane ? null : undefined}
             >
                 <MainChat
                     headerActions={
-                        <IconButton
-                            className="h-8 w-8"
-                            icon={X}
-                            iconSize={15}
-                            title={`Close ${side} split pane`}
-                            variant="ghost"
-                            onClick={(): void => {
-                                const otherSide: SplitViewSide =
-                                    side === 'left' ? 'right' : 'left';
-                                const remaining = splitView[otherSide];
+                        isSplitViewPane ? (
+                            <IconButton
+                                className="h-8 w-8"
+                                icon={X}
+                                iconSize={15}
+                                title={`Close ${side} split pane`}
+                                variant="ghost"
+                                onClick={(): void => {
+                                    const otherSide: SplitViewSide =
+                                        side === 'left' ? 'right' : 'left';
+                                    const remaining = splitView[otherSide];
 
-                                if (remaining) {
-                                    if (remaining.type === 'channel') {
-                                        void navigate(
-                                            `/chat/@server/${remaining.serverId}/channel/${remaining.channelId}`,
+                                    if (remaining) {
+                                        if (remaining.type === 'channel') {
+                                            void navigate(
+                                                `/chat/@server/${remaining.serverId}/channel/${remaining.channelId}`,
+                                            );
+                                        } else if (remaining.type === 'dm') {
+                                            void navigate(
+                                                `/chat/@user/${remaining.friendId}`,
+                                            );
+                                        }
+                                        dispatch(
+                                            closeSplitViewToConversation(
+                                                remaining,
+                                            ),
                                         );
-                                    } else if (remaining.type === 'dm') {
-                                        void navigate(
-                                            `/chat/@user/${remaining.friendId}`,
-                                        );
+                                    } else {
+                                        dispatch(closeSplitView());
                                     }
-                                    dispatch(closeSplitView());
-                                } else {
-                                    dispatch(closeSplitView());
-                                }
-                            }}
-                        />
+                                }}
+                            />
+                        ) : undefined
                     }
-                    hideMemberListButton={isAnySplitMemberListOpen}
-                    isMemberListOpen={isMobileMemberListOpen}
+                    hideMemberListButton={
+                        isSplitViewPane && isAnySplitMemberListOpen
+                    }
+                    isMemberListOpen={
+                        isSplitViewPane ? isMobileMemberListOpen : undefined
+                    }
                     key={getConversationKey(conversation)}
-                    requireUrlMatch={false}
-                    onToggleMemberList={(): {
-                        payload: SplitViewSide;
-                        type: 'nav/toggleMobileMemberListForSplitView';
-                    } => dispatch(toggleMobileMemberListForSplitView(side))}
+                    requireUrlMatch={!isSplitViewPane}
+                    onToggleMemberList={
+                        isSplitViewPane
+                            ? (): {
+                                  payload: SplitViewSide;
+                                  type: 'nav/toggleMobileMemberListForSplitView';
+                              } =>
+                                  dispatch(
+                                      toggleMobileMemberListForSplitView(side),
+                                  )
+                            : undefined
+                    }
                 />
-                {isMobileMemberListOpen
+                {isSplitViewPane && isMobileMemberListOpen
                     ? createPortal(
                           <div className="fixed inset-0 z-[var(--z-index-top)] md:hidden">
                               <TertiarySidebar
@@ -324,6 +382,15 @@ export const MainContent = () => {
         : selectedServerId && selectedChannelId
           ? `channel-${selectedServerId}-${selectedChannelId}`
           : 'none';
+    const routeConversation: SplitViewConversation | null = selectedFriendId
+        ? { type: 'dm', friendId: selectedFriendId }
+        : selectedServerId && selectedChannelId
+          ? {
+                type: 'channel',
+                serverId: selectedServerId,
+                channelId: selectedChannelId,
+            }
+          : null;
 
     return (
         <main
@@ -356,14 +423,42 @@ export const MainContent = () => {
                 <React.Suspense fallback={null}>
                     <ServerMembersPage />
                 </React.Suspense>
-            ) : isSplitViewActive ? (
+            ) : isSplitViewActive || routeConversation ? (
                 <Box className="chat-background flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
-                    <SplitViewPane conversation={splitView.left} side="left" />
-                    <Box className="h-px shrink-0 bg-border-subtle md:h-full md:w-px" />
-                    <SplitViewPane
-                        conversation={splitView.right}
-                        side="right"
-                    />
+                    <>
+                        {isSplitViewActive ? (
+                            <SplitViewPane
+                                conversation={splitView.left}
+                                key={
+                                    splitView.left
+                                        ? getConversationKey(splitView.left)
+                                        : 'empty-left'
+                                }
+                                side="left"
+                            />
+                        ) : routeConversation ? (
+                            <SplitViewPane
+                                conversation={routeConversation}
+                                isSplitViewPane={false}
+                                key={getConversationKey(routeConversation)}
+                                side="left"
+                            />
+                        ) : null}
+                        {isSplitViewActive ? (
+                            <Box className="h-px shrink-0 bg-border-subtle md:h-full md:w-px" />
+                        ) : null}
+                        {isSplitViewActive ? (
+                            <SplitViewPane
+                                conversation={splitView.right}
+                                key={
+                                    splitView.right
+                                        ? getConversationKey(splitView.right)
+                                        : 'empty-right'
+                                }
+                                side="right"
+                            />
+                        ) : null}
+                    </>
                 </Box>
             ) : isNothingSelected ? (
                 navMode === 'friends' ? (

@@ -63,7 +63,7 @@ export const ComposerRestrictionNotice = (
         >
             <Text
                 as="div"
-                className="truncate text-sm opacity-80"
+                className="max-h-40 overflow-y-auto text-sm break-words whitespace-pre-wrap opacity-80"
                 variant="caution"
             >
                 {props.muteReason || 'No reason provided'}

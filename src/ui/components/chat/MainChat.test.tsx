@@ -61,9 +61,11 @@ vi.mock('@/hooks/ws/useChatWS', () => ({
 
 vi.mock('@/api/servers/servers.queries', () => ({
     useChannels: vi.fn().mockReturnValue({ data: [] }),
+    useCategories: vi.fn().mockReturnValue({ data: [] }),
     useMembers: vi.fn().mockReturnValue({ data: [] }),
     useRoles: vi.fn().mockReturnValue({ data: [] }),
     useServerDetails: vi.fn().mockReturnValue({ data: undefined }),
+    useAllServerEmojis: vi.fn().mockReturnValue({ data: [] }),
 }));
 
 vi.mock('@/api/chat/chat.queries', () => ({

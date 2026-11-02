@@ -5,11 +5,15 @@ import { useLocation, useParams } from 'react-router-dom';
 import {
     useCategories,
     useChannels,
-    useMembers,
+    useMemberByUserId,
     useRoles,
     useServerDetails,
 } from '@/api/servers/servers.queries';
-import type { RolePermissions } from '@/api/servers/servers.types';
+import type {
+    Category,
+    Channel,
+    RolePermissions,
+} from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
 
 export interface UsePermissionsReturn {
@@ -52,13 +56,153 @@ const subscribeTime = (callback: () => void): (() => void) => {
 const getTimeSnapshot = (): number => globalNow;
 const getServerTimeSnapshot = (): number => 0;
 
+export const useChannelAccessMap = (
+    serverId: string | null,
+    channels: Channel[],
+    categories: Category[],
+): {
+    accessByChannelId: Map<
+        string,
+        { canViewChannels: boolean; canConnect: boolean }
+    >;
+    canManageChannels: boolean;
+    isOwner: boolean;
+    isLoading: boolean;
+} => {
+    const { data: currentUser } = useMe();
+    const { data: member, isLoading: isLoadingMember } = useMemberByUserId(
+        serverId,
+        currentUser?.id,
+        { enabled: !!serverId },
+    );
+    const { data: roles } = useRoles(serverId, { enabled: !!serverId });
+    const { data: server } = useServerDetails(serverId, {
+        enabled: !!serverId,
+    });
+
+    const isOwner = !!(
+        server?.ownerId &&
+        currentUser?.id &&
+        server.ownerId === currentUser.id
+    );
+
+    const { accessByChannelId, canManageChannels } = useMemo(() => {
+        const access = new Map<
+            string,
+            { canViewChannels: boolean; canConnect: boolean }
+        >();
+        const assignedRoles = (roles ?? []).filter(
+            (role): boolean => !!member?.roles.includes(role.id),
+        );
+        const everyoneRole = roles?.find(
+            (role): boolean => role.name === '@everyone',
+        );
+        const isAdministrator =
+            isOwner ||
+            assignedRoles.some(
+                (role): boolean | undefined => role.permissions?.administrator,
+            );
+        const categoryById = new Map(
+            categories.map((category): [string, Category] => [
+                category.id,
+                category,
+            ]),
+        );
+
+        const getOverride = (
+            overrides: Record<string, Record<string, boolean>> | undefined,
+            permission: keyof RolePermissions,
+        ): boolean | undefined => {
+            if (!overrides) return undefined;
+
+            for (const role of assignedRoles) {
+                if (overrides[role.id]?.[permission] === true) return true;
+            }
+
+            const everyoneOverrides =
+                (everyoneRole ? overrides[everyoneRole.id] : undefined) ??
+                overrides.everyone;
+            if (everyoneOverrides?.[permission] === true) return true;
+
+            const hasExplicitDeny =
+                assignedRoles.some(
+                    (role): boolean =>
+                        overrides[role.id]?.[permission] === false,
+                ) || everyoneOverrides?.[permission] === false;
+            return hasExplicitDeny ? false : undefined;
+        };
+
+        const evaluateBasePermission = (
+            permission: keyof RolePermissions,
+        ): boolean => {
+            if (isAdministrator) return true;
+
+            const values = [
+                ...assignedRoles.map(
+                    (role): boolean | undefined =>
+                        role.permissions?.[permission],
+                ),
+                everyoneRole?.permissions?.[permission],
+            ];
+            if (values.some((value): boolean => value === true)) return true;
+            if (values.some((value): boolean => value !== undefined)) {
+                return false;
+            }
+
+            return permission === 'viewChannels' || permission === 'connect';
+        };
+
+        for (const channel of channels) {
+            if (!member && !isOwner) {
+                access.set(channel.id, {
+                    canViewChannels: false,
+                    canConnect: false,
+                });
+                continue;
+            }
+
+            const category = channel.categoryId
+                ? categoryById.get(channel.categoryId)
+                : undefined;
+            const evaluateChannelPermission = (
+                permission: 'viewChannels' | 'connect',
+            ): boolean => {
+                if (isAdministrator) return true;
+
+                const override =
+                    getOverride(channel.permissions, permission) ??
+                    getOverride(category?.permissions, permission);
+                return override ?? evaluateBasePermission(permission);
+            };
+
+            access.set(channel.id, {
+                canViewChannels: evaluateChannelPermission('viewChannels'),
+                canConnect: evaluateChannelPermission('connect'),
+            });
+        }
+
+        return {
+            accessByChannelId: access,
+            canManageChannels: evaluateBasePermission('manageChannels'),
+        };
+    }, [channels, categories, roles, member, isOwner]);
+
+    return {
+        accessByChannelId,
+        canManageChannels,
+        isOwner,
+        isLoading: !currentUser || isLoadingMember || !roles || !server,
+    };
+};
+
 const usePermissionData = (
     serverId: string | null,
     channelId: string | null | undefined,
     isEnabled: boolean,
 ): UsePermissionsReturn => {
     const { data: currentUser } = useMe();
-    const { data: members } = useMembers(serverId, { enabled: isEnabled });
+    const { data: currentMember, isLoading: isLoadingMembers } =
+        useMemberByUserId(serverId, currentUser?.id, { enabled: isEnabled });
     const { data: roles } = useRoles(serverId, { enabled: isEnabled });
     const { data: server } = useServerDetails(serverId, { enabled: isEnabled });
     const { data: channels } = useChannels(serverId, {
@@ -67,15 +211,6 @@ const usePermissionData = (
     const { data: categories } = useCategories(serverId, {
         enabled: isEnabled && !!channelId,
     });
-
-    const memberByUserId = useMemo(() => {
-        const map = new Map<string, NonNullable<typeof members>[number]>();
-        if (members)
-            for (const serverMember of members) {
-                map.set(serverMember.userId, serverMember);
-            }
-        return map;
-    }, [members]);
 
     const channelById = useMemo(() => {
         const map = new Map<string, NonNullable<typeof channels>[number]>();
@@ -95,10 +230,7 @@ const usePermissionData = (
         return map;
     }, [categories]);
 
-    const member = useMemo(() => {
-        if (!members || !currentUser || !serverId) return null;
-        return memberByUserId.get(currentUser.id) ?? null;
-    }, [members, currentUser, serverId, memberByUserId]);
+    const member = currentMember ?? null;
 
     const isOwner = !!(
         server?.ownerId &&
@@ -177,7 +309,6 @@ const usePermissionData = (
                     {
                         serverId,
                         currentUserId: currentUser?.id,
-                        memberUserIds: members?.map((m): string => m.userId),
                     },
                 );
             }
@@ -317,7 +448,6 @@ const usePermissionData = (
         channelId,
         channels,
         categories,
-        members,
         channelById,
         categoryById,
     ]);
@@ -350,7 +480,7 @@ const usePermissionData = (
             remainingTimeoutMs,
             isLoading:
                 !currentUser ||
-                !members ||
+                isLoadingMembers ||
                 !roles ||
                 !server ||
                 (!!channelId && (!channels || !categories)),
@@ -362,7 +492,7 @@ const usePermissionData = (
             isTimedOut,
             remainingTimeoutMs,
             currentUser,
-            members,
+            isLoadingMembers,
             roles,
             server,
             channelId,

@@ -3,10 +3,15 @@ import type { ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { SessionVerificationError } from '@/ui/components/common/SessionVerificationError';
 
 export const AdminRoute = (): ReactNode => {
-    const { data: user, isLoading } = useMe();
+    const { isAuthenticated } = useAuth();
+    const { data: user, isLoading, isError, isFetching, refetch } = useMe();
+
+    if (!isAuthenticated) return <Navigate replace to="/login" />;
 
     if (isLoading) {
         return (
@@ -17,8 +22,17 @@ export const AdminRoute = (): ReactNode => {
     }
 
     if (!user) {
-        console.warn('AdminRoute: No user found, redirecting to /login');
-        return <Navigate replace to="/login" />;
+        if (isError) {
+            return (
+                <SessionVerificationError
+                    isRetrying={isFetching}
+                    onRetry={(): void => {
+                        void refetch();
+                    }}
+                />
+            );
+        }
+        return <LoadingSpinner size="lg" />;
     }
 
     // Check if user has any administrative permissions

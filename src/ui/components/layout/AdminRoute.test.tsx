@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as UsersQueries from '@/api/users/users.queries';
+import * as Auth from '@/hooks/useAuth';
 
 import { AdminRoute } from './AdminRoute';
 
@@ -17,6 +18,10 @@ vi.mock('@/api/users/users.queries', () => ({
     useMe: vi.fn(),
 }));
 
+vi.mock('@/hooks/useAuth', () => ({
+    useAuth: vi.fn(),
+}));
+
 vi.mock('@/ui/components/common/LoadingSpinner', () => ({
     LoadingSpinner: ({ size }: { size: string }) => (
         <div data-size={size} data-testid="loading-spinner" />
@@ -26,6 +31,7 @@ vi.mock('@/ui/components/common/LoadingSpinner', () => ({
 describe('AdminRoute', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
+        vi.mocked(Auth.useAuth).mockReturnValue({ isAuthenticated: true });
         vi.mocked(Outlet).mockReturnValue(
             <div data-testid="outlet">Admin Content</div>,
         );
@@ -47,6 +53,7 @@ describe('AdminRoute', (): void => {
     });
 
     it('redirects to /login when there is no authenticated user', (): void => {
+        vi.mocked(Auth.useAuth).mockReturnValue({ isAuthenticated: false });
         vi.mocked(UsersQueries.useMe).mockReturnValue({
             data: undefined,
             isLoading: false,

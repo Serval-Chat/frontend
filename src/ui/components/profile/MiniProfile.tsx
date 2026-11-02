@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 
 import { useMe } from '@/api/users/users.queries';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
-import { useAppSelector } from '@/store/hooks';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
@@ -40,9 +39,6 @@ export const MiniProfile = () => {
     const [isStatusPickerOpen, setIsStatusPickerOpen] = useState(false);
     const avatarRef = useRef<HTMLElement>(null);
 
-    const backendInstanceId = useAppSelector(
-        (state): string | null => state.presence.backendInstanceId,
-    );
     const { status: displayStatus, setStatus } = useSelfStatus();
 
     const customStatus = user?.customStatus;
@@ -100,14 +96,6 @@ export const MiniProfile = () => {
                             'Set specific status'
                         )}
                     </Box>
-                    {backendInstanceId ? (
-                        <Box
-                            className="text-header-secondary mt-1 max-w-[150px] truncate text-[10px] opacity-70 hover:opacity-100"
-                            title={`Backend Instance: ${backendInstanceId}`}
-                        >
-                            Instance: {backendInstanceId}
-                        </Box>
-                    ) : null}
                 </Box>
             </Box>
 

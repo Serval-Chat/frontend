@@ -1,12 +1,22 @@
 import React, { useMemo } from 'react';
 
-import type { MessageAttachment, MessagePoll } from '@/api/chat/chat.types';
+import type {
+    MessageAttachment,
+    MessagePoll,
+    ReadOnlyMessagePoll,
+} from '@/api/chat/chat.types';
 import {
     useCategories,
     useChannels,
     useSticker,
 } from '@/api/servers/servers.queries';
-import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
+import type {
+    Category,
+    Channel,
+    Role,
+    Server,
+    ServerMember,
+} from '@/api/servers/servers.types';
 import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import type { ButtonComponent, Embed } from '@/types/embed';
@@ -27,6 +37,7 @@ import {
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 import { FileEmbed } from './FileEmbed';
+import type { MessageChannelData } from './Message/Message.types';
 import { Poll } from './Poll';
 
 interface MessageContentProps {
@@ -37,6 +48,7 @@ interface MessageContentProps {
     components?: ButtonComponent[];
     attachments?: MessageAttachment[];
     poll?: MessagePoll | null;
+    reportPoll?: ReadOnlyMessagePoll;
     isDeleted?: boolean;
     isEdited?: boolean;
     messageId?: string;
@@ -47,11 +59,82 @@ interface MessageContentProps {
     senderRoles?: Role[];
     isEphemeral?: boolean;
     isFailed?: boolean;
+    isReportPreview?: boolean;
     invocationId?: string;
+    messageChannelData?: MessageChannelData;
     onResize?: () => void;
 }
 
-export const MessageContent = React.memo(
+interface MessageContentBodyProps extends MessageContentProps {
+    channels: Channel[];
+    categories: Category[];
+}
+
+const MessageSticker = ({
+    stickerId,
+    onResize,
+}: {
+    stickerId: string;
+    onResize?: () => void;
+}) => {
+    const { data: sticker } = useSticker(stickerId);
+    const limitedAnimations = useLimitedAnimations();
+    const {
+        selectedSticker,
+        infoBoxPosition,
+        server,
+        showStickerInfo,
+        closeInfoBox,
+    } = useStickerInfoBox();
+
+    if (!sticker) return null;
+
+    return (
+        <>
+            <div className="mt-1 flex max-w-[240px] flex-col gap-1">
+                <Tooltip fullWidth content={sticker.name} position="top">
+                    <button
+                        className="block w-full cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
+                        type="button"
+                        onClick={(event): void => {
+                            showStickerInfo(
+                                {
+                                    id: sticker.id,
+                                    name: sticker.name,
+                                    url: sticker.imageUrl,
+                                    serverId: sticker.serverId,
+                                },
+                                event,
+                            );
+                        }}
+                    >
+                        <PausedAnimatedImage
+                            alt={sticker.name}
+                            className="aspect-square w-full select-none"
+                            paused={
+                                limitedAnimations
+                                    ? isAnimatedImageUrl(sticker.imageUrl)
+                                    : false
+                            }
+                            src={resolveApiUrl(sticker.imageUrl) || ''}
+                            onLoad={onResize}
+                        />
+                    </button>
+                </Tooltip>
+            </div>
+            {selectedSticker && infoBoxPosition ? (
+                <StickerInfoBox
+                    position={infoBoxPosition}
+                    server={server}
+                    sticker={selectedSticker}
+                    onClose={closeInfoBox}
+                />
+            ) : null}
+        </>
+    );
+};
+
+const MessageContentBody = React.memo(
     ({
         text,
         serverId,
@@ -60,6 +143,7 @@ export const MessageContent = React.memo(
         components,
         attachments,
         poll,
+        reportPoll,
         isDeleted,
         isEdited,
         messageId,
@@ -70,17 +154,12 @@ export const MessageContent = React.memo(
         senderRoles,
         isEphemeral,
         isFailed,
+        isReportPreview,
         invocationId,
+        channels,
+        categories,
         onResize,
-    }: MessageContentProps) => {
-        const { data: sticker } = useSticker(stickerId || null);
-        const limitedAnimations = useLimitedAnimations();
-        const { data: channels = [] } = useChannels(serverId || null, {
-            enabled: !!serverId,
-        });
-        const { data: categories = [] } = useCategories(serverId || null, {
-            enabled: !!serverId,
-        });
+    }: MessageContentBodyProps) => {
         const channel = useMemo(
             () => channels.find((item): boolean => item.id === channelId),
             [channelId, channels],
@@ -125,14 +204,6 @@ export const MessageContent = React.memo(
             [parserOptions, text],
         );
 
-        const {
-            selectedSticker,
-            infoBoxPosition,
-            server,
-            showStickerInfo,
-            closeInfoBox,
-        } = useStickerInfoBox();
-
         const isEmojiOnly = useMemo((): boolean => {
             if (nodes.length === 0) return false;
             const hasEmoji = nodes.some(
@@ -159,10 +230,13 @@ export const MessageContent = React.memo(
                 {text ? (
                     <>
                         <ParsedText
+                            disableUrlEmbeds={isReportPreview}
                             largeEmojis={isEmojiOnly}
                             nodes={nodes}
                             serverId={serverId}
-                            variant={isDeleted || isFailed ? 'danger' : 'default'}
+                            variant={
+                                isDeleted || isFailed ? 'danger' : 'default'
+                            }
                             wrap="preWrap"
                             onResize={onResize}
                         />
@@ -173,13 +247,13 @@ export const MessageContent = React.memo(
                         ) : null}
                     </>
                 ) : null}
-                {(embeds && embeds.length > 0) ||
-                (components && components.length > 0) ? (
+                {embeds?.length || components?.length ? (
                     <EmbedRenderer
                         channelId={channelId}
                         invocationId={invocationId}
                         isDeleted={isDeleted}
                         isEphemeral={isEphemeral}
+                        isReportPreview={isReportPreview}
                         messageId={messageId}
                         payload={{ embeds, components, content: undefined }}
                         senderId={senderId}
@@ -197,7 +271,7 @@ export const MessageContent = React.memo(
                     />
                 ))}
 
-                {poll ? (
+                {poll && !isReportPreview ? (
                     <Poll
                         channelId={channelId}
                         messageId={messageId || 'unknown'}
@@ -206,53 +280,75 @@ export const MessageContent = React.memo(
                     />
                 ) : null}
 
-                {sticker ? (
-                    <div className="mt-1 flex max-w-[240px] flex-col gap-1">
-                        <Tooltip fullWidth content={sticker.name} position="top">
-                            <button
-                                className="block w-full cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
-                                type="button"
-                                onClick={(e): void => {
-                                    showStickerInfo(
-                                        {
-                                            id: sticker.id,
-                                            name: sticker.name,
-                                            url: sticker.imageUrl,
-                                            serverId: sticker.serverId,
-                                        },
-                                        e,
-                                    );
-                                }}
-                            >
-                                <PausedAnimatedImage
-                                    alt={sticker.name}
-                                    className="aspect-square w-full select-none"
-                                    paused={
-                                        limitedAnimations
-                                            ? isAnimatedImageUrl(
-                                                  sticker.imageUrl,
-                                              )
-                                            : false
-                                    }
-                                    src={resolveApiUrl(sticker.imageUrl) || ''}
-                                    onLoad={onResize}
-                                />
-                            </button>
-                        </Tooltip>
+                {isReportPreview && reportPoll ? (
+                    <div className="mt-2 rounded-lg border border-border-subtle p-3">
+                        <div className="font-semibold">{reportPoll.title}</div>
+                        <div className="mt-2 flex flex-col gap-1">
+                            {reportPoll.options.map((option) => (
+                                <div
+                                    className="flex justify-between gap-3"
+                                    key={option.id}
+                                >
+                                    <span>
+                                        {option.emoji ? `${option.emoji} ` : ''}
+                                        {option.text}
+                                    </span>
+                                    <span className="text-text-muted">
+                                        {option.votes}{' '}
+                                        {option.votes === 1 ? 'vote' : 'votes'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ) : null}
 
-                {selectedSticker && infoBoxPosition ? (
-                    <StickerInfoBox
-                        position={infoBoxPosition}
-                        server={server}
-                        sticker={selectedSticker}
-                        onClose={closeInfoBox}
-                    />
+                {stickerId && !isReportPreview ? (
+                    <MessageSticker stickerId={stickerId} onResize={onResize} />
+                ) : null}
+
+                {isReportPreview && stickerId ? (
+                    <div className="mt-1 text-xs text-text-muted">
+                        Sticker: {stickerId}
+                    </div>
                 ) : null}
             </Box>
         );
     },
 );
 
+const EMPTY_CHANNELS: Channel[] = [];
+const EMPTY_CATEGORIES: Category[] = [];
+
+const MessageContentWithQueries = (props: MessageContentProps) => {
+    const { data: channels = EMPTY_CHANNELS } = useChannels(
+        props.serverId || null,
+        { enabled: !!props.serverId },
+    );
+    const { data: categories = EMPTY_CATEGORIES } = useCategories(
+        props.serverId || null,
+        { enabled: !!props.serverId },
+    );
+
+    return React.createElement(MessageContentBody, {
+        ...props,
+        categories,
+        channels,
+    });
+};
+
+export const MessageContent = React.memo((props: MessageContentProps) => {
+    const messageChannelData = props.messageChannelData;
+    if (!messageChannelData) {
+        return React.createElement(MessageContentWithQueries, props);
+    }
+
+    return React.createElement(MessageContentBody, {
+        ...props,
+        categories: messageChannelData.categories ?? EMPTY_CATEGORIES,
+        channels: messageChannelData.channels ?? EMPTY_CHANNELS,
+    });
+});
+
+MessageContentBody.displayName = 'MessageContentBody';
 MessageContent.displayName = 'MessageContent';

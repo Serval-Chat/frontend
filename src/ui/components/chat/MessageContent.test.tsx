@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { filesApi } from '@/api/files/files.api';
 import { interactionsApi } from '@/api/interactions/interactions.api';
 import type * as ServersQueries from '@/api/servers/servers.queries';
 import { ToastProvider } from '@/ui/components/common/Toast';
@@ -100,6 +101,48 @@ describe('MessageContent embeds', (): void => {
         expect(screen.getByText('New deployment ready')).toBeInTheDocument();
         expect(screen.getByText('Build Result')).toBeInTheDocument();
         expect(screen.getByText('Deployment completed')).toBeInTheDocument();
+    });
+
+    it('keeps report message URLs and saved media inert', async (): Promise<void> => {
+        const resolveFile = vi.spyOn(filesApi, 'getProxyMetadata');
+        const url = 'https://example.com/image.png';
+        render(
+            <TestWrapper>
+                <MessageContent
+                    isReportPreview
+                    embeds={[{ image: { url } }]}
+                    text={`[%file%](${url})`}
+                />
+            </TestWrapper>,
+        );
+
+        expect(screen.getByText(url)).toBeInTheDocument();
+        expect(document.querySelector(`img[src="${url}"]`)).toBeNull();
+        expect(resolveFile).not.toHaveBeenCalled();
+    });
+
+    it('renders the saved report poll as a read-only message part', (): void => {
+        render(
+            <TestWrapper>
+                <MessageContent
+                    isReportPreview
+                    reportPoll={{
+                        title: 'Question',
+                        options: [
+                            { id: 'yes', text: 'Yes', votes: 2 },
+                            { id: 'no', text: 'No', votes: 1 },
+                        ],
+                        multiSelect: false,
+                    }}
+                    text=""
+                />
+            </TestWrapper>,
+        );
+
+        expect(screen.getByText('Question')).toBeInTheDocument();
+        expect(screen.getByText('Yes')).toBeInTheDocument();
+        expect(screen.getByText('2 votes')).toBeInTheDocument();
+        expect(screen.queryByRole('button')).toBeNull();
     });
 
     it('renders embed buttons and sends custom button clicks', async (): Promise<void> => {

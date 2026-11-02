@@ -36,9 +36,9 @@ export const StandingSettings = () => {
                 <div className="space-y-6">
                     <CalloutBox icon={ShieldAlert} title="Disciplinary History">
                         <Text as="p" size="sm" variant="muted">
-                            Below is a list of warnings issued to your
-                            account. Some may require acknowledgment before
-                            they can be dismissed.
+                            Below is a list of warnings issued to your account.
+                            Some may require acknowledgment before they can be
+                            dismissed.
                         </Text>
                     </CalloutBox>
 
@@ -67,7 +67,12 @@ export const StandingSettings = () => {
                                     </Text>
                                 </div>
                                 <div className="mb-4 rounded border border-border-subtle bg-background p-3">
-                                    <Text size="sm">{warning.message}</Text>
+                                    <Text
+                                        className="max-h-64 overflow-y-auto break-words whitespace-pre-wrap"
+                                        size="sm"
+                                    >
+                                        {warning.message}
+                                    </Text>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     {warning.acknowledged ? (

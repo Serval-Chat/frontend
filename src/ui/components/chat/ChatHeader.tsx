@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
 import { Hash, Pin, Search, Users, Volume2, X } from 'lucide-react';
@@ -26,6 +26,8 @@ import { resolveDisplayName } from '@/utils/displayName';
 
 import { PinsDrawer } from './PinsDrawer';
 
+export const CHAT_SEARCH_SIDEBAR_WIDTH = 360;
+
 interface ChatHeaderMemberListProps {
     /** Whether the member list panel is currently open. Falls back to redux nav state when omitted. */
     isOpen?: boolean;
@@ -44,6 +46,17 @@ interface ChatHeaderProps {
     actions?: React.ReactNode;
     isSearchOpen?: boolean;
     onToggleSearch?: () => void;
+    onHeightChange?: (height: number, lowerEdge: number) => void;
+    hasVisibleStickyMessage?: boolean;
+    isViewingOlderMessages?: boolean;
+}
+
+interface HeaderContour {
+    clipPath: string;
+    borderPath: string;
+    lowerEdge: number;
+    width: number;
+    height: number;
 }
 
 /**
@@ -59,6 +72,9 @@ export const ChatHeader = ({
     actions,
     isSearchOpen,
     onToggleSearch,
+    onHeightChange,
+    hasVisibleStickyMessage = false,
+    isViewingOlderMessages = false,
 }: ChatHeaderProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -76,6 +92,13 @@ export const ChatHeader = ({
 
     const [descExpanded, setDescExpanded] = useState(false);
     const pinButtonRef = useRef<HTMLButtonElement>(null);
+    const headerRef = useRef<HTMLElement>(null);
+    const channelNameRef = useRef<HTMLDivElement>(null);
+    const descriptionRef = useRef<HTMLSpanElement>(null);
+    const actionsRef = useRef<HTMLDivElement>(null);
+    const [headerContour, setHeaderContour] = useState<HeaderContour | null>(
+        null,
+    );
 
     const { data: me } = useMe();
     const { data: friends } = useFriends();
@@ -87,6 +110,22 @@ export const ChatHeader = ({
         selectedChannelId,
     );
     const [lastViewedAt, setLastViewedAt] = useState<number>(0);
+
+    useLayoutEffect((): (() => void) | undefined => {
+        const header = headerRef.current;
+        if (!header || !onHeightChange) return undefined;
+
+        const reportHeight = (): void => {
+            const height = header.getBoundingClientRect().height;
+            onHeightChange(height, headerContour?.lowerEdge ?? height);
+        };
+        reportHeight();
+
+        const observer = new ResizeObserver(reportHeight);
+        observer.observe(header);
+        if (actionsRef.current) observer.observe(actionsRef.current);
+        return (): void => observer.disconnect();
+    }, [headerContour?.lowerEdge, onHeightChange]);
 
     // Sync lastViewedAt from localStorage
     useEffect((): (() => void) | undefined => {
@@ -116,6 +155,139 @@ export const ChatHeader = ({
     const hasDescription = !selectedFriendId && !!selectedChannel?.description;
     const hasStatus = !!selectedFriendId && !!friendUser?.customStatus?.text;
     const showSecondary = hasDescription || hasStatus;
+
+    useLayoutEffect((): (() => void) | undefined => {
+        const header = headerRef.current;
+        const channelName = channelNameRef.current;
+        const description = descriptionRef.current;
+        const actionsElement = actionsRef.current;
+        if (
+            !hasDescription ||
+            hasVisibleStickyMessage ||
+            isViewingOlderMessages ||
+            descExpanded ||
+            !header ||
+            !channelName ||
+            !description ||
+            !actionsElement
+        ) {
+            setHeaderContour(null);
+            return undefined;
+        }
+
+        const getTextRight = (element: HTMLElement): number => {
+            const bounds = element.getBoundingClientRect();
+            const text = element.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+            const style = getComputedStyle(element);
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            if (!context || !text) return bounds.left;
+
+            context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+            const letterSpacing =
+                style.letterSpacing === 'normal'
+                    ? 0
+                    : Number.parseFloat(style.letterSpacing);
+            const textWidth =
+                context.measureText(text).width +
+                (Number.isFinite(letterSpacing)
+                    ? letterSpacing * Math.max(0, text.length - 1)
+                    : 0);
+            return bounds.left + Math.min(textWidth, element.clientWidth);
+        };
+
+        const updateContour = (): void => {
+            const headerBounds = header.getBoundingClientRect();
+            const actionsBounds = actionsElement.getBoundingClientRect();
+            const width = header.clientWidth;
+            const height = header.clientHeight;
+            const actionsLeft = actionsBounds.left - headerBounds.left;
+            const textRight =
+                Math.max(getTextRight(channelName), getTextRight(description)) -
+                headerBounds.left;
+            const curveStart = Math.round(textRight + 4);
+            const curveEnd = Math.min(curveStart + 72, actionsLeft - 8);
+            const rightEdge = Math.round(
+                actionsBounds.bottom - headerBounds.top + 4,
+            );
+
+            if (
+                width <= 0 ||
+                height <= 0 ||
+                curveEnd - curveStart < 32 ||
+                height - rightEdge < 8
+            ) {
+                setHeaderContour(null);
+                return;
+            }
+
+            const endX = Math.round(curveEnd);
+            const startX = Math.round(curveStart);
+            const rightY = Math.min(rightEdge, height);
+            const curveHandle = (endX - startX) * 0.45;
+            const asPercent = (value: number, size: number): string =>
+                `${((value / size) * 100).toFixed(3)}%`;
+            const curvePoints: string[] = [];
+            for (let sample = 15; sample > 0; sample -= 1) {
+                const t = sample / 16;
+                const inverseT = 1 - t;
+                const x =
+                    inverseT ** 3 * startX +
+                    3 * inverseT ** 2 * t * (startX + curveHandle) +
+                    3 * inverseT * t ** 2 * (endX - curveHandle) +
+                    t ** 3 * endX;
+                const y =
+                    inverseT ** 3 * height +
+                    3 * inverseT ** 2 * t * height +
+                    3 * inverseT * t ** 2 * rightY +
+                    t ** 3 * rightY;
+                curvePoints.push(
+                    `${asPercent(x, width)} ${asPercent(y, height)}`,
+                );
+            }
+            const clipPath = `polygon(0 0, 100% 0, 100% ${asPercent(rightY, height)}, ${asPercent(endX, width)} ${asPercent(rightY, height)}, ${curvePoints.join(', ')}, ${asPercent(startX, width)} 100%, 0 100%)`;
+            const borderPath = `M 0 ${height - 0.5} H ${startX} C ${startX + curveHandle} ${height - 0.5}, ${endX - curveHandle} ${rightY - 0.5}, ${endX} ${rightY - 0.5} H ${width}`;
+            const nextContour = {
+                clipPath,
+                borderPath,
+                lowerEdge: rightY,
+                width,
+                height,
+            };
+
+            setHeaderContour(
+                (current): HeaderContour =>
+                    current?.clipPath === nextContour.clipPath &&
+                    current.borderPath === nextContour.borderPath &&
+                    current.lowerEdge === nextContour.lowerEdge &&
+                    current.width === nextContour.width &&
+                    current.height === nextContour.height
+                        ? current
+                        : nextContour,
+            );
+        };
+
+        updateContour();
+        const observer = new ResizeObserver(updateContour);
+        observer.observe(header);
+        observer.observe(channelName);
+        observer.observe(description);
+        observer.observe(actionsElement);
+        window.addEventListener('resize', updateContour);
+
+        return (): void => {
+            observer.disconnect();
+            window.removeEventListener('resize', updateContour);
+        };
+    }, [
+        hasDescription,
+        hasVisibleStickyMessage,
+        isViewingOlderMessages,
+        descExpanded,
+        selectedChannel?.description,
+        selectedChannel?.name,
+    ]);
+
     const memberListOpen =
         memberList?.isOpen ??
         (window.innerWidth >= 768
@@ -136,14 +308,49 @@ export const ChatHeader = ({
         <Box
             as="header"
             className={cn(
-                'pride-glass-strong z-50 flex shrink-0 border-b border-white/5 bg-(--bg-chat-header) px-4 backdrop-blur-sm',
+                'pointer-events-none relative z-50 flex shrink-0 px-4',
+                !headerContour &&
+                    !isViewingOlderMessages &&
+                    'border-b border-white/5',
                 showSecondary ? 'items-start' : 'items-center',
             )}
+            ref={headerRef}
         >
+            <Box
+                aria-hidden="true"
+                className="pride-glass-strong pointer-events-none absolute inset-0 z-0 bg-(--bg-chat-header) backdrop-blur-sm"
+                style={
+                    headerContour
+                        ? { clipPath: headerContour.clipPath }
+                        : undefined
+                }
+            />
+            <AnimatePresence>
+                {isSearchOpen && headerContour ? (
+                    <m.div
+                        animate={{
+                            width: Math.min(
+                                CHAT_SEARCH_SIDEBAR_WIDTH,
+                                headerContour.width,
+                            ),
+                        }}
+                        aria-hidden="true"
+                        className="pride-glass-strong pointer-events-none absolute right-0 bottom-0 z-0 overflow-hidden rounded-tl-xl bg-(--bg-chat-header) backdrop-blur-sm"
+                        exit={{ width: 0 }}
+                        initial={{ width: 0 }}
+                        key="search-header-extension"
+                        style={{
+                            height:
+                                headerContour.height - headerContour.lowerEdge,
+                        }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                    />
+                ) : null}
+            </AnimatePresence>
             {/* Left: icon + name + description */}
             <Box
                 className={cn(
-                    'flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden py-3',
+                    'relative z-10 flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden py-3',
                     showSecondary ? 'items-start' : 'justify-center',
                 )}
             >
@@ -171,7 +378,10 @@ export const ChatHeader = ({
                             })()
                         )}
                     </Box>
-                    <Box className="min-w-0 flex-1 truncate text-[15px] leading-5 font-semibold text-foreground">
+                    <Box
+                        className="min-w-0 flex-1 truncate text-[15px] leading-5 font-semibold text-foreground"
+                        ref={channelNameRef}
+                    >
                         {selectedFriendId
                             ? (resolveDisplayName(
                                   localNickname,
@@ -182,37 +392,55 @@ export const ChatHeader = ({
                     </Box>
                 </Box>
                 {hasDescription ? (
-                    <m.button
-                        className="w-full text-left focus:outline-none"
-                        type="button"
-                        onClick={(): void => {
-                            setDescExpanded((v): boolean => !v);
-                        }}
-                    >
-                        <m.div
-                            animate={descExpanded ? 'expanded' : 'collapsed'}
-                            className="overflow-hidden"
-                            initial={false}
-                            transition={{
-                                duration: 0.2,
-                                ease: 'easeInOut',
-                            }}
-                            variants={{
-                                collapsed: { height: '1.25rem' },
-                                expanded: { height: 'auto' },
+                    <Box className="flex min-w-0 items-start">
+                        <svg
+                            aria-hidden="true"
+                            className="pointer-events-none -mt-0.5 ml-[9px] h-4 w-[19px] shrink-0 self-start overflow-visible"
+                            fill="none"
+                            viewBox="0 0 19 16"
+                        >
+                            <path
+                                d="M1 0v4c0 3.314 2.686 6 6 6h12"
+                                stroke="var(--border-subtle)"
+                                strokeLinecap="round"
+                                strokeWidth="2"
+                            />
+                        </svg>
+                        <m.button
+                            className="pointer-events-auto min-w-0 flex-1 text-left focus:outline-none"
+                            type="button"
+                            onClick={(): void => {
+                                setDescExpanded((v): boolean => !v);
                             }}
                         >
-                            <span
-                                className={`text-foreground-muted block text-xs break-words ${
-                                    descExpanded
-                                        ? 'pb-0.5 whitespace-pre-wrap'
-                                        : 'truncate'
-                                }`}
+                            <m.div
+                                animate={
+                                    descExpanded ? 'expanded' : 'collapsed'
+                                }
+                                className="overflow-hidden"
+                                initial={false}
+                                transition={{
+                                    duration: 0.2,
+                                    ease: 'easeInOut',
+                                }}
+                                variants={{
+                                    collapsed: { height: '1.25rem' },
+                                    expanded: { height: 'auto' },
+                                }}
                             >
-                                {selectedChannel.description}
-                            </span>
-                        </m.div>
-                    </m.button>
+                                <span
+                                    className={`text-foreground-muted block text-xs break-words ${
+                                        descExpanded
+                                            ? 'pb-0.5 whitespace-pre-wrap'
+                                            : 'truncate'
+                                    }`}
+                                    ref={descriptionRef}
+                                >
+                                    {selectedChannel.description}
+                                </span>
+                            </m.div>
+                        </m.button>
+                    </Box>
                 ) : null}
                 {hasStatus ? (
                     <Box className="flex min-w-0 items-center">
@@ -239,9 +467,10 @@ export const ChatHeader = ({
             {/* Icons Area */}
             <Box
                 className={cn(
-                    'ml-2 flex shrink-0 items-center gap-1',
+                    'pointer-events-auto relative z-10 ml-2 flex shrink-0 items-center gap-1',
                     showSecondary && 'pt-2',
                 )}
+                ref={actionsRef}
             >
                 {actions}
                 {(selectedChannel || selectedFriendId) && onToggleSearch ? (
@@ -330,6 +559,22 @@ export const ChatHeader = ({
                     <X className="h-6 w-6" />
                 </button>
             </Box>
+            {headerContour ? (
+                <svg
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 z-20 h-full w-full"
+                    preserveAspectRatio="none"
+                    viewBox={`0 0 ${headerContour.width} ${headerContour.height}`}
+                >
+                    <path
+                        d={headerContour.borderPath}
+                        fill="none"
+                        stroke="var(--pride-glass-border, rgba(255, 255, 255, 0.05))"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                    />
+                </svg>
+            ) : null}
         </Box>
     );
 };

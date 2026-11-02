@@ -9,6 +9,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 
 vi.mock('@/api/servers/servers.queries', () => ({
     useMembers: vi.fn(),
+    useMemberByUserId: vi.fn(),
     useRoles: vi.fn(),
     useServerDetails: vi.fn(),
     useChannels: vi.fn(),
@@ -27,6 +28,10 @@ vi.mock('react-router-dom', () => ({
 describe('usePermissions', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
+        vi.mocked(ServerQueries.useMemberByUserId).mockReturnValue({
+            data: mockMember,
+            isLoading: false,
+        } as never);
     });
 
     const mockMe = { id: 'user1' } as User;
@@ -358,8 +363,9 @@ describe('usePermissions', (): void => {
                 },
             ],
         } as never);
-        vi.mocked(ServerQueries.useMembers).mockReturnValue({
-            data: [{ userId: 'user1', roles: ['admin_role'] }],
+        vi.mocked(ServerQueries.useMemberByUserId).mockReturnValue({
+            data: { userId: 'user1', roles: ['admin_role'] },
+            isLoading: false,
         } as never);
         vi.mocked(ServerQueries.useChannels).mockReturnValue({
             data: [

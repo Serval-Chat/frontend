@@ -1,10 +1,10 @@
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
+import type { RootState } from '@/store';
 import * as hooksPattern from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -20,6 +20,14 @@ vi.mock('@/store/hooks', () => ({
 vi.mock('@/api/reactions/reactions.queries', () => ({
     useAddReaction: () => ({ mutate: vi.fn() }),
     useRemoveReaction: () => ({ mutate: vi.fn() }),
+}));
+
+vi.mock('@/api/friends/friends.queries', () => ({
+    useFriends: vi.fn().mockReturnValue({ data: [] }),
+}));
+
+vi.mock('@/hooks/useIsMobile', () => ({
+    useIsMobile: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock(
@@ -96,11 +104,22 @@ describe('Frontend Blocking Content Filters', (): void => {
     beforeEach((): void => {
         vi.clearAllMocks();
         mockUseAppSelector = vi.spyOn(hooksPattern, 'useAppSelector');
+        mockUseAppSelector.mockImplementation(
+            (selector: (state: RootState) => unknown) =>
+                selector({ blocking: { blocks: {} } } as never),
+        );
     });
+
+    const mockBlockingState = (blocks: Record<string, number>): void => {
+        mockUseAppSelector.mockImplementation(
+            (selector: (state: RootState) => unknown) =>
+                selector({ blocking: { blocks } } as never),
+        );
+    };
 
     describe('MessagesList (Flags: SPOILER_MESSAGES, HIDE_REPLIES_TO_THEM)', (): void => {
         it('renders collapsed group for messages from blocked users (Flag 2)', (): void => {
-            mockUseAppSelector.mockReturnValue({
+            mockBlockingState({
                 'sender-blocked': BlockFlags.SPOILER_MESSAGES,
             });
 
@@ -154,7 +173,7 @@ describe('Frontend Blocking Content Filters', (): void => {
         });
 
         it('completely hides messages that are replies to blocked users (Flag 4)', (): void => {
-            mockUseAppSelector.mockReturnValue({
+            mockBlockingState({
                 'sender-blocked': BlockFlags.HIDE_REPLIES_TO_THEM,
             });
 
@@ -195,7 +214,7 @@ describe('Frontend Blocking Content Filters', (): void => {
 
     describe('TypingIndicator (Flag 8: HIDE_FROM_TYPING_INDICATORS)', (): void => {
         it('removes blocked users from typing users list', (): void => {
-            mockUseAppSelector.mockReturnValue({
+            mockBlockingState({
                 'blocked-usr': BlockFlags.HIDE_FROM_TYPING_INDICATORS,
             });
 
@@ -218,7 +237,7 @@ describe('Frontend Blocking Content Filters', (): void => {
 
     describe('Reactions (Flag 9: HIDE_THEIR_REACTIONS)', (): void => {
         it('removes the blocked user from the users array so chip count drops', (): void => {
-            mockUseAppSelector.mockReturnValue({
+            mockBlockingState({
                 'u-blocked': BlockFlags.HIDE_THEIR_REACTIONS,
             });
 
@@ -249,7 +268,7 @@ describe('Frontend Blocking Content Filters', (): void => {
         });
 
         it('renders custom reactions by emoji id when the reaction has no URL', (): void => {
-            mockUseAppSelector.mockReturnValue({});
+            mockBlockingState({});
 
             const reactions: MessageReaction[] = [
                 {

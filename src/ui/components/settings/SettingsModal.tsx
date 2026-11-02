@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { ChevronLeft } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { DeveloperSettings } from './DeveloperSettings';
 import { KeybindSettings } from './KeybindSettings';
 import { NotificationSettings } from './NotificationSettings';
 import { PrivacySettings } from './PrivacySettings';
+import { ReportsSettings } from './ReportsSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { SettingsSidebar } from './SettingsSidebar';
 import { StandingSettings } from './StandingSettings';
@@ -41,6 +42,7 @@ const SECTION_URL_MAP: Record<string, string> = {
     privacy: 'privacy',
     blocking: 'blocking',
     standing: 'standing',
+    reports: 'reports',
     notifications: 'notifications',
     keybinds: 'keybinds',
     developer: 'developer',
@@ -57,6 +59,7 @@ const SECTION_ID_TO_URL: Record<string, string> = {
     privacy: 'privacy',
     blocking: 'blocking',
     standing: 'standing',
+    reports: 'reports',
     notifications: 'notifications',
     keybinds: 'keybinds',
     developer: 'developer',
@@ -165,6 +168,9 @@ export const SettingsModal = ({
                         ) : null}
                         {activeSection === 'standing' ? (
                             <StandingSettings />
+                        ) : null}
+                        {activeSection === 'reports' ? (
+                            <ReportsSettings />
                         ) : null}
                         {activeSection === 'notifications' ? (
                             <NotificationSettings />

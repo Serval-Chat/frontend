@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AnimatePresence, m } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 
+import type { Role } from '@/api/servers/servers.types';
 import { useResizable } from '@/hooks/useResizable';
 import { useTertiarySidebarData } from '@/hooks/useTertiarySidebarData';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -14,9 +15,16 @@ import { DMSidebarSection } from '@/ui/components/sidebar/DMSidebarSection';
 import { ServerSidebarSection } from '@/ui/components/sidebar/ServerSidebarSection';
 import { cn } from '@/utils/cn';
 
-const MEMBER_SEARCH_PLACEHOLDER_FULL =
-    'Search (supports regex /pattern/)...';
+const MEMBER_SEARCH_PLACEHOLDER_FULL = 'Search (supports regex /pattern/)...';
 const MEMBER_SEARCH_PLACEHOLDER_SHORT = 'Search members...';
+const EMPTY_MEMBER_SECTION_DATA = {
+    isLoading: true,
+    memberIconRoleMap: new Map<string, Role>(),
+    memberRoleMap: new Map<string, Role>(),
+    members: undefined,
+    roles: undefined,
+    serverDetails: undefined,
+};
 
 /**
  * @description Tertiary sidebar displaying DM participants or Server members.
@@ -111,10 +119,31 @@ export const TertiarySidebar = ({
     const effectiveIsResizing = isControlled
         ? (isResizingOverride ?? false)
         : isResizing;
-    const effectiveHandleMouseDown =
-        onResizeMouseDown ?? handleMouseDown;
+    const effectiveHandleMouseDown = onResizeMouseDown ?? handleMouseDown;
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const memberSectionData = useMemo(
+        () => ({
+            isLoading: isLoadingMembers,
+            memberIconRoleMap,
+            memberRoleMap,
+            members,
+            roles,
+            serverDetails,
+        }),
+        [
+            isLoadingMembers,
+            memberIconRoleMap,
+            memberRoleMap,
+            members,
+            roles,
+            serverDetails,
+        ],
+    );
+    const deferredMemberSectionData = useDeferredValue(
+        memberSectionData,
+        EMPTY_MEMBER_SECTION_DATA,
+    );
 
     if (!selectedFriendId && !selectedServerId) {
         return null;
@@ -209,7 +238,10 @@ export const TertiarySidebar = ({
                             initial={{ height: 0, opacity: 0 }}
                         >
                             <div className="p-3">
-                                <div className="relative" ref={searchWrapperRef}>
+                                <div
+                                    className="relative"
+                                    ref={searchWrapperRef}
+                                >
                                     <span
                                         className="pointer-events-none invisible absolute text-xs whitespace-nowrap"
                                         ref={searchPlaceholderMeasureRef}
@@ -244,14 +276,20 @@ export const TertiarySidebar = ({
                     {/* Server Context */}
                     {selectedServerId ? (
                         <ServerSidebarSection
-                            isLoading={isLoadingMembers}
-                            memberIconRoleMap={memberIconRoleMap}
-                            memberRoleMap={memberRoleMap}
-                            members={members}
-                            roles={roles}
+                            isLoading={deferredMemberSectionData.isLoading}
+                            memberIconRoleMap={
+                                deferredMemberSectionData.memberIconRoleMap
+                            }
+                            memberRoleMap={
+                                deferredMemberSectionData.memberRoleMap
+                            }
+                            members={deferredMemberSectionData.members}
+                            roles={deferredMemberSectionData.roles}
                             scrollRef={scrollContainerRef}
                             searchQuery={searchQuery}
-                            serverDetails={serverDetails}
+                            serverDetails={
+                                deferredMemberSectionData.serverDetails
+                            }
                         />
                     ) : null}
                 </Box>

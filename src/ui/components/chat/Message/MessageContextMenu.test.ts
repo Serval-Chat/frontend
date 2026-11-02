@@ -87,8 +87,9 @@ describe('useMessageContextMenu', (): void => {
     });
 
     it('offers moderation and friend actions on an ordinary server message', (): void => {
+        const onReport = vi.fn();
         const { result } = renderHook(() =>
-            useMessageContextMenu(makeParams()),
+            useMessageContextMenu(makeParams({ onReport })),
         );
         const labels = labelsOf(result.current);
 
@@ -98,6 +99,7 @@ describe('useMessageContextMenu', (): void => {
                 'Kick Member',
                 'Ban Member',
                 'Add Friend',
+                'Report Message',
             ]),
         );
     });

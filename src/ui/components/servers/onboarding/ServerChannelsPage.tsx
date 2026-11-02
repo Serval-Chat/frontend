@@ -11,7 +11,7 @@ import {
 } from '@/api/servers/servers.queries';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
-import { Box } from '@/ui/components/layout/Box';
+import { ServerSubpageLayout } from '@/ui/components/servers/ServerSubpageLayout';
 
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
 
@@ -104,75 +104,76 @@ export const ServerChannelsPage = () => {
     if (!serverId) return null;
 
     return (
-        <Box className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden">
-            <Box className="custom-scrollbar flex-1 overflow-y-auto p-6 md:p-10">
-                {!onboarding || !channels || !categories ? (
-                    <div className="flex min-h-40 items-center justify-center">
-                        <LoadingSpinner />
-                    </div>
-                ) : (
-                    <div className="max-w-3xl space-y-6 pb-24">
-                        <button
-                            aria-label="Back to server"
-                            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                            type="button"
-                            onClick={handleBack}
-                        >
-                            ← Back
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Hash className="h-6 w-6 shrink-0 text-muted-foreground" />
-                            <div className="flex min-w-0 flex-1 flex-col">
-                                <span className="text-xl leading-6 font-semibold text-foreground">
-                                    Channels &amp; Categories
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                    Configure which channels you want to see.
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <EyeOff className="h-3.5 w-3.5 shrink-0" />
-                            <span>
-                                Click a channel or category to hide it from
-                                your sidebar.
+        <ServerSubpageLayout
+            footer={
+                <SettingsFloatingBar
+                    containerClassName="pride-glass-input"
+                    isPending={updatePreferences.isPending}
+                    isVisible={hasUnsavedChanges}
+                    offset="0px"
+                    onReset={(): void => {
+                        if (onboarding) {
+                            setHiddenChannelIds(
+                                onboarding.member.hiddenChannelIds ?? [],
+                            );
+                            setHiddenCategoryIds(
+                                onboarding.member.hiddenCategoryIds ?? [],
+                            );
+                        }
+                        setHasUnsavedChanges(false);
+                    }}
+                    onSave={handleSave}
+                />
+            }
+            reserveFooterSpace={hasUnsavedChanges}
+        >
+            {!onboarding || !channels || !categories ? (
+                <div className="flex min-h-40 items-center justify-center">
+                    <LoadingSpinner />
+                </div>
+            ) : (
+                <div className="max-w-3xl space-y-6">
+                    <button
+                        aria-label="Back to server"
+                        className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                        type="button"
+                        onClick={handleBack}
+                    >
+                        ← Back
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <Hash className="h-6 w-6 shrink-0 text-muted-foreground" />
+                        <div className="flex min-w-0 flex-1 flex-col">
+                            <span className="text-xl leading-6 font-semibold text-foreground">
+                                Channels &amp; Categories
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                                Configure which channels you want to see.
                             </span>
                         </div>
-                        <div className="space-y-3">
-                            {groupedChannels.map((group) => (
-                                <ChannelPreferenceGroup
-                                    category={group.category}
-                                    channels={group.channels}
-                                    hiddenCategories={hiddenCategories}
-                                    hiddenChannels={hiddenChannels}
-                                    key={group.category?.id ?? 'uncategorized'}
-                                    onToggleCategory={handleToggleCategory}
-                                    onToggleChannel={handleToggleChannel}
-                                />
-                            ))}
-                        </div>
                     </div>
-                )}
-            </Box>
-
-            <SettingsFloatingBar
-                containerClassName="pride-glass-input"
-                isPending={updatePreferences.isPending}
-                isVisible={hasUnsavedChanges}
-                offset="0px"
-                onReset={(): void => {
-                    if (onboarding) {
-                        setHiddenChannelIds(
-                            onboarding.member.hiddenChannelIds ?? [],
-                        );
-                        setHiddenCategoryIds(
-                            onboarding.member.hiddenCategoryIds ?? [],
-                        );
-                    }
-                    setHasUnsavedChanges(false);
-                }}
-                onSave={handleSave}
-            />
-        </Box>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <EyeOff className="h-3.5 w-3.5 shrink-0" />
+                        <span>
+                            Click a channel or category to hide it from your
+                            sidebar.
+                        </span>
+                    </div>
+                    <div className="space-y-3">
+                        {groupedChannels.map((group) => (
+                            <ChannelPreferenceGroup
+                                category={group.category}
+                                channels={group.channels}
+                                hiddenCategories={hiddenCategories}
+                                hiddenChannels={hiddenChannels}
+                                key={group.category?.id ?? 'uncategorized'}
+                                onToggleCategory={handleToggleCategory}
+                                onToggleChannel={handleToggleChannel}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+        </ServerSubpageLayout>
     );
 };

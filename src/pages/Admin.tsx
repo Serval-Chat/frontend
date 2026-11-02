@@ -19,6 +19,7 @@ import { AdminIAM } from '@/ui/components/admin/AdminIAM';
 import { AdminInvites } from '@/ui/components/admin/AdminInvites';
 import { AdminLayout } from '@/ui/components/admin/AdminLayout';
 import { AdminOverview } from '@/ui/components/admin/AdminOverview';
+import { AdminReports } from '@/ui/components/admin/AdminReports';
 import { AdminServerDetail } from '@/ui/components/admin/AdminServerDetail';
 import { AdminServers } from '@/ui/components/admin/AdminServers';
 import { AdminSettings } from '@/ui/components/admin/AdminSettings';
@@ -29,13 +30,17 @@ import { Text } from '@/ui/components/common/Text';
 const AdminUserDetailWrapper = (): ReactNode => {
     const { userId } = useParams<{ userId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     if (!userId) return <Navigate replace to="/admin/users" />;
-    return (
-        <AdminUserDetail
-            userId={userId}
-            onBack={(): undefined => void navigate('/admin/users')}
-        />
-    );
+    const returnPath = (location.state as { from?: unknown } | null)?.from;
+    const onBack = (): void =>
+        void navigate(
+            typeof returnPath === 'string' &&
+                returnPath.startsWith('/admin/reports')
+                ? returnPath
+                : '/admin/users',
+        );
+    return <AdminUserDetail userId={userId} onBack={onBack} />;
 };
 
 const AdminServerDetailWrapper = (): ReactNode => {
@@ -103,6 +108,7 @@ const AdminContent = ({ navigate }: AdminContentProps): ReactNode => (
         <Route element={<AdminBotsAwaitingReview />} path="bots/review" />
 
         <Route element={<AdminAuditLogs />} path="logs" />
+        <Route element={<AdminReports />} path="reports" />
         <Route element={<AdminBadges />} path="badges" />
         <Route element={<AdminInvites />} path="invites" />
         <Route element={<AdminSettings />} path="settings" />
@@ -142,6 +148,7 @@ export const Admin = (): ReactNode => {
         if (path === '/admin/bots') return 'Bot Moderation';
         if (path === '/admin/bans') return 'Bans & Mutes';
         if (path === '/admin/logs') return 'Audit Logs';
+        if (path === '/admin/reports') return 'User Reports';
         if (path === '/admin/badges') return 'Badges';
         if (path === '/admin/invites') return 'Invite Tokens';
         if (path === '/admin/settings') return 'Admin Settings';

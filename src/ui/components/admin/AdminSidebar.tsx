@@ -5,6 +5,7 @@ import {
     BarChart3,
     Bot,
     FileText,
+    Flag,
     Server,
     Settings,
     ShieldAlert,
@@ -152,6 +153,11 @@ export const AdminSidebar = (): ReactNode => {
                     icon={<FileText size={18} />}
                     label="Audit Logs"
                     to="/admin/logs"
+                />
+                <SidebarItem
+                    icon={<Flag size={18} />}
+                    label="Reports"
+                    to="/admin/reports"
                 />
                 <SidebarItem
                     icon={<BadgeCheck size={18} />}

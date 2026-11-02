@@ -272,14 +272,16 @@ export const CodeBlock = ({
                 ) : null}
             </div>
 
-            <CodeModal
-                content={content}
-                isOpen={isModalOpen}
-                language={language}
-                onClose={(): void => {
-                    setIsModalOpen(false);
-                }}
-            />
+            {isModalOpen ? (
+                <CodeModal
+                    isOpen
+                    content={content}
+                    language={language}
+                    onClose={(): void => {
+                        setIsModalOpen(false);
+                    }}
+                />
+            ) : null}
         </>
     );
 };

@@ -10,6 +10,14 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
+vi.mock('@/api/friends/friends.queries', () => ({
+    useFriends: vi.fn().mockReturnValue({ data: [] }),
+}));
+
+vi.mock('@/hooks/useIsMobile', () => ({
+    useIsMobile: vi.fn().mockReturnValue(false),
+}));
+
 vi.mock('@/ui/components/chat/MessageItem', () => ({
     MessageItem: ({
         message,

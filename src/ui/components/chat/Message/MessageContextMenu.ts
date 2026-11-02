@@ -6,6 +6,7 @@ import {
     Copy,
     CornerUpLeft,
     Edit,
+    Flag,
     ListTree,
     Pin,
     RefreshCw,
@@ -36,6 +37,7 @@ interface ContextMenuParams {
     canPin: boolean;
     canReact: boolean;
     friends?: Friend[];
+    isFriend?: boolean;
     onReplyToMessage?: (message: ProcessedChatMessage) => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -62,6 +64,7 @@ interface ContextMenuParams {
     onBan?: () => void;
     onKick?: () => void;
     onTimeout?: () => void;
+    onReport?: () => void;
 }
 
 function buildContextMenuItems({
@@ -73,6 +76,7 @@ function buildContextMenuItems({
     canPin,
     canReact,
     friends,
+    isFriend: isFriendProp,
     onReplyToMessage,
     onEdit,
     onDelete,
@@ -99,8 +103,12 @@ function buildContextMenuItems({
     onBan,
     onKick,
     onTimeout,
+    onReport,
 }: ContextMenuParams): ContextMenuItem[] {
     const items: ContextMenuItem[] = [];
+    const isFriend =
+        isFriendProp ??
+        friends?.some((friend): boolean => friend.id === message.senderId);
 
     const isWebhookMessage = !!message.isWebhook;
 
@@ -158,10 +166,16 @@ function buildContextMenuItems({
     });
 
     if (!isMessageSender && !isWebhookMessage) {
-        const isFriend = friends?.some(
-            (f): boolean => f.id === message.senderId,
-        );
         items.push({ type: 'divider' });
+
+        if (onReport) {
+            items.push({
+                label: 'Report Message',
+                icon: Flag,
+                variant: 'danger',
+                onClick: onReport,
+            });
+        }
 
         if (isFriend) {
             items.push({
@@ -369,6 +383,7 @@ export function useMessageContextMenu(
         canPin,
         canReact,
         friends,
+        isFriend,
         onReplyToMessage,
         onEdit,
         onDelete,
@@ -395,6 +410,7 @@ export function useMessageContextMenu(
         onBan,
         onKick,
         onTimeout,
+        onReport,
     } = params;
 
     return React.useMemo(
@@ -408,6 +424,7 @@ export function useMessageContextMenu(
                 canPin,
                 canReact,
                 friends,
+                isFriend,
                 onReplyToMessage,
                 onEdit: onEdit,
                 onDelete: onDelete,
@@ -434,6 +451,7 @@ export function useMessageContextMenu(
                 onBan,
                 onKick,
                 onTimeout,
+                onReport,
             }),
 
         [
@@ -445,6 +463,7 @@ export function useMessageContextMenu(
             canPin,
             canReact,
             friends,
+            isFriend,
             onReplyToMessage,
             onEdit,
             onDelete,
@@ -471,6 +490,7 @@ export function useMessageContextMenu(
             onBan,
             onKick,
             onTimeout,
+            onReport,
         ],
     );
 }

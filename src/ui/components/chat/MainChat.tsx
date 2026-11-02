@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useRef } from 'react';
+import React, { useCallback, useReducer, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, m } from 'framer-motion';
@@ -19,7 +19,10 @@ import { useTheme } from '@/providers/ThemeProvider';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { ChatEmptyState } from '@/ui/components/chat/ChatEmptyState';
-import { ChatHeader } from '@/ui/components/chat/ChatHeader';
+import {
+    CHAT_SEARCH_SIDEBAR_WIDTH,
+    ChatHeader,
+} from '@/ui/components/chat/ChatHeader';
 import { MessageInput } from '@/ui/components/chat/MessageInput';
 import { MessageSearchPanel } from '@/ui/components/chat/MessageSearchPanel';
 import {
@@ -66,12 +69,14 @@ interface UsernameStyle {
 }
 
 interface ChatMainColumnProps {
+    hasVisibleStickyMessage: boolean;
     isServerContext: boolean;
     selectedServerId: string | null;
     selectedChannelId: string | null;
     selectedFriendId: string | null;
     isViewingOlderMessages: boolean;
     selectedChannel: Channel | undefined;
+    messageChannelData: ChatData['messageChannelData'];
     friendUser: User | undefined;
     chatContainerRef: React.RefObject<HTMLElement | null>;
     messagesListRef: React.RefObject<MessagesListHandle | null>;
@@ -84,7 +89,8 @@ interface ChatMainColumnProps {
     isFetchingNextPage: boolean;
     isFetchingNewerMessages: boolean;
     isLoading: boolean;
-    hasPermission: ChatData['hasPermission'];
+    messagePermissions: ChatData['messagePermissions'];
+    quickReactions: ChatData['quickReactions'];
     isOwner: boolean;
     messages: ChatData['messages'];
     isAtBottom: boolean;
@@ -109,15 +115,18 @@ interface ChatMainColumnProps {
     onReplyClick: (messageId: string) => void;
     onReplyToMessage: (msg: ProcessedChatMessage) => void;
     onCancelReply: () => void;
+    onStickyVisibilityChange: (isVisible: boolean) => void;
 }
 
 const ChatMainColumn = ({
+    hasVisibleStickyMessage,
     isServerContext,
     selectedServerId,
     selectedChannelId,
     selectedFriendId,
     isViewingOlderMessages,
     selectedChannel,
+    messageChannelData,
     friendUser,
     chatContainerRef,
     messagesListRef,
@@ -130,7 +139,8 @@ const ChatMainColumn = ({
     isFetchingNextPage,
     isFetchingNewerMessages,
     isLoading,
-    hasPermission,
+    messagePermissions,
+    quickReactions,
     isOwner,
     messages,
     isAtBottom,
@@ -153,17 +163,27 @@ const ChatMainColumn = ({
     onReplyClick,
     onReplyToMessage,
     onCancelReply,
+    onStickyVisibilityChange,
 }: ChatMainColumnProps): React.ReactNode => (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="relative flex min-h-0 flex-1 flex-col">
         {isServerContext && selectedChannelId && selectedServerId ? (
-            <StickyMessageBar
-                channelId={selectedChannelId}
-                serverId={selectedServerId}
-            />
+            <div
+                className={
+                    hasVisibleStickyMessage
+                        ? 'relative z-20'
+                        : 'relative z-[60]'
+                }
+            >
+                <StickyMessageBar
+                    channelId={selectedChannelId}
+                    serverId={selectedServerId}
+                    onVisibilityChange={onStickyVisibilityChange}
+                />
+            </div>
         ) : null}
 
         {isViewingOlderMessages ? (
-            <Box className="bg-warning/10 border-warning/30 flex items-center justify-between border-b px-6 py-3">
+            <Box className="border-warning/30 relative z-10 flex items-center justify-between border-b bg-background px-6 py-3">
                 <Text className="text-warning" size="sm">
                     You are viewing older messages
                 </Text>
@@ -190,8 +210,9 @@ const ChatMainColumn = ({
         ) : (
             <>
                 <Box
-                    className="relative flex min-h-0 flex-1 flex-col"
+                    className="relative z-0 flex min-h-0 flex-1 flex-col"
                     ref={chatContainerRef}
+                    style={{ marginTop: 'var(--chat-header-overlap, 0px)' }}
                 >
                     <MessagesList
                         activeHighlightId={targetMessageId}
@@ -206,20 +227,21 @@ const ChatMainColumn = ({
                         fullMemberMap={memberMaps.fullMemberMap}
                         hasMore={hasNextPage}
                         hasMoreNewer={isViewingOlderMessages}
-                        hasPermission={hasPermission}
                         isLoading={isLoading}
                         isLoadingMore={isFetchingNextPage}
                         isLoadingMoreNewer={isFetchingNewerMessages}
                         isOwner={isOwner}
                         key={selectedChannelId || selectedFriendId}
                         me={me}
+                        messageChannelData={messageChannelData}
+                        messagePermissions={messagePermissions}
                         messages={messages}
+                        quickReactions={quickReactions}
                         ref={messagesListRef}
                         retryMessage={retryMessage}
                         roleMap={memberMaps.roleMap}
                         selectedChannel={selectedChannel}
                         serverDetails={serverDetails}
-                        userRolesMap={memberMaps.userRolesMap}
                         onAtBottomChange={onAtBottomChange}
                         onLoadMore={onLoadMore}
                         onLoadMoreNewer={onLoadNewer}
@@ -324,7 +346,7 @@ const ChatSearchSidebar = ({
     <AnimatePresence>
         {isOpen ? (
             <m.aside
-                animate={{ width: 360 }}
+                animate={{ width: CHAT_SEARCH_SIDEBAR_WIDTH }}
                 exit={{ width: 0 }}
                 initial={{ width: 0 }}
                 key="search-sidebar"
@@ -339,7 +361,7 @@ const ChatSearchSidebar = ({
             >
                 <div
                     style={{
-                        width: 360,
+                        width: CHAT_SEARCH_SIDEBAR_WIDTH,
                         display: 'flex',
                         flexDirection: 'column',
                         flex: 1,
@@ -404,7 +426,35 @@ export const MainChat = ({
     const fileQueueResult = useFileQueue();
     const { theme, setTheme } = useTheme();
     const chatContainerRef = useRef<HTMLElement>(null);
+    const chatLayoutRef = useRef<HTMLElement>(null);
     const messagesListRef = useRef<MessagesListHandle>(null);
+    const [hasVisibleStickyMessage, setHasVisibleStickyMessage] =
+        useState(false);
+    const handleStickyVisibilityChange = useCallback(
+        (isVisible: boolean): void => {
+            setHasVisibleStickyMessage((current): boolean =>
+                current === isVisible ? current : isVisible,
+            );
+        },
+        [],
+    );
+    const handleChatHeaderHeightChange = useCallback(
+        (height: number, lowerEdge: number): void => {
+            chatLayoutRef.current?.style.setProperty(
+                '--chat-header-height',
+                `${height}px`,
+            );
+            chatLayoutRef.current?.style.setProperty(
+                '--chat-header-overlap',
+                `${-height}px`,
+            );
+            chatLayoutRef.current?.style.setProperty(
+                '--chat-header-hidden-tab-offset',
+                `${Math.max(0, height - lowerEdge)}px`,
+            );
+        },
+        [],
+    );
 
     useServalBackground(chatContainerRef, theme);
 
@@ -438,13 +488,15 @@ export const MainChat = ({
         friendUser,
         isFriendError,
         serverDetails,
-        hasPermission,
+        messagePermissions,
+        quickReactions,
         isOwner,
         pings,
         clearChannelPings,
         deletePing,
         canSendMessages,
         selectedChannel,
+        messageChannelData,
         memberMaps,
         messages,
         isLoading,
@@ -607,32 +659,43 @@ export const MainChat = ({
     return (
         <Box
             className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden"
+            ref={chatLayoutRef}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
-            <ChatHeader
-                actions={headerActions}
-                friendUser={friendUser}
-                isSearchOpen={isSearchOpen}
-                memberList={{
-                    isOpen: isMemberListOpen,
-                    hideButton: hideMemberListButton,
-                    onToggle: onToggleMemberList,
-                }}
-                selectedChannel={selectedChannel}
-                selectedFriendId={selectedFriendId}
-                showPins={showPins}
-                onTogglePins={(): void => {
-                    patchUi((s) => ({ showPins: !s.showPins }));
-                }}
-                onToggleSearch={(): void => {
-                    patchUi((s) => ({ isSearchOpen: !s.isSearchOpen }));
-                }}
-            />
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-50">
+                <ChatHeader
+                    actions={headerActions}
+                    friendUser={friendUser}
+                    hasVisibleStickyMessage={
+                        isServerContext && hasVisibleStickyMessage
+                    }
+                    isSearchOpen={isSearchOpen}
+                    isViewingOlderMessages={isViewingOlderMessages}
+                    memberList={{
+                        isOpen: isMemberListOpen,
+                        hideButton: hideMemberListButton,
+                        onToggle: onToggleMemberList,
+                    }}
+                    selectedChannel={selectedChannel}
+                    selectedFriendId={selectedFriendId}
+                    showPins={showPins}
+                    onHeightChange={handleChatHeaderHeightChange}
+                    onTogglePins={(): void => {
+                        patchUi((s) => ({ showPins: !s.showPins }));
+                    }}
+                    onToggleSearch={(): void => {
+                        patchUi((s) => ({ isSearchOpen: !s.isSearchOpen }));
+                    }}
+                />
+            </div>
 
             {/* horizontal content row: main chat + search sidebar */}
-            <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div
+                className="flex min-h-0 flex-1 overflow-hidden"
+                style={{ paddingTop: 'var(--chat-header-height, 0px)' }}
+            >
                 <ChatMainColumn
                     canBypassSlowMode={canBypassSlowMode}
                     canSendMessages={canSendMessages}
@@ -642,7 +705,9 @@ export const MainChat = ({
                     fileQueueResult={fileQueueResult}
                     friendUser={friendUser}
                     hasNextPage={hasNextPage}
-                    hasPermission={hasPermission}
+                    hasVisibleStickyMessage={
+                        isServerContext && hasVisibleStickyMessage
+                    }
                     isAtBottom={isAtBottom}
                     isDragging={isDragging}
                     isFetchingNewerMessages={isFetchingNewerMessages}
@@ -653,8 +718,11 @@ export const MainChat = ({
                     isViewingOlderMessages={isViewingOlderMessages}
                     me={currentUser}
                     memberMaps={memberMaps}
+                    messageChannelData={messageChannelData}
+                    messagePermissions={messagePermissions}
                     messages={messages}
                     messagesListRef={messagesListRef}
+                    quickReactions={quickReactions}
                     replyingTo={replyingTo}
                     resolvedTypingUsers={resolvedTypingUsers}
                     retryMessage={retryMessage}
@@ -679,6 +747,7 @@ export const MainChat = ({
                     onLoadNewer={handleLoadNewer}
                     onReplyClick={handleReplyClick}
                     onReplyToMessage={handleReplyToMessage}
+                    onStickyVisibilityChange={handleStickyVisibilityChange}
                 />
 
                 <ChatSearchSidebar

@@ -23,7 +23,7 @@ interface ModalProps {
     fullScreen?: boolean;
     mobileFullScreen?: boolean;
     wrapperClassName?: string;
-    zIndex?: number;
+    zIndex?: React.CSSProperties['zIndex'];
 }
 
 /**
@@ -89,6 +89,7 @@ export const Modal = ({
                         mobileFullScreen && 'p-0 md:p-4',
                         wrapperClassName,
                     )}
+                    data-modal-root=""
                     style={{ zIndex }}
                 >
                     <m.div

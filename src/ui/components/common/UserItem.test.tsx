@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/api/users/users.types';
 import type { ManualUserStatus } from '@/hooks/useSelfStatus';
+import type * as SelfStatusModule from '@/hooks/useSelfStatus';
 
 import { UserItem } from './UserItem';
 
@@ -19,13 +20,10 @@ const useSelfStatusMock = vi.fn(
     }),
 );
 
-import type * as SelfStatusModule from '@/hooks/useSelfStatus';
-
 vi.mock('@/hooks/useSelfStatus', async () => {
-    const actual =
-        await vi.importActual<typeof SelfStatusModule>(
-            '@/hooks/useSelfStatus',
-        );
+    const actual = await vi.importActual<typeof SelfStatusModule>(
+        '@/hooks/useSelfStatus',
+    );
     return {
         ...actual,
         useSelfStatus: () => useSelfStatusMock(),
@@ -66,6 +64,7 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useTimeoutMember: () => ({ mutate: vi.fn() }),
     useServerDetails: () => useServerDetailsMock(),
     useMembers: () => useMembersMock(),
+    useMemberByUserId: () => ({ data: undefined }),
 }));
 
 vi.mock('@/api/users/users.queries', () => ({
@@ -112,9 +111,7 @@ vi.mock('@/ui/components/servers/modals/BanUserModal', () => ({
     }: {
         onConfirm: (reason: string, deleteMessageDuration?: string) => void;
     }) => (
-        <button
-            onClick={(): void => onConfirm('test reason', '24h')}
-        >
+        <button onClick={(): void => onConfirm('test reason', '24h')}>
             Confirm Ban
         </button>
     ),

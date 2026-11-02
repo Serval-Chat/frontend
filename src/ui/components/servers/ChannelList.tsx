@@ -12,7 +12,7 @@ import type { Category, Channel } from '@/api/servers/servers.types';
 import { useChannelClick } from '@/hooks/useChannelClick';
 import { useChannelListMenus } from '@/hooks/useChannelListMenus';
 import { useChannelListReorder } from '@/hooks/useChannelListReorder';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useChannelAccessMap } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import { mergeReducer } from '@/utils/mergeReducer';
@@ -93,8 +93,12 @@ export const ChannelList = ({
         isMobile,
     } = ui;
 
-    const { hasPermission, isOwner } = usePermissions(selectedServerId);
-    const canManageChannels = hasPermission('manageChannels');
+    const {
+        accessByChannelId,
+        canManageChannels,
+        isLoading: isPermissionLoading,
+        isOwner,
+    } = useChannelAccessMap(selectedServerId, channels, categories);
     const { data: server } = useServerDetails(selectedServerId);
 
     useVoiceStates(selectedServerId);
@@ -292,6 +296,11 @@ export const ChannelList = ({
                 >
                     {renderedItems.map(
                         ({ item, virtualRow }, index): React.ReactNode => {
+                            const channelAccess =
+                                item.type === 'channel'
+                                    ? accessByChannelId.get(item.id)
+                                    : undefined;
+
                             return (
                                 <React.Fragment key={item.id}>
                                     {dropIndicatorIndex === index ? (
@@ -302,7 +311,14 @@ export const ChannelList = ({
                                         />
                                     ) : null}
                                     <ChannelListRow
+                                        canConnect={
+                                            channelAccess?.canConnect ?? false
+                                        }
                                         canManageChannels={canManageChannels}
+                                        canViewChannels={
+                                            channelAccess?.canViewChannels ??
+                                            false
+                                        }
                                         channelPings={channelPings}
                                         collapsedCategories={
                                             collapsedCategories
@@ -318,6 +334,9 @@ export const ChannelList = ({
                                             getChannelMenuItems
                                         }
                                         isMobile={isMobile}
+                                        isPermissionLoading={
+                                            isPermissionLoading
+                                        }
                                         isReordering={isReordering}
                                         item={item}
                                         measureElement={

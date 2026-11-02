@@ -67,22 +67,29 @@ export const ChannelItem = React.memo(
     }: ChannelItemProps) => {
         const channelClasses = cn(
             'group flex min-w-0 items-center justify-between rounded-md border-none px-2 py-1.5 shadow-none transition-colors',
-            disabled
-                ? 'cursor-not-allowed opacity-50'
-                : 'cursor-pointer hover:bg-white/5',
+            disabled ? 'cursor-not-allowed' : 'cursor-pointer',
             isActive
-                ? 'bg-white/10 text-foreground'
+                ? 'text-foreground'
                 : isUnread
                   ? 'text-foreground'
                   : 'text-muted-foreground',
         );
+        const rowClasses = cn(
+            'group relative mb-[1px] flex items-center rounded-md pr-1.5 transition-colors',
+            disabled
+                ? 'cursor-not-allowed opacity-50'
+                : isActive
+                  ? 'bg-white/10'
+                  : 'hover:bg-white/5',
+        );
 
         return (
-            <div className="group relative mb-[1px] flex items-center">
+            <div className={rowClasses}>
                 <m.button
                     className={cn(
                         'relative min-h-6 min-w-0 flex-1 select-none',
                         buttonVariants({ variant: 'ghost' }),
+                        'bg-transparent hover:bg-transparent',
                         channelClasses,
                     )}
                     disabled={disabled}
@@ -127,7 +134,7 @@ export const ChannelItem = React.memo(
                     </div>
                 </m.button>
                 {onSettingsClick ? (
-                    <div className="shrink-0 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+                    <div className="flex h-6 shrink-0 items-center justify-center opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                         <IconButton
                             className="h-6 w-6 shrink-0"
                             icon={Settings}

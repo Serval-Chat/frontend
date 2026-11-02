@@ -1,15 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import {
     Calendar,
     Camera,
     Check,
+    ChevronRight,
+    Copy,
+    Flag,
     Globe,
     HelpCircle,
     MessageSquare,
     Pencil,
     Plus,
     Server,
+    Settings,
     UserMinus,
     UserPlus,
     X,
@@ -36,16 +40,17 @@ import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { useAppSelector } from '@/store/hooks';
 import type { AdminExtendedUser } from '@/types/admin';
 import { BotTag } from '@/ui/components/common/BotTag';
-import { Button } from '@/ui/components/common/Button';
 import { Heading } from '@/ui/components/common/Heading';
 import { Link } from '@/ui/components/common/Link';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedText } from '@/ui/components/common/ParsedText';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { Popover } from '@/ui/components/common/Popover';
+import { ReportModal } from '@/ui/components/common/ReportModal';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
 import { Text } from '@/ui/components/common/Text';
+import { useToast } from '@/ui/components/common/Toast';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { UserBadge } from '@/ui/components/common/UserBadge';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
@@ -87,6 +92,7 @@ interface UserProfileCardProps {
     nickname?: string;
     hideActions?: boolean;
     adminView?: boolean;
+    ignoreLivePresence?: boolean;
 
     allServerRoles?: Role[];
     canManageRoles?: boolean;
@@ -137,6 +143,7 @@ const RoleSelector = ({
     onRemoveRole: (roleId: string) => void;
 }) => {
     const [isOpen, setIsOpen] = React.useState(false);
+    const [popoverOpensLeft, setPopoverOpensLeft] = React.useState(false);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
 
     const rolesToDisplay = allRoles.filter(
@@ -147,19 +154,36 @@ const RoleSelector = ({
     return (
         <>
             <button
-                className="hover:bg-bg-tertiary flex h-5 w-5 items-center justify-center rounded-md border border-border-subtle bg-bg-secondary text-muted-foreground transition-colors hover:text-foreground"
+                aria-expanded={isOpen}
+                className="flex h-5 w-5 cursor-pointer items-center justify-center"
                 ref={triggerRef}
                 title="Add Role"
                 type="button"
                 onClick={(): void => {
-                    setIsOpen(true);
+                    if (!isOpen) {
+                        const triggerRect =
+                            triggerRef.current?.getBoundingClientRect();
+                        setPopoverOpensLeft(
+                            !!triggerRect &&
+                                triggerRect.right + 12 + 192 >
+                                    window.innerWidth,
+                        );
+                    }
+                    setIsOpen((open) => !open);
                 }}
             >
-                <Plus size={14} />
+                {isOpen ? (
+                    <ChevronRight
+                        className={popoverOpensLeft ? 'rotate-180' : 'rotate-0'}
+                        size={16}
+                    />
+                ) : (
+                    <Plus size={16} />
+                )}
             </button>
 
             <Popover
-                className="w-48 p-1"
+                className="z-[var(--z-index-profile-menu)] w-48 p-1"
                 isOpen={isOpen}
                 triggerRef={triggerRef}
                 onClose={(): void => {
@@ -781,7 +805,7 @@ const ProfileCardRoles = ({
 
                         return r.description ? (
                             <Tooltip
-                                className="z-[10000] max-w-[200px] font-normal whitespace-normal"
+                                className="z-[var(--z-index-tooltip)] max-w-[200px] font-normal whitespace-normal"
                                 content={r.description}
                                 key={r.id}
                                 position="top"
@@ -802,8 +826,7 @@ type FriendRelationshipStatus = 'friend' | 'incoming' | 'outgoing' | 'none';
 const ProfileCardActions = ({
     user,
     currentUserId,
-    hasCustomColors,
-    cardOnDark,
+    targetUserId,
     friendStatus,
     hideActions,
     onMessage,
@@ -814,8 +837,7 @@ const ProfileCardActions = ({
 }: {
     user?: User | Partial<User>;
     currentUserId?: string;
-    hasCustomColors: boolean;
-    cardOnDark: boolean;
+    targetUserId?: string;
     friendStatus: FriendRelationshipStatus;
     hideActions?: boolean;
     onMessage: () => void;
@@ -824,85 +846,141 @@ const ProfileCardActions = ({
     onAcceptFriend: () => void;
     onCancelFriendRequest: () => void;
 }): React.ReactNode => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const { showToast } = useToast();
+
     if (
         hideActions ||
-        currentUserId === user?.id ||
+        !targetUserId ||
+        currentUserId === targetUserId ||
         user?.isBot ||
         isWebhookUser(user)
     ) {
         return null;
     }
 
-    const customButtonStyle = hasCustomColors
-        ? {
-              backgroundColor: cardOnDark
-                  ? 'rgba(255,255,255,0.15)'
-                  : 'rgba(0,0,0,0.1)',
-              borderColor: cardOnDark
-                  ? 'rgba(255,255,255,0.3)'
-                  : 'rgba(0,0,0,0.2)',
-              color: cardOnDark ? '#ffffff' : '#000000',
-          }
-        : undefined;
+    const handleFriendAction = (): void => {
+        setIsMenuOpen(false);
+        if (friendStatus === 'friend') {
+            onRemoveFriend();
+        } else if (friendStatus === 'incoming') {
+            onAcceptFriend();
+        } else if (friendStatus === 'outgoing') {
+            onCancelFriendRequest();
+        } else {
+            onAddFriend();
+        }
+    };
+
+    const handleCopyUserId = async (): Promise<void> => {
+        setIsMenuOpen(false);
+        try {
+            await navigator.clipboard.writeText(targetUserId);
+            showToast('User ID copied to clipboard.', 'success');
+        } catch {
+            showToast('Could not copy user ID.', 'error');
+        }
+    };
 
     return (
-        <Box className="mt-4 flex gap-2">
-            {friendStatus === 'friend' ? (
-                <Button
-                    className="flex-1 gap-2"
-                    size="sm"
-                    style={customButtonStyle}
-                    onClick={onMessage}
+        <>
+            <div className="absolute top-3 right-3 z-30">
+                <button
+                    aria-expanded={isMenuOpen}
+                    aria-haspopup="menu"
+                    aria-label="Profile actions"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/50 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                    ref={triggerRef}
+                    title="Profile actions"
+                    type="button"
+                    onClick={(): void => setIsMenuOpen((open) => !open)}
                 >
-                    <MessageSquare size={14} />
-                    Message
-                </Button>
+                    <Settings size={18} />
+                </button>
+                <Popover
+                    className="w-56 p-1"
+                    isOpen={isMenuOpen}
+                    triggerRef={triggerRef}
+                    onClose={(): void => setIsMenuOpen(false)}
+                >
+                    <div role="menu">
+                        <button
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
+                            role="menuitem"
+                            type="button"
+                            onClick={handleFriendAction}
+                        >
+                            {friendStatus === 'friend' ? (
+                                <UserMinus size={16} />
+                            ) : friendStatus === 'outgoing' ? (
+                                <X size={16} />
+                            ) : friendStatus === 'incoming' ? (
+                                <Check size={16} />
+                            ) : (
+                                <UserPlus size={16} />
+                            )}
+                            {friendStatus === 'friend'
+                                ? 'Un-friend'
+                                : friendStatus === 'outgoing'
+                                  ? 'Cancel Friend Request'
+                                  : friendStatus === 'incoming'
+                                    ? 'Accept Friend Request'
+                                    : 'Send a Friend Request'}
+                        </button>
+                        <button
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
+                            role="menuitem"
+                            type="button"
+                            onClick={(): void => {
+                                setIsMenuOpen(false);
+                                onMessage();
+                            }}
+                        >
+                            <MessageSquare size={16} />
+                            Message
+                        </button>
+                        <button
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
+                            role="menuitem"
+                            type="button"
+                            onClick={(): void => {
+                                void handleCopyUserId();
+                            }}
+                        >
+                            <Copy size={16} />
+                            Copy User ID
+                        </button>
+                        <div
+                            aria-hidden
+                            className="my-1 border-t border-border-subtle"
+                        />
+                        <button
+                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
+                            role="menuitem"
+                            type="button"
+                            onClick={(): void => {
+                                setIsMenuOpen(false);
+                                setIsReportModalOpen(true);
+                            }}
+                        >
+                            <Flag size={16} />
+                            Report User Profile
+                        </button>
+                    </div>
+                </Popover>
+            </div>
+            {isReportModalOpen ? (
+                <ReportModal
+                    isOpen
+                    targetId={targetUserId}
+                    targetType="user"
+                    zIndex="var(--z-index-modal-top)"
+                    onClose={(): void => setIsReportModalOpen(false)}
+                />
             ) : null}
-            {friendStatus === 'friend' ? (
-                <Button
-                    aria-label="Remove friend"
-                    className="gap-2"
-                    size="sm"
-                    variant="danger"
-                    onClick={onRemoveFriend}
-                >
-                    <UserMinus size={14} />
-                </Button>
-            ) : friendStatus === 'incoming' ? (
-                <Button
-                    className="flex-1 gap-2"
-                    size="sm"
-                    style={customButtonStyle}
-                    variant="normal"
-                    onClick={onAcceptFriend}
-                >
-                    <Check size={14} />
-                    Accept Friend Request
-                </Button>
-            ) : friendStatus === 'outgoing' ? (
-                <Button
-                    className="flex-1 gap-2"
-                    size="sm"
-                    style={customButtonStyle}
-                    variant="normal"
-                    onClick={onCancelFriendRequest}
-                >
-                    <X size={14} />
-                    Cancel Friend Request
-                </Button>
-            ) : (
-                <Button
-                    className="flex-1 gap-2"
-                    size="sm"
-                    style={customButtonStyle}
-                    variant="normal"
-                    onClick={onAddFriend}
-                >
-                    <UserPlus size={14} />
-                    Send Friend Request
-                </Button>
-            )}
-        </Box>
+        </>
     );
 };
 
@@ -940,6 +1018,7 @@ export const UserProfileCard = ({
     nickname,
     hideActions,
     adminView,
+    ignoreLivePresence,
 }: UserProfileCardProps) => {
     const { data: currentUser } = useMe();
     const { status: selfStatus } = useSelfStatus();
@@ -961,19 +1040,21 @@ export const UserProfileCard = ({
     );
 
     const finalStatus = (
-        userId && userId === currentUser?.id
-            ? selfStatus
-            : presence?.status === 'online'
-              ? (presence.presenceStatus ?? 'online')
-              : (presence?.status ?? propPresenceStatus ?? 'offline')
+        ignoreLivePresence
+            ? (propPresenceStatus ?? 'offline')
+            : userId && userId === currentUser?.id
+              ? selfStatus
+              : presence?.status === 'online'
+                ? (presence.presenceStatus ?? 'online')
+                : (presence?.status ?? propPresenceStatus ?? 'offline')
     ) as UserStatus;
     const finalCustomText =
         customStatus?.text ??
-        presence?.customStatus?.text ??
+        (ignoreLivePresence ? undefined : presence?.customStatus?.text) ??
         user?.customStatus?.text;
     const finalCustomEmoji =
         customStatus?.emoji ??
-        presence?.customStatus?.emoji ??
+        (ignoreLivePresence ? undefined : presence?.customStatus?.emoji) ??
         user?.customStatus?.emoji;
     const userBio = user?.bio;
     const bioNodes = useMemo(
@@ -1087,10 +1168,34 @@ export const UserProfileCard = ({
                 usernameGradient={user?.usernameGradient}
                 onBannerClick={onBannerClick}
             />
+            <ProfileCardActions
+                currentUserId={currentUser?.id}
+                friendStatus={friendStatus}
+                hideActions={hideActions}
+                targetUserId={userId}
+                user={user}
+                onAcceptFriend={(): void => {
+                    if (incomingRequest)
+                        acceptFriendRequest(incomingRequest.id);
+                }}
+                onAddFriend={(): void => {
+                    if (user?.username) sendFriendRequest(user.username);
+                }}
+                onCancelFriendRequest={(): void => {
+                    if (outgoingRequest)
+                        cancelFriendRequest(outgoingRequest.id);
+                }}
+                onMessage={(): void => {
+                    if (userId) void navigate(`/chat/@user/${userId}`);
+                }}
+                onRemoveFriend={(): void => {
+                    if (user?.id) removeFriend(user.id);
+                }}
+            />
             {user?.isPrivate === true &&
             currentUser?.id !== user?.id &&
             user?.privacySettings === undefined ? (
-                <div className="absolute top-3 right-3 z-10">
+                <div className="absolute top-3 left-3 z-10">
                     <Tooltip
                         content="This profile is private. Some fields may be hidden from you."
                         position="left"
@@ -1138,7 +1243,7 @@ export const UserProfileCard = ({
                 </Box>
             </Box>
 
-            <Box className="p-4 pt-2">
+            <Box className="px-4 pt-2 pb-0">
                 <Box className="mb-4">
                     <Box className="flex min-w-0 items-center gap-2">
                         {onDisplayNameChange ? (
@@ -1257,32 +1362,6 @@ export const UserProfileCard = ({
                     }}
                     onRemoveRole={(roleId): void => {
                         if (userId) removeRole({ userId, roleId });
-                    }}
-                />
-
-                <ProfileCardActions
-                    cardOnDark={cardOnDark}
-                    currentUserId={currentUser?.id}
-                    friendStatus={friendStatus}
-                    hasCustomColors={hasCustomColors}
-                    hideActions={hideActions}
-                    user={user}
-                    onAcceptFriend={(): void => {
-                        if (incomingRequest)
-                            acceptFriendRequest(incomingRequest.id);
-                    }}
-                    onAddFriend={(): void => {
-                        if (user?.username) sendFriendRequest(user.username);
-                    }}
-                    onCancelFriendRequest={(): void => {
-                        if (outgoingRequest)
-                            cancelFriendRequest(outgoingRequest.id);
-                    }}
-                    onMessage={(): void => {
-                        if (user?.id) void navigate(`/chat/@user/${user.id}`);
-                    }}
-                    onRemoveFriend={(): void => {
-                        if (user?.id) removeFriend(user.id);
                     }}
                 />
 

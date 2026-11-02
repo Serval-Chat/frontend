@@ -11,14 +11,16 @@ import React, {
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
+import { useFriends } from '@/api/friends/friends.queries';
 import type {
     Channel,
     Role,
-    RolePermissions,
     Server,
     ServerMember,
 } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
+import type { QuickReactionEmoji } from '@/hooks/useFrequentlyUsedEmojis';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
@@ -34,6 +36,10 @@ import { ScrollSpring } from '@/utils/scrollSpring';
 import { formatDateSeparator, isSameDay } from '@/utils/timestamp';
 
 import { ChatSkeleton } from './ChatSkeleton';
+import type {
+    MessageChannelData,
+    MessagePermissionFlags,
+} from './Message/Message.types';
 
 export interface MessagesListHandle {
     scrollToBottom: (onSettled?: () => void) => void;
@@ -61,10 +67,11 @@ export interface MessagesListProps {
     serverDetails?: Server;
     selectedChannel?: Channel;
     friendUser?: User;
-    hasPermission?: (permission: keyof RolePermissions) => boolean;
+    messagePermissions?: MessagePermissionFlags;
+    quickReactions?: QuickReactionEmoji[];
+    messageChannelData?: MessageChannelData;
     isOwner?: boolean;
     fullMemberMap?: Map<string, ServerMember>;
-    userRolesMap?: Map<string, Role[]>;
     roleMap?: Map<string, Role>;
     retryMessage?: (localId: string) => void;
     discardMessage?: (localId: string) => void;
@@ -73,6 +80,22 @@ export interface MessagesListProps {
 const AT_BOTTOM_TOLERANCE_PX = 2;
 const LOAD_MORE_TRIGGER_PX = 500;
 const CORRECTION_THRESHOLD_PX = 1;
+
+const messageMentionsUser = (
+    message: ProcessedChatMessage,
+    userId: string | undefined,
+    roleIds: string[] | undefined,
+): boolean => {
+    if (!userId) return false;
+    if (message.text.includes(`<userid:'${userId}'>`)) return true;
+    if (message.text.includes('<everyone>')) return true;
+
+    return (
+        roleIds?.some((roleId): boolean =>
+            message.text.includes(`<roleid:'${roleId}'>`),
+        ) ?? false
+    );
+};
 
 type VirtualItemData =
     | { type: 'channel-start' }
@@ -120,10 +143,11 @@ export const MessagesList = React.memo(
         serverDetails,
         selectedChannel,
         friendUser,
-        hasPermission,
+        messagePermissions,
+        quickReactions,
+        messageChannelData,
         isOwner,
         fullMemberMap,
-        userRolesMap,
         roleMap,
         retryMessage,
         discardMessage,
@@ -131,6 +155,33 @@ export const MessagesList = React.memo(
         const blocks = useAppSelector(
             (state): Record<string, number> => state.blocking.blocks,
         );
+        const { data: friends } = useFriends();
+        const isMobileLayout = useIsMobile();
+        const friendDataById = useMemo(
+            () =>
+                new Map(
+                    (friends ?? []).map((friend) => [
+                        friend.id,
+                        { nickname: friend.nickname, isFriend: true },
+                    ]),
+                ),
+            [friends],
+        );
+        const currentUserMember = me ? fullMemberMap?.get(me.id) : undefined;
+        const currentUserHighestRolePosition = useMemo((): number => {
+            if (!currentUserMember || !roleMap) return -1;
+
+            const positions = currentUserMember.roles
+                .map(
+                    (roleId): number | undefined =>
+                        roleMap.get(roleId)?.position,
+                )
+                .filter(
+                    (position): position is number => position !== undefined,
+                );
+
+            return positions.length > 0 ? Math.max(...positions) : -1;
+        }, [currentUserMember, roleMap]);
 
         const scrollerElRef = useRef<HTMLDivElement | null>(null);
 
@@ -667,26 +718,45 @@ export const MessagesList = React.memo(
             }
 
             if (item.type === 'message') {
+                const friendData = friendDataById.get(item.message.senderId);
                 return (
                     <MessageItem
+                        currentUserHighestRolePosition={
+                            currentUserHighestRolePosition
+                        }
                         disableColors={disableColors}
                         disableCustomFonts={disableCustomFonts}
                         disableGlow={disableGlow}
                         disableGlowAndColors={disableGlowAndColors}
                         discardMessage={discardMessage}
-                        fullMemberMap={fullMemberMap}
-                        hasPermission={hasPermission}
                         iconRole={item.message.iconRole}
+                        interactionMember={
+                            item.message.interaction?.user?.id
+                                ? fullMemberMap?.get(
+                                      item.message.interaction.user.id,
+                                  )
+                                : undefined
+                        }
+                        isFriend={friendData?.isFriend}
                         isHighlighted={highlightId === item.message.id}
+                        isMobileLayout={isMobileLayout}
                         isOwner={isOwner}
+                        localNickname={friendData?.nickname ?? undefined}
                         me={me}
+                        mentionsMe={messageMentionsUser(
+                            item.message,
+                            me?.id,
+                            currentUserMember?.roles,
+                        )}
                         message={item.message}
+                        messageChannelData={messageChannelData}
+                        messagePermissions={messagePermissions}
                         prevMessage={item.prevMessage}
+                        quickReactions={quickReactions}
                         retryMessage={retryMessage}
                         role={item.message.role}
                         roleMap={roleMap}
                         senderMember={fullMemberMap?.get(item.message.senderId)}
-                        senderRoles={userRolesMap?.get(item.message.senderId)}
                         serverDetails={serverDetails}
                         onReplyClick={handleReplyClick}
                         onReplyToMessage={onReplyToMessage}
@@ -719,6 +789,9 @@ export const MessagesList = React.memo(
                                 {item.messages.map(
                                     (msg, mIdx): React.ReactNode => (
                                         <MessageItem
+                                            currentUserHighestRolePosition={
+                                                currentUserHighestRolePosition
+                                            }
                                             disableColors={disableColors}
                                             disableCustomFonts={
                                                 disableCustomFonts
@@ -727,27 +800,51 @@ export const MessagesList = React.memo(
                                             disableGlowAndColors={
                                                 disableGlowAndColors
                                             }
-                                            fullMemberMap={fullMemberMap}
-                                            hasPermission={hasPermission}
                                             iconRole={msg.iconRole}
+                                            interactionMember={
+                                                msg.interaction?.user?.id
+                                                    ? fullMemberMap?.get(
+                                                          msg.interaction.user
+                                                              .id,
+                                                      )
+                                                    : undefined
+                                            }
+                                            isFriend={
+                                                friendDataById.get(msg.senderId)
+                                                    ?.isFriend
+                                            }
                                             isHighlighted={
                                                 highlightId === msg.id
                                             }
+                                            isMobileLayout={isMobileLayout}
                                             isOwner={isOwner}
                                             key={msg.id}
+                                            localNickname={
+                                                friendDataById.get(msg.senderId)
+                                                    ?.nickname ?? undefined
+                                            }
                                             me={me}
+                                            mentionsMe={messageMentionsUser(
+                                                msg,
+                                                me?.id,
+                                                currentUserMember?.roles,
+                                            )}
                                             message={msg}
+                                            messageChannelData={
+                                                messageChannelData
+                                            }
+                                            messagePermissions={
+                                                messagePermissions
+                                            }
                                             prevMessage={
                                                 mIdx > 0
                                                     ? item.messages[mIdx - 1]
                                                     : undefined
                                             }
+                                            quickReactions={quickReactions}
                                             role={msg.role}
                                             roleMap={roleMap}
                                             senderMember={fullMemberMap?.get(
-                                                msg.senderId,
-                                            )}
-                                            senderRoles={userRolesMap?.get(
                                                 msg.senderId,
                                             )}
                                             serverDetails={serverDetails}
@@ -795,6 +892,8 @@ export const MessagesList = React.memo(
                     style={{
                         overflowAnchor: 'none',
                         opacity: hasSettled ? 1 : 0,
+                        paddingTop:
+                            'calc(var(--chat-header-height, 0px) + 1rem)',
                     }}
                     tabIndex={0}
                     onScroll={handleScroll}

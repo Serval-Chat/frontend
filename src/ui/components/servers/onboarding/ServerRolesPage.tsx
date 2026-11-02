@@ -13,7 +13,7 @@ import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { RoleDot } from '@/ui/components/common/RoleDot';
 import { SettingsFloatingBar } from '@/ui/components/common/SettingsFloatingBar';
 import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
+import { ServerSubpageLayout } from '@/ui/components/servers/ServerSubpageLayout';
 import { cn } from '@/utils/cn';
 
 const sortByPosition = <T extends { position: number }>(items: T[]): T[] =>
@@ -159,63 +159,64 @@ export const ServerRolesPage = () => {
     if (!serverId) return null;
 
     return (
-        <Box className="chat-background relative flex min-h-0 flex-1 flex-col overflow-hidden">
-            <Box className="custom-scrollbar flex-1 overflow-y-auto p-6 md:p-10">
-                {!onboarding || !roles ? (
-                    <div className="flex min-h-40 items-center justify-center">
-                        <LoadingSpinner />
-                    </div>
-                ) : (
-                    <div className="max-w-3xl space-y-6 pb-24">
-                        <button
-                            aria-label="Back to server"
-                            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                            type="button"
-                            onClick={handleBack}
-                        >
-                            ← Back
-                        </button>
-                        <div className="flex items-center gap-3">
-                            <Tag className="h-6 w-6 shrink-0 text-muted-foreground" />
-                            <div className="flex min-w-0 flex-1 flex-col">
-                                <span className="text-xl leading-6 font-semibold text-foreground">
-                                    Self-assignable roles
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                    Pick the roles you want in this server.
-                                </span>
-                            </div>
+        <ServerSubpageLayout
+            footer={
+                <SettingsFloatingBar
+                    containerClassName="pride-glass-input"
+                    isPending={updateSelfRoles.isPending}
+                    isVisible={hasUnsavedChanges}
+                    offset="0px"
+                    onReset={(): void => {
+                        if (onboarding) {
+                            const allowed = new Set(
+                                onboarding.onboarding.selfAssignableRoleIds,
+                            );
+                            setSelectedRoleIds(
+                                onboarding.member.roles.filter(
+                                    (roleId): boolean => allowed.has(roleId),
+                                ),
+                            );
+                        }
+                        setHasUnsavedChanges(false);
+                    }}
+                    onSave={handleSave}
+                />
+            }
+            reserveFooterSpace={hasUnsavedChanges}
+        >
+            {!onboarding || !roles ? (
+                <div className="flex min-h-40 items-center justify-center">
+                    <LoadingSpinner />
+                </div>
+            ) : (
+                <div className="max-w-3xl space-y-6">
+                    <button
+                        aria-label="Back to server"
+                        className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
+                        type="button"
+                        onClick={handleBack}
+                    >
+                        ← Back
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <Tag className="h-6 w-6 shrink-0 text-muted-foreground" />
+                        <div className="flex min-w-0 flex-1 flex-col">
+                            <span className="text-xl leading-6 font-semibold text-foreground">
+                                Self-assignable roles
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                                Pick the roles you want in this server.
+                            </span>
                         </div>
-                        <RoleAssignList
-                            allowedRoleIds={allowedRoleIds}
-                            roles={roles}
-                            selectedRoleIds={selectedRoleIds}
-                            onChange={handleChange}
-                        />
                     </div>
-                )}
-            </Box>
-
-            <SettingsFloatingBar
-                containerClassName="pride-glass-input"
-                isPending={updateSelfRoles.isPending}
-                isVisible={hasUnsavedChanges}
-                offset="0px"
-                onReset={(): void => {
-                    if (onboarding) {
-                        const allowed = new Set(
-                            onboarding.onboarding.selfAssignableRoleIds,
-                        );
-                        setSelectedRoleIds(
-                            onboarding.member.roles.filter((roleId): boolean =>
-                                allowed.has(roleId),
-                            ),
-                        );
-                    }
-                    setHasUnsavedChanges(false);
-                }}
-                onSave={handleSave}
-            />
-        </Box>
+                    <RoleAssignList
+                        allowedRoleIds={allowedRoleIds}
+                        roles={roles}
+                        selectedRoleIds={selectedRoleIds}
+                        onChange={handleChange}
+                    />
+                </div>
+            )}
+        </ServerSubpageLayout>
     );
 };

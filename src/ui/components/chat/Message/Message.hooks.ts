@@ -18,9 +18,10 @@ export function useMessageData(
         serverDetails?: Server;
         senderMember?: ServerMember;
         senderRoles?: Role[];
+        interactionMember?: ServerMember;
+        mentionsMe?: boolean;
         hasPermission?: (permission: keyof RolePermissions) => boolean;
         isOwner?: boolean;
-        fullMemberMap?: Map<string, ServerMember>;
         roleMap?: Map<string, Role>;
     },
 ): {
@@ -43,17 +44,13 @@ export function useMessageData(
 
     if (data?.senderMember?.nickname) {
         user = { ...user, nickname: data.senderMember.nickname };
-    } else if (data?.fullMemberMap?.has(user.id)) {
-        const member = data.fullMemberMap.get(user.id);
-        if (member?.nickname) {
-            user = { ...user, nickname: member.nickname };
-        }
     }
 
     const me = data?.me;
     const serverDetails = data?.serverDetails;
     const senderMember = data?.senderMember;
     const senderRoles = data?.senderRoles;
+    const mentionsMe = data?.mentionsMe ?? false;
 
     const hasPermission = React.useMemo(
         (): ((permission: keyof RolePermissions) => boolean) =>
@@ -62,33 +59,13 @@ export function useMessageData(
     );
     const isOwner = !!data?.isOwner;
 
-    const fullMemberMap = data?.fullMemberMap;
+    const interactionMember = data?.interactionMember;
     const roleMap = data?.roleMap;
 
-    const myId = me?.id;
-    const mentionsMe = React.useMemo((): boolean => {
-        if (!myId) return false;
-
-        if (message.text.includes(`<userid:'${myId}'>`)) return true;
-
-        if (message.text.includes('<everyone>')) return true;
-
-        const myMember = fullMemberMap?.get(myId);
-        if (
-            myMember?.roles.some((roleId): boolean =>
-                message.text.includes(`<roleid:'${roleId}'>`),
-            )
-        ) {
-            return true;
-        }
-
-        return false;
-    }, [message.text, myId, fullMemberMap]);
-
     const interactionUser = React.useMemo((): User | undefined => {
-        if (!message.interaction?.user?.id || !fullMemberMap) return undefined;
-        const member = fullMemberMap.get(message.interaction.user.id);
-        if (!member) return undefined;
+        if (!message.interaction?.user?.id || !interactionMember)
+            return undefined;
+        const member = interactionMember;
         return {
             ...member.user,
             id: member.userId,
@@ -100,12 +77,12 @@ export function useMessageData(
             usernameGradient: member.user.usernameGradient,
             isBot: member.user.isBot,
         } as unknown as User;
-    }, [message.interaction, fullMemberMap]);
+    }, [message.interaction, interactionMember]);
 
     const interactionRole = React.useMemo((): Role | undefined => {
-        if (!message.interaction?.user?.id || !fullMemberMap || !roleMap)
+        if (!message.interaction?.user?.id || !interactionMember || !roleMap)
             return undefined;
-        const member = fullMemberMap.get(message.interaction.user.id);
+        const member = interactionMember;
         if (!member?.roles.length) return undefined;
 
         const roles = member.roles
@@ -115,7 +92,7 @@ export function useMessageData(
 
         const maxPosition = Math.max(...roles.map((r): number => r.position));
         return roles.find((r): boolean => r.position === maxPosition);
-    }, [message.interaction, fullMemberMap, roleMap]);
+    }, [message.interaction, interactionMember, roleMap]);
 
     return {
         user,
@@ -173,7 +150,9 @@ export function useMessageModerationPermissions(
     isHigherHierarchy: boolean;
 } {
     const canBan =
-        isOwner || hasPermission('administrator') || hasPermission('banMembers');
+        isOwner ||
+        hasPermission('administrator') ||
+        hasPermission('banMembers');
 
     const canKick =
         isOwner ||

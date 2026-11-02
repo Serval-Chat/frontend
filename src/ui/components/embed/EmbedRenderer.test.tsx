@@ -140,3 +140,39 @@ describe('EmbedRenderer accent bar', (): void => {
         );
     });
 });
+
+describe('EmbedRenderer report preview', (): void => {
+    it('shows saved embed text without resolving media or activating URLs', (): void => {
+        const { container } = render(
+            <EmbedRenderer
+                isReportPreview
+                payload={{
+                    embeds: [
+                        {
+                            title: 'Saved title',
+                            url: 'https://example.com',
+                            description: 'Saved description',
+                            image: { url: 'https://example.com/image.png' },
+                            video: { url: 'https://example.com/video.mp4' },
+                        },
+                    ],
+                    components: [
+                        {
+                            type: 'button',
+                            style: 'link',
+                            label: 'Saved button',
+                            url: 'https://example.com/button',
+                        },
+                    ],
+                }}
+            />,
+        );
+
+        expect(container).toHaveTextContent('Saved title');
+        expect(container).toHaveTextContent('Saved description');
+        expect(container).toHaveTextContent('External media preview omitted');
+        expect(container).toHaveTextContent('Saved button');
+        expect(container.querySelector('a')).toBeNull();
+        expect(container.querySelector('img, video, iframe')).toBeNull();
+    });
+});

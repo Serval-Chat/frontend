@@ -2,7 +2,8 @@ import React from 'react';
 
 import { createPortal } from 'react-dom';
 
-import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
+import { useCustomEmojis } from '@/hooks/useCustomEmojis';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { Box } from '@/ui/components/layout/Box';
 
 const EmojiPicker = React.lazy(() =>
@@ -12,11 +13,10 @@ const EmojiPicker = React.lazy(() =>
 );
 
 interface MessageEmojiPickerProps {
-    isOpen: boolean;
     coords: { x: number; y: number };
     pickerRef: React.RefObject<HTMLDivElement | null>;
-    customCategories?: CustomEmojiCategory[];
-    hasExternalEmojiPermission?: boolean;
+    serverId?: string;
+    channelId?: string;
 
     onSelect: (emoji: string) => void;
     onCustomSelect: (emoji: { id: string; name: string }) => void;
@@ -25,16 +25,24 @@ interface MessageEmojiPickerProps {
 
 export const MessageEmojiPicker = React.memo(
     ({
-        isOpen,
         coords,
         pickerRef,
-        customCategories,
-        hasExternalEmojiPermission,
+        serverId,
+        channelId,
         onSelect,
         onCustomSelect,
         onClose,
     }: MessageEmojiPickerProps) => {
-        if (!isOpen) return null;
+        const { customCategories, hasExternalEmojiPermission } =
+            useCustomEmojis({ serverId, channelId });
+        const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
+        const pickerCategories = React.useMemo(
+            () =>
+                frequentlyUsedCategory
+                    ? [...customCategories, frequentlyUsedCategory]
+                    : customCategories,
+            [customCategories, frequentlyUsedCategory],
+        );
 
         return createPortal(
             <Box
@@ -54,7 +62,7 @@ export const MessageEmojiPicker = React.memo(
                     }
                 >
                     <EmojiPicker
-                        customCategories={customCategories}
+                        customCategories={pickerCategories}
                         hasExternalEmojiPermission={hasExternalEmojiPermission}
                         onClickAway={onClose}
                         onCustomEmojiSelect={onCustomSelect}

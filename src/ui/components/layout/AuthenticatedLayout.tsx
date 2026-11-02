@@ -20,6 +20,7 @@ import { WebSocketProvider } from '@/providers/WebSocketProvider';
 import { BannedScreen } from '@/ui/components/common/BannedScreen';
 import { LoadingScreen } from '@/ui/components/common/LoadingScreen';
 import { PushPrompt } from '@/ui/components/common/PushPrompt';
+import { SessionVerificationError } from '@/ui/components/common/SessionVerificationError';
 import { FurTweaker } from '@/ui/components/nt/FurTweaker';
 import { NTConsole } from '@/ui/components/nt/NTConsole';
 import { ThemeTweaker } from '@/ui/components/nt/ThemeTweaker';
@@ -34,7 +35,14 @@ const WsDebugger = React.lazy(() =>
 export const AuthenticatedLayout = (): ReactNode => {
     const { isAuthenticated } = useAuth();
     const location = useLocation();
-    const { data: user, isLoading: isUserLoading, error: meError } = useMe();
+    const {
+        data: user,
+        isLoading: isUserLoading,
+        isError: isMeError,
+        isFetching: isMeFetching,
+        error: meError,
+        refetch: refetchMe,
+    } = useMe();
     const { isLoading: isServersLoading } = useServers();
     const { isLoading: isUnreadLoading } = useUnreadStatus();
     usePings();
@@ -111,6 +119,17 @@ export const AuthenticatedLayout = (): ReactNode => {
             <BannedScreen
                 expirationTimestamp={meBanError?.expirationTimestamp}
                 reason={meBanError?.reason}
+            />
+        );
+    }
+
+    if (isAuthenticated && !user && isMeError) {
+        return (
+            <SessionVerificationError
+                isRetrying={isMeFetching}
+                onRetry={(): void => {
+                    void refetchMe();
+                }}
             />
         );
     }

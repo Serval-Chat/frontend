@@ -8,6 +8,7 @@ import {
     usePings,
 } from '@/api/pings/pings.queries';
 import {
+    useCategories,
     useChannels,
     useMembers,
     useRoles,
@@ -19,8 +20,10 @@ import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
 import { useSlowMode } from '@/hooks/chat/useSlowMode';
+import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
+import type { MessagePermissionFlags } from '@/ui/components/chat/Message/Message.types';
 
 interface UseMainChatDataArgs {
     requireUrlMatch: boolean;
@@ -68,17 +71,45 @@ export const useMainChatData = ({
     const { data: channels } = useChannels(selectedServerId, {
         enabled: isServerContextReady,
     });
+    const { data: categories } = useCategories(selectedServerId, {
+        enabled: isServerContextReady,
+    });
     const { data: members } = useMembers(selectedServerId, {
         enabled: isServerContextReady,
     });
     const { data: roles } = useRoles(selectedServerId, {
         enabled: isServerContextReady,
     });
-    const { hasPermission, isOwner, isTimedOut } = usePermissions(
+    const { permissions, hasPermission, isOwner, isTimedOut } = usePermissions(
         selectedServerId,
         selectedChannelId,
         { enabled: isServerContextReady },
     );
+    const messagePermissions = useMemo(
+        (): MessagePermissionFlags => ({
+            administrator: permissions.administrator,
+            manageMessages: permissions.manageMessages,
+            deleteMessagesOfOthers: permissions.deleteMessagesOfOthers,
+            pinMessages: permissions.pinMessages,
+            banMembers: permissions.banMembers,
+            kickMembers: permissions.kickMembers,
+            moderateMembers: permissions.moderateMembers,
+            manageRoles: permissions.manageRoles,
+            manageReactions: permissions.manageReactions,
+        }),
+        [
+            permissions.administrator,
+            permissions.manageMessages,
+            permissions.deleteMessagesOfOthers,
+            permissions.pinMessages,
+            permissions.banMembers,
+            permissions.kickMembers,
+            permissions.moderateMembers,
+            permissions.manageRoles,
+            permissions.manageReactions,
+        ],
+    );
+    const { quickReactions } = useFrequentlyUsedEmojis();
     const { data: pings } = usePings();
     const { mutate: clearChannelPings } = useClearChannelPings();
     const { mutate: deletePing } = useDeletePing();
@@ -89,6 +120,10 @@ export const useMainChatData = ({
     const selectedChannel = useMemo(
         () => channels?.find((c): boolean => c.id === selectedChannelId),
         [channels, selectedChannelId],
+    );
+    const messageChannelData = useMemo(
+        () => ({ channels, categories }),
+        [channels, categories],
     );
 
     const memberMaps = useMemberMaps(members, roles);
@@ -143,13 +178,15 @@ export const useMainChatData = ({
         friendUser,
         isFriendError,
         serverDetails,
-        hasPermission,
+        messagePermissions,
+        quickReactions,
         isOwner,
         pings,
         clearChannelPings,
         deletePing,
         canSendMessages,
         selectedChannel,
+        messageChannelData,
         memberMaps,
         messages,
         isLoading,

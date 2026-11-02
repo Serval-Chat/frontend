@@ -20,6 +20,7 @@ vi.mock('@/store/hooks', () => ({
 vi.mock('@/hooks/usePermissions', () => ({
     usePermissions: vi.fn(),
     usePermissionsForActiveServer: vi.fn(),
+    useChannelAccessMap: vi.fn(),
 }));
 
 vi.mock('@/api/servers/servers.queries', () => ({
@@ -235,6 +236,22 @@ describe('ChannelList state cluster', (): void => {
             isTimedOut: false,
             remainingTimeoutMs: 0,
         });
+        vi.mocked(Permissions.useChannelAccessMap).mockImplementation(
+            (_serverId, channels) => ({
+                accessByChannelId: new Map(
+                    channels.map(
+                        (channel) =>
+                            [
+                                channel.id,
+                                { canViewChannels: true, canConnect: true },
+                            ] as const,
+                    ),
+                ),
+                canManageChannels: true,
+                isOwner: true,
+                isLoading: false,
+            }),
+        );
     });
 
     afterEach((): void => {

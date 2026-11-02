@@ -48,6 +48,7 @@ export interface AdminPermissions {
     viewBans: boolean;
     warnUsers: boolean;
     viewLogs: boolean;
+    viewReports: boolean;
     manageServer: boolean;
     manageInvites: boolean;
     manageBots: boolean;

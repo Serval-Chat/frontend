@@ -1,11 +1,13 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FriendRequest } from '@/api/friends/friends.types';
 import type { User } from '@/api/users/users.types';
 import type { ManualUserStatus } from '@/hooks/useSelfStatus';
 
 import { UserProfileCard } from './UserProfileCard';
+
+let presenceUsers: Record<string, unknown> = {};
 
 const meMock = vi.fn(() => ({ data: { id: 'user-a' } }));
 const friendsMock = vi.fn(() => ({ data: [] as { id: string }[] }));
@@ -23,6 +25,21 @@ const useSelfStatusMock = vi.fn(
 );
 
 import type * as SelfStatusModule from '@/hooks/useSelfStatus';
+
+beforeEach((): void => {
+    vi.stubGlobal(
+        'ResizeObserver',
+        class {
+            observe = vi.fn();
+            disconnect = vi.fn();
+            unobserve = vi.fn();
+        },
+    );
+});
+
+afterEach((): void => {
+    vi.unstubAllGlobals();
+});
 
 vi.mock('@/hooks/useSelfStatus', async () => {
     const actual =
@@ -68,7 +85,7 @@ vi.mock('@/store/hooks', () => ({
     useAppDispatch: () => vi.fn(),
     useAppSelector: (selector: (state: unknown) => unknown) =>
         selector({
-            presence: { users: {} },
+            presence: { users: presenceUsers },
         }),
 }));
 
@@ -90,18 +107,22 @@ describe('UserProfileCard friend request action', (): void => {
             status: 'online',
             setStatus: vi.fn(),
         });
+        presenceUsers = {};
     });
 
-    it('shows "Send Friend Request" when there is no existing relationship', (): void => {
+    it('shows "Send a Friend Request" when there is no existing relationship', (): void => {
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
-        expect(screen.getByText('Send Friend Request')).toBeInTheDocument();
+        expect(screen.getByText('Send a Friend Request')).toBeInTheDocument();
         expect(
             screen.queryByText('Accept Friend Request'),
         ).not.toBeInTheDocument();
     });
 
-    it('shows "Accept Friend Request" instead of "Send Friend Request" when the viewed user already sent me a friend request', (): void => {
+    it('shows "Accept Friend Request" instead of "Send a Friend Request" when the viewed user already sent me a friend request', (): void => {
         incomingRequestsMock.mockReturnValue({
             data: [
                 {
@@ -114,10 +135,13 @@ describe('UserProfileCard friend request action', (): void => {
         });
 
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
         expect(screen.getByText('Accept Friend Request')).toBeInTheDocument();
         expect(
-            screen.queryByText('Send Friend Request'),
+            screen.queryByText('Send a Friend Request'),
         ).not.toBeInTheDocument();
     });
 
@@ -134,6 +158,9 @@ describe('UserProfileCard friend request action', (): void => {
         });
 
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
         screen.getByText('Accept Friend Request').click();
 
@@ -142,10 +169,13 @@ describe('UserProfileCard friend request action', (): void => {
 
     it('switches to "Cancel Friend Request" once a request has been sent, so the click has visible feedback', (): void => {
         const { rerender } = render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
-        expect(screen.getByText('Send Friend Request')).toBeInTheDocument();
+        expect(screen.getByText('Send a Friend Request')).toBeInTheDocument();
 
-        screen.getByText('Send Friend Request').click();
+        screen.getByText('Send a Friend Request').click();
         expect(sendFriendRequestMock).toHaveBeenCalledWith('userb');
 
         // Simulates the cache update `useSendFriendRequest` performs on
@@ -161,12 +191,13 @@ describe('UserProfileCard friend request action', (): void => {
             ],
         });
         rerender(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
+        expect(screen.getByText('Cancel Friend Request')).toBeInTheDocument();
         expect(
-            screen.getByText('Cancel Friend Request'),
-        ).toBeInTheDocument();
-        expect(
-            screen.queryByText('Send Friend Request'),
+            screen.queryByText('Send a Friend Request'),
         ).not.toBeInTheDocument();
     });
 
@@ -183,19 +214,25 @@ describe('UserProfileCard friend request action', (): void => {
         });
 
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
         screen.getByText('Cancel Friend Request').click();
 
         expect(cancelFriendRequestMock).toHaveBeenCalledWith('request-2');
     });
 
-    it('hides the "Message" action when the viewed user is not a friend, since DMs are only readable between friends', (): void => {
+    it('shows the "Message" action for profiles without a friend relationship', (): void => {
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
-        expect(screen.queryByText('Message')).not.toBeInTheDocument();
+        expect(screen.getByText('Message')).toBeInTheDocument();
     });
 
-    it('hides the "Message" action for an incoming request too, since accepting is required before DMs work', (): void => {
+    it('shows the "Message" action when there is an incoming friend request', (): void => {
         incomingRequestsMock.mockReturnValue({
             data: [
                 {
@@ -208,14 +245,20 @@ describe('UserProfileCard friend request action', (): void => {
         });
 
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
-        expect(screen.queryByText('Message')).not.toBeInTheDocument();
+        expect(screen.getByText('Message')).toBeInTheDocument();
     });
 
     it('shows the "Message" action once the viewed user is a friend', (): void => {
         friendsMock.mockReturnValue({ data: [{ id: 'user-b' }] });
 
         render(<UserProfileCard user={userB} />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Profile actions' }),
+        );
 
         expect(screen.getByText('Message')).toBeInTheDocument();
     });
@@ -485,5 +528,60 @@ describe('UserProfileCard self status display', (): void => {
 
         expect(screen.getByTitle('Offline')).toBeInTheDocument();
         expect(screen.queryByTitle('Online')).not.toBeInTheDocument();
+    });
+});
+
+describe('UserProfileCard saved profile snapshot display', (): void => {
+    beforeEach((): void => {
+        vi.clearAllMocks();
+        meMock.mockReturnValue({ data: { id: 'admin' } });
+        friendsMock.mockReturnValue({ data: [] });
+        incomingRequestsMock.mockReturnValue({ data: [] });
+        outgoingRequestsMock.mockReturnValue({ data: [] });
+        presenceUsers = {
+            'user-snapshot': {
+                status: 'online',
+                presenceStatus: 'dnd',
+                customStatus: {
+                    text: 'Current live status',
+                    emoji: '👋',
+                },
+            },
+        };
+    });
+
+    it('uses only saved status values and does not fill missing values from live presence', (): void => {
+        render(
+            <UserProfileCard
+                adminView
+                hideActions
+                ignoreLivePresence
+                presenceStatus="idle"
+                user={{ id: 'user-snapshot', username: 'snapshot-user' }}
+            />,
+        );
+
+        expect(screen.getByTitle('Idle')).toBeInTheDocument();
+        expect(screen.queryByTitle('Do Not Disturb')).not.toBeInTheDocument();
+        expect(
+            screen.queryByText('Current live status'),
+        ).not.toBeInTheDocument();
+    });
+
+    it('shows the captured custom status when one exists', (): void => {
+        render(
+            <UserProfileCard
+                adminView
+                hideActions
+                ignoreLivePresence
+                customStatus={{ text: 'Saved status', emoji: '📌' }}
+                user={{ id: 'user-snapshot', username: 'snapshot-user' }}
+            />,
+        );
+
+        expect(screen.getByText('Saved status')).toBeInTheDocument();
+        expect(
+            screen.queryByText('Current live status'),
+        ).not.toBeInTheDocument();
     });
 });

@@ -268,6 +268,32 @@ const navSlice = createSlice({
 
             state.mobileMemberListSplitViewSide = null;
         },
+        closeSplitViewToConversation: (
+            state,
+            action: PayloadAction<SplitViewConversation>,
+        ): void => {
+            const conversation = action.payload;
+            if (conversation.type === 'dm') {
+                state.navMode = 'friends';
+                state.selectedFriendId = conversation.friendId;
+                state.selectedServerId = null;
+                state.selectedChannelId = null;
+                state.lastSelectedFriendId = conversation.friendId;
+            } else {
+                state.navMode = 'servers';
+                state.selectedFriendId = null;
+                state.selectedServerId = conversation.serverId;
+                state.selectedChannelId = conversation.channelId;
+                state.lastOpenedChannelByServer[conversation.serverId] =
+                    conversation.channelId;
+                saveLastChannels(state.lastOpenedChannelByServer);
+            }
+
+            state.targetMessageId = null;
+            clearSplitView(state);
+            state.showMobileMemberList = false;
+            state.mobileMemberListSplitViewSide = null;
+        },
         toggleMobileHomeTab: (state): void => {
             state.mobileHomeTab =
                 state.mobileHomeTab === 'friends' ? 'requests' : 'friends';
@@ -330,6 +356,7 @@ export const {
     setSplitViewPane,
     clearSplitViewPane,
     closeSplitView,
+    closeSplitViewToConversation,
     toggleMobileHomeTab,
     setMobileHomeTab,
     toggleMobileMemberList,

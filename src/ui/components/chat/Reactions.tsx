@@ -3,15 +3,10 @@ import React from 'react';
 import { SmilePlus, Trash2, Users } from 'lucide-react';
 
 import type { MessageReaction } from '@/api/chat/chat.types';
-import {
-    useAddReaction,
-    useRemoveReaction,
-} from '@/api/reactions/reactions.queries';
-import { useMe } from '@/api/users/users.queries';
+import { useRemoveReaction } from '@/api/reactions/reactions.queries';
+import type { AddReactionRequest } from '@/api/reactions/reactions.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { usePermissions } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { BlockFlags } from '@/types/blocks';
 import { Button } from '@/ui/components/common/Button';
@@ -33,50 +28,114 @@ interface ReactionsProps {
     serverId?: string;
     channelId?: string;
     isDeleted?: boolean;
+    canManageReactions?: boolean;
+    currentUserId?: string;
+    isMobile?: boolean;
+    onAddReaction?: (variables: {
+        messageId: string;
+        serverId?: string;
+        channelId?: string;
+        data: AddReactionRequest;
+    }) => void;
     onAddClick?: () => void;
 }
 
-export const Reactions = React.memo(
+interface ActiveReactionsProps extends ReactionsProps {
+    showPicker: boolean;
+    setShowPicker: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+interface ReactionEmojiPickerProps {
+    serverId?: string;
+    channelId?: string;
+    pickerRef: React.RefObject<HTMLDivElement | null>;
+    onClickAway: () => void;
+    onCustomEmojiSelect: (emoji: { id: string; name: string }) => void;
+    onEmojiSelect: (emoji: string) => void;
+}
+
+const ReactionEmojiPicker = ({
+    serverId,
+    channelId,
+    pickerRef,
+    onClickAway,
+    onCustomEmojiSelect,
+    onEmojiSelect,
+}: ReactionEmojiPickerProps) => {
+    const { customCategories, hasExternalEmojiPermission } = useCustomEmojis({
+        serverId,
+        channelId,
+    });
+    const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
+    const pickerCategories = React.useMemo(
+        () =>
+            frequentlyUsedCategory
+                ? [...customCategories, frequentlyUsedCategory]
+                : customCategories,
+        [customCategories, frequentlyUsedCategory],
+    );
+
+    return (
+        <div
+            className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
+            ref={pickerRef}
+        >
+            <EmojiPicker
+                customCategories={pickerCategories}
+                hasExternalEmojiPermission={hasExternalEmojiPermission}
+                onClickAway={onClickAway}
+                onCustomEmojiSelect={onCustomEmojiSelect}
+                onEmojiSelect={onEmojiSelect}
+            />
+        </div>
+    );
+};
+
+const ReactionsContent = React.memo(
     ({
         messageId,
         reactions,
         serverId,
         channelId,
         isDeleted,
-    }: ReactionsProps) => {
-        const { data: me } = useMe();
-        const blocks = useAppSelector(
-            (state): Record<string, number> => state.blocking.blocks,
+        canManageReactions = false,
+        currentUserId,
+        isMobile = false,
+        onAddReaction,
+        showPicker,
+        setShowPicker,
+    }: ActiveReactionsProps) => {
+        const hiddenReactionUsersKey = useAppSelector((state): string => {
+            const hiddenUsers = new Set<string>();
+            for (const reaction of reactions) {
+                for (const userId of reaction.users) {
+                    if (
+                        userId !== currentUserId &&
+                        (state.blocking.blocks[userId] || 0) &
+                            BlockFlags.HIDE_THEIR_REACTIONS
+                    ) {
+                        hiddenUsers.add(userId);
+                    }
+                }
+            }
+            return [...hiddenUsers].sort().join('\u0000');
+        });
+        const hiddenReactionUsers = React.useMemo(
+            () =>
+                new Set(
+                    hiddenReactionUsersKey
+                        ? hiddenReactionUsersKey.split('\u0000')
+                        : [],
+                ),
+            [hiddenReactionUsersKey],
         );
-        const addReaction = useAddReaction();
         const removeReaction = useRemoveReaction();
-        const [showPicker, setShowPicker] = React.useState(false);
         const [isVotersModalOpen, setIsVotersModalOpen] = React.useState(false);
         const [votersModalEmoji, setVotersModalEmoji] = React.useState<
             string | undefined
         >();
 
         const pickerRef = React.useRef<HTMLDivElement>(null);
-        const isMobile = useIsMobile();
-        const { customCategories, hasExternalEmojiPermission } =
-            useCustomEmojis({
-                enabled: showPicker,
-                serverId,
-                channelId,
-            });
-        const { frequentlyUsedCategory } = useFrequentlyUsedEmojis();
-        const pickerCategories = React.useMemo(
-            () =>
-                frequentlyUsedCategory
-                    ? [...customCategories, frequentlyUsedCategory]
-                    : customCategories,
-            [customCategories, frequentlyUsedCategory],
-        );
-        const { hasPermission } = usePermissions(
-            serverId ?? null,
-            channelId ?? null,
-        );
-        const canManageReactions = hasPermission('manageReactions');
 
         // Close picker when clicking outside
         React.useEffect((): (() => void) | undefined => {
@@ -96,11 +155,11 @@ export const Reactions = React.memo(
             return (): void => {
                 document.removeEventListener('mousedown', handleClickOutside);
             };
-        }, [isMobile, showPicker]);
+        }, [isMobile, setShowPicker, showPicker]);
 
         const handleEmojiSelect = React.useCallback(
             (emoji: string): void => {
-                addReaction.mutate({
+                onAddReaction?.({
                     messageId,
                     serverId,
                     channelId,
@@ -108,12 +167,12 @@ export const Reactions = React.memo(
                 });
                 setShowPicker(false);
             },
-            [addReaction, messageId, serverId, channelId],
+            [onAddReaction, messageId, serverId, channelId, setShowPicker],
         );
 
         const handleCustomEmojiSelect = React.useCallback(
             (emoji: { id: string; name: string }): void => {
-                addReaction.mutate({
+                onAddReaction?.({
                     messageId,
                     serverId,
                     channelId,
@@ -125,12 +184,12 @@ export const Reactions = React.memo(
                 });
                 setShowPicker(false);
             },
-            [addReaction, messageId, serverId, channelId],
+            [onAddReaction, messageId, serverId, channelId, setShowPicker],
         );
 
         const handleReactionClick = React.useCallback(
             (reaction: MessageReaction): void => {
-                const hasReacted = reaction.users.includes(me?.id || '');
+                const hasReacted = reaction.users.includes(currentUserId || '');
 
                 if (hasReacted) {
                     removeReaction.mutate({
@@ -147,7 +206,7 @@ export const Reactions = React.memo(
                         },
                     });
                 } else {
-                    addReaction.mutate({
+                    onAddReaction?.({
                         messageId,
                         serverId,
                         channelId,
@@ -163,33 +222,41 @@ export const Reactions = React.memo(
                 }
             },
             [
-                addReaction,
                 removeReaction,
                 messageId,
                 serverId,
                 channelId,
-                me?.id,
+                currentUserId,
+                onAddReaction,
             ],
         );
 
-        if (reactions.length === 0 && !showPicker) return null;
-
-        const filteredReactions = reactions.flatMap((r) => {
-            const filteredUsers = r.users.filter((uid): boolean => {
-                if (uid === me?.id) return true;
-                const userBlocks = blocks[uid] || 0;
-                return !(userBlocks & BlockFlags.HIDE_THEIR_REACTIONS);
-            });
-            if (filteredUsers.length === 0) return [];
-            return [
-                { ...r, users: filteredUsers, count: filteredUsers.length },
-            ];
-        });
+        const filteredReactions = React.useMemo(
+            () =>
+                reactions.flatMap((reaction) => {
+                    const filteredUsers = reaction.users.filter(
+                        (userId): boolean =>
+                            userId === currentUserId ||
+                            !hiddenReactionUsers.has(userId),
+                    );
+                    if (filteredUsers.length === 0) return [];
+                    return [
+                        {
+                            ...reaction,
+                            users: filteredUsers,
+                            count: filteredUsers.length,
+                        },
+                    ];
+                }),
+            [currentUserId, hiddenReactionUsers, reactions],
+        );
 
         return (
             <Box className="mt-1 mb-1 flex flex-wrap gap-1">
                 {filteredReactions.map((reaction) => {
-                    const hasReacted = reaction.users.includes(me?.id || '');
+                    const hasReacted = reaction.users.includes(
+                        currentUserId || '',
+                    );
                     const reactionKey =
                         reaction.emojiType === 'custom'
                             ? reaction.emojiId
@@ -264,7 +331,12 @@ export const Reactions = React.memo(
                         },
                     ];
 
-                    if (canManageReactions && serverId && channelId && !isDeleted) {
+                    if (
+                        canManageReactions &&
+                        serverId &&
+                        channelId &&
+                        !isDeleted
+                    ) {
                         contextMenuItems.push({
                             id: 'remove-reaction',
                             label: 'Remove Emoji',
@@ -303,27 +375,21 @@ export const Reactions = React.memo(
                             title="Add Reaction"
                             variant="ghost"
                             onClick={(): void => {
-                                setShowPicker(!showPicker);
+                                setShowPicker((previous): boolean => !previous);
                             }}
                         >
                             <SmilePlus size={18} />
                         </Button>
 
                         {showPicker ? (
-                            <div
-                                className="absolute bottom-full left-0 z-[var(--z-index-popover)] pb-2"
-                                ref={pickerRef}
-                            >
-                                <EmojiPicker
-                                    customCategories={pickerCategories}
-                                    hasExternalEmojiPermission={
-                                        hasExternalEmojiPermission
-                                    }
-                                    onClickAway={(): void => setShowPicker(false)}
-                                    onCustomEmojiSelect={handleCustomEmojiSelect}
-                                    onEmojiSelect={handleEmojiSelect}
-                                />
-                            </div>
+                            <ReactionEmojiPicker
+                                channelId={channelId}
+                                pickerRef={pickerRef}
+                                serverId={serverId}
+                                onClickAway={(): void => setShowPicker(false)}
+                                onCustomEmojiSelect={handleCustomEmojiSelect}
+                                onEmojiSelect={handleEmojiSelect}
+                            />
                         ) : null}
                     </Box>
                 )}
@@ -341,5 +407,29 @@ export const Reactions = React.memo(
         );
     },
 );
+
+ReactionsContent.displayName = 'ReactionsContent';
+
+export const Reactions = React.memo((props: ReactionsProps) => {
+    const [showPicker, setShowPicker] = React.useState(false);
+    if (props.reactions.length === 0 && !showPicker) return null;
+
+    return (
+        <ReactionsContent
+            canManageReactions={props.canManageReactions}
+            channelId={props.channelId}
+            currentUserId={props.currentUserId}
+            isDeleted={props.isDeleted}
+            isMobile={props.isMobile}
+            messageId={props.messageId}
+            reactions={props.reactions}
+            serverId={props.serverId}
+            setShowPicker={setShowPicker}
+            showPicker={showPicker}
+            onAddClick={props.onAddClick}
+            onAddReaction={props.onAddReaction}
+        />
+    );
+});
 
 Reactions.displayName = 'Reactions';

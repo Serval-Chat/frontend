@@ -27,7 +27,8 @@ export const useSmartPosition = ({
     const updatePosition = (): void => {
         if (!isOpen || !elementRef.current) return;
 
-        const elementRect = elementRef.current.getBoundingClientRect();
+        const elementWidth = elementRef.current.offsetWidth;
+        const elementHeight = elementRef.current.offsetHeight;
         const { innerWidth, innerHeight } = globalThis;
 
         let x = 0;
@@ -42,23 +43,23 @@ export const useSmartPosition = ({
             y = triggerRect.top;
 
             // Flip if overflow right
-            if (x + elementRect.width > innerWidth) {
-                x = triggerRect.left - elementRect.width - offset;
+            if (x + elementWidth > innerWidth) {
+                x = triggerRect.left - elementWidth - offset;
             }
         } else {
             // Center fallback
-            x = innerWidth / 2 - elementRect.width / 2;
-            y = innerHeight / 2 - elementRect.height / 2;
+            x = innerWidth / 2 - elementWidth / 2;
+            y = innerHeight / 2 - elementHeight / 2;
         }
 
         // Boundary checks
         // Right edge
-        if (x + elementRect.width > innerWidth - padding) {
-            x = innerWidth - elementRect.width - padding;
+        if (x + elementWidth > innerWidth - padding) {
+            x = innerWidth - elementWidth - padding;
         }
         // Bottom edge
-        if (y + elementRect.height > innerHeight - padding) {
-            y = innerHeight - elementRect.height - padding;
+        if (y + elementHeight > innerHeight - padding) {
+            y = innerHeight - elementHeight - padding;
         }
         // Left edge
         if (x < padding) x = padding;

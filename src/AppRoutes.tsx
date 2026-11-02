@@ -153,6 +153,7 @@ export const AppRoutes = (): React.ReactNode => (
                     <Route element={<NavigationSync />} path="appearance" />
                     <Route element={<NavigationSync />} path="accessibility" />
                     <Route element={<NavigationSync />} path="standing" />
+                    <Route element={<NavigationSync />} path="reports" />
                     <Route element={<NavigationSync />} path="developer" />
                     <Route element={<NavigationSync />} path="blocking" />
                     <Route element={<NavigationSync />} path="notifications" />

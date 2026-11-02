@@ -50,6 +50,7 @@ const createDefaultPermissions = () => ({
     viewBans: false,
     warnUsers: false,
     viewLogs: false,
+    viewReports: false,
     manageServer: false,
     manageInvites: false,
     manageBots: false,
@@ -64,6 +65,7 @@ const PERMISSION_KEYS: (keyof AdminPermissions)[] = [
     'viewBans',
     'warnUsers',
     'viewLogs',
+    'viewReports',
     'manageServer',
     'manageInvites',
     'manageBots',
@@ -292,6 +294,9 @@ const getPermissionDescription = (key: string): string => {
         }
         case 'viewLogs': {
             return 'Allows viewing granular administrative audit logs';
+        }
+        case 'viewReports': {
+            return 'Allows reviewing submitted user reports and internal notes';
         }
         case 'manageServer': {
             return 'Allows management and oversight of all user-created servers';

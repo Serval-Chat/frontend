@@ -1637,11 +1637,50 @@ export const setupGlobalWsHandlers = (
         wsClient.on<IMemberUpdatedEvent>(
             WsEvents.MEMBER_UPDATED,
             (payload): void => {
-                void queryClient.invalidateQueries({
-                    queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
-                });
-                if (payload.userId === currentUser?.id) {
-                    void queryClient.invalidateQueries({ queryKey: ['me'] });
+                let previousMember: ServerMember | undefined;
+                queryClient.setQueryData<ServerMember[]>(
+                    SERVERS_QUERY_KEYS.members(payload.serverId),
+                    (members): ServerMember[] | undefined => {
+                        if (!members) return members;
+
+                        const memberIndex = members.findIndex(
+                            (member): boolean =>
+                                member.userId === payload.userId,
+                        );
+                        if (memberIndex === -1) return members;
+
+                        const currentMember = members[memberIndex];
+                        if (!currentMember) return members;
+
+                        previousMember = currentMember;
+                        const updatedMembers = [...members];
+                        updatedMembers[memberIndex] = {
+                            ...currentMember,
+                            ...payload.member,
+                            communicationDisabledUntil:
+                                'communicationDisabledUntil' in payload.member
+                                    ? (payload.member
+                                          .communicationDisabledUntil ??
+                                      undefined)
+                                    : currentMember.communicationDisabledUntil,
+                        };
+                        return updatedMembers;
+                    },
+                );
+
+                const onboardingChanged =
+                    previousMember !== undefined &&
+                    (('onboardingRequired' in payload.member &&
+                        previousMember.onboardingRequired !==
+                            payload.member.onboardingRequired) ||
+                        ('rulesAcceptedAt' in payload.member &&
+                            previousMember.rulesAcceptedAt !==
+                                payload.member.rulesAcceptedAt) ||
+                        ('onboardingCompletedAt' in payload.member &&
+                            previousMember.onboardingCompletedAt !==
+                                payload.member.onboardingCompletedAt));
+
+                if (payload.userId === currentUser?.id && onboardingChanged) {
                     void queryClient.invalidateQueries({
                         queryKey: SERVERS_QUERY_KEYS.onboarding(
                             payload.serverId,

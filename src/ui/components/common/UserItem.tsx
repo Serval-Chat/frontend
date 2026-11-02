@@ -5,6 +5,7 @@ import {
     Ban,
     Check,
     Copy,
+    Flag,
     HeadphoneOff,
     ListTree,
     MessageSquare,
@@ -44,13 +45,13 @@ import {
     useAddRoleToMember,
     useBanMember,
     useKickMember,
-    useMembers,
+    useMemberByUserId,
     useRemoveRoleFromMember,
     useServerDetails,
     useServers,
     useTimeoutMember,
 } from '@/api/servers/servers.queries';
-import type { Role, ServerMember } from '@/api/servers/servers.types';
+import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
@@ -62,6 +63,7 @@ import type {
     UserPresenceStatus,
 } from '@/store/slices/presenceSlice';
 import { setUserVolume } from '@/store/slices/voiceSlice';
+import { ReportModal } from '@/ui/components/common/ReportModal';
 import { Box } from '@/ui/components/layout/Box';
 import { ProfilePopup } from '@/ui/components/profile/ProfilePopup';
 import { BlockUserModal } from '@/ui/components/profile/modals/BlockUserModal';
@@ -79,7 +81,6 @@ import { wsMessages } from '@/ws/messages';
 import { BotTag } from './BotTag';
 import { CodeModal } from './CodeModal';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
-import { MarqueeText } from './MarqueeText';
 import { ParsedEmoji } from './ParsedEmoji';
 import { ParsedUnicodeEmoji } from './ParsedUnicodeEmoji';
 import { RoleDot } from './RoleDot';
@@ -118,16 +119,40 @@ interface UserItemProps {
 }
 
 interface ServerData {
-    addRole: ReturnType<typeof useAddRoleToMember>['mutate'];
-    isAdding: boolean;
-    removeRole: ReturnType<typeof useRemoveRoleFromMember>['mutate'];
-    isRemoving: boolean;
     kickMember: ReturnType<typeof useKickMember>['mutate'];
     banMember: ReturnType<typeof useBanMember>['mutate'];
     timeoutMember: ReturnType<typeof useTimeoutMember>['mutate'];
     serverDetails: ReturnType<typeof useServerDetails>['data'];
-    members: ReturnType<typeof useMembers>['data'];
+    currentUserMember: ReturnType<typeof useMemberByUserId>['data'];
 }
+
+const UserItemViewportContext = React.createContext<boolean | null>(null);
+
+const UserItemViewportProvider = React.memo(
+    ({ children }: { children: React.ReactNode }): ReactNode => {
+        const [isMobile, setIsMobile] = React.useState(
+            (): boolean => window.innerWidth < 768,
+        );
+
+        React.useEffect((): (() => void) => {
+            const handleResize = (): void => {
+                setIsMobile(window.innerWidth < 768);
+            };
+            window.addEventListener('resize', handleResize);
+            return (): void => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }, []);
+
+        return (
+            <UserItemViewportContext.Provider value={isMobile}>
+                {children}
+            </UserItemViewportContext.Provider>
+        );
+    },
+);
+
+UserItemViewportProvider.displayName = 'UserItemViewportProvider';
 
 const ServerDataInjector = React.memo(
     ({
@@ -137,40 +162,33 @@ const ServerDataInjector = React.memo(
         serverId: string;
         children: (data: ServerData) => React.ReactNode;
     }): ReactNode => {
-        const { mutate: addRole, isPending: isAdding } =
-            useAddRoleToMember(serverId);
-        const { mutate: removeRole, isPending: isRemoving } =
-            useRemoveRoleFromMember(serverId);
         const { mutate: kickMember } = useKickMember(serverId);
         const { mutate: banMember } = useBanMember(serverId);
         const { mutate: timeoutMember } = useTimeoutMember(serverId);
         const { data: serverDetails } = useServerDetails(serverId, {
             enabled: true,
         });
-        const { data: members } = useMembers(serverId, { enabled: true });
+        const { data: currentUser } = useMe();
+        const { data: currentUserMember } = useMemberByUserId(
+            serverId,
+            currentUser?.id,
+            { enabled: true },
+        );
 
         const data = useMemo(
             () => ({
-                addRole,
-                isAdding,
-                removeRole,
-                isRemoving,
                 kickMember,
                 banMember,
                 timeoutMember,
                 serverDetails,
-                members,
+                currentUserMember,
             }),
             [
-                addRole,
-                isAdding,
-                removeRole,
-                isRemoving,
                 kickMember,
                 banMember,
                 timeoutMember,
                 serverDetails,
-                members,
+                currentUserMember,
             ],
         );
 
@@ -209,19 +227,24 @@ export const UserItemServerDataProvider = React.memo(
     }: {
         serverId: string;
         children: React.ReactNode;
-    }): ReactNode => {
-        if (!serverId) return children;
-
-        return (
-            <ServerDataInjector serverId={serverId}>
-                {(data): ReactNode => (
-                    <ServerDataContextProvider data={data} serverId={serverId}>
-                        {children}
-                    </ServerDataContextProvider>
-                )}
-            </ServerDataInjector>
-        );
-    },
+    }): ReactNode => (
+        <UserItemViewportProvider>
+            {serverId ? (
+                <ServerDataInjector serverId={serverId}>
+                    {(data): ReactNode => (
+                        <ServerDataContextProvider
+                            data={data}
+                            serverId={serverId}
+                        >
+                            {children}
+                        </ServerDataContextProvider>
+                    )}
+                </ServerDataInjector>
+            ) : (
+                children
+            )}
+        </UserItemViewportProvider>
+    ),
 );
 
 UserItemServerDataProvider.displayName = 'UserItemServerDataProvider';
@@ -254,7 +277,11 @@ const UserItemInner = React.memo(
         initialPresenceStatus,
         hideUnread,
         showPinIcon,
-    }: UserItemProps & { serverData: ServerData | null }): ReactNode => {
+        isMobile,
+    }: UserItemProps & {
+        serverData: ServerData | null;
+        isMobile: boolean;
+    }): ReactNode => {
         const dispatch = useAppDispatch();
         const navigate = useNavigate();
 
@@ -265,20 +292,25 @@ const UserItemInner = React.memo(
             '';
         const sid = serverId || null;
 
+        const { mutate: addRole, isPending: isAdding } = useAddRoleToMember(
+            sid ?? '',
+        );
+        const { mutate: removeRole, isPending: isRemoving } =
+            useRemoveRoleFromMember(sid ?? '');
+
         const noopMutate = useCallback((..._args: unknown[]): void => {}, []);
         const {
-            addRole = noopMutate,
-            isAdding = false,
-            removeRole = noopMutate,
-            isRemoving = false,
             kickMember = noopMutate,
             banMember = noopMutate,
             timeoutMember = noopMutate,
             serverDetails,
-            members,
+            currentUserMember,
         } = serverData || {};
 
         const { data: currentUser } = useMe();
+        const { data: targetMember } = useMemberByUserId(sid, userId, {
+            enabled: !!sid,
+        });
         const { status: selfStatus } = useSelfStatus();
 
         const [isKickModalOpen, setIsKickModalOpen] = React.useState(false);
@@ -286,6 +318,7 @@ const UserItemInner = React.memo(
         const [isTimeoutModalOpen, setIsTimeoutModalOpen] =
             React.useState(false);
         const [isBlockModalOpen, setIsBlockModalOpen] = React.useState(false);
+        const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
         const [isInviteToServerModalOpen, setIsInviteToServerModalOpen] =
             React.useState(false);
         const [isNicknameModalOpen, setIsNicknameModalOpen] =
@@ -293,20 +326,6 @@ const UserItemInner = React.memo(
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
-        const [isMobile, setIsMobile] = React.useState(
-            (): boolean => window.innerWidth < 768,
-        );
-
-        React.useEffect((): (() => void) => {
-            const handleResize = (): void => {
-                setIsMobile(window.innerWidth < 768);
-            };
-            window.addEventListener('resize', handleResize);
-            return (): void => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
-
         const { data: fetchedUser } = useUserById(userId, {
             enabled: !noFetch && !providedUser,
         });
@@ -443,11 +462,7 @@ const UserItemInner = React.memo(
         const hasUnread =
             unreadCount > 0 && !hideUnread && !providedServerId && !isActive;
 
-        const myMember = useMemo(
-            (): ServerMember | undefined =>
-                members?.find((m): boolean => m.userId === currentUser?.id),
-            [members, currentUser?.id],
-        );
+        const myMember = currentUserMember;
         const myRoles = useMemo(
             (): Role[] | undefined =>
                 serverRoles?.filter(
@@ -498,11 +513,6 @@ const UserItemInner = React.memo(
             ) ??
                 false);
 
-        const targetMember = useMemo(
-            (): ServerMember | undefined =>
-                members?.find((m): boolean => m.userId === userId),
-            [members, userId],
-        );
         const targetRoles = useMemo(
             (): Role[] | undefined =>
                 serverRoles?.filter((r) => targetMember?.roles.includes(r.id)),
@@ -542,6 +552,15 @@ const UserItemInner = React.memo(
                     setShowProfile(true);
                 },
             });
+
+            if (!isMe && !userProfile?.isBot) {
+                items.push({
+                    label: 'Report User',
+                    icon: Flag,
+                    variant: 'danger',
+                    onClick: (): void => setIsReportModalOpen(true),
+                });
+            }
 
             // Group 1: DM Actions
             if (isFriend) {
@@ -933,6 +952,7 @@ const UserItemInner = React.memo(
             upsertBlock,
             removeBlock,
             setIsBlockModalOpen,
+            setIsReportModalOpen,
             setIsInviteToServerModalOpen,
             localNickname,
             setIsNicknameModalOpen,
@@ -1079,12 +1099,9 @@ const UserItemInner = React.memo(
                                         </span>
                                     ) : null}
                                     {presenceCustomText ? (
-                                        <MarqueeText
-                                            className="text-foreground-muted min-w-0 flex-1 text-xs"
-                                            speed={40}
-                                        >
+                                        <span className="text-foreground-muted min-w-0 flex-1 truncate text-xs">
                                             {presenceCustomText}
-                                        </MarqueeText>
+                                        </span>
                                     ) : null}
                                 </div>
                             ) : null}
@@ -1150,7 +1167,14 @@ const UserItemInner = React.memo(
                         setShowProfile(false);
                     }}
                 />
-
+                {isReportModalOpen ? (
+                    <ReportModal
+                        isOpen
+                        targetId={userId}
+                        targetType="user"
+                        onClose={(): void => setIsReportModalOpen(false)}
+                    />
+                ) : null}
                 {isKickModalOpen ? (
                     <KickUserModal
                         isOpen={isKickModalOpen}
@@ -1211,14 +1235,16 @@ const UserItemInner = React.memo(
                         }}
                     />
                 ) : null}
-                <CodeModal
-                    content={colorResolverReport ?? ''}
-                    isOpen={!!colorResolverReport}
-                    language="json"
-                    onClose={(): void => {
-                        setColorResolverReport(null);
-                    }}
-                />
+                {colorResolverReport ? (
+                    <CodeModal
+                        isOpen
+                        content={colorResolverReport}
+                        language="json"
+                        onClose={(): void => {
+                            setColorResolverReport(null);
+                        }}
+                    />
+                ) : null}
 
                 {isInviteToServerModalOpen ? (
                     <InviteToServerModal
@@ -1252,49 +1278,20 @@ const UserItemInner = React.memo(
 
 UserItemInner.displayName = 'UserItemInner';
 
-export const UserItem = React.memo((props: UserItemProps): ReactNode => {
-    const sharedServerData = React.useContext(ServerDataContext);
-    const isServerContext = !!props.serverId;
-    const serverId =
-        props.serverId ||
-        props.role?.serverId ||
-        props.serverRoles?.[0]?.serverId ||
-        '';
-    const sid = serverId || null;
+const UserItemWithViewport = React.memo(
+    (props: UserItemProps & { isMobile: boolean }): ReactNode => {
+        const sharedServerData = React.useContext(ServerDataContext);
+        const isServerContext = !!props.serverId;
+        const serverId =
+            props.serverId ||
+            props.role?.serverId ||
+            props.serverRoles?.[0]?.serverId ||
+            '';
+        const sid = serverId || null;
 
-    if (isServerContext && sid) {
-        if (sharedServerData?.serverId === sid) {
-            return (
-                <UserItemInner
-                    allRoles={props.allRoles}
-                    className={props.className}
-                    disableColors={props.disableColors}
-                    disableCustomFonts={props.disableCustomFonts}
-                    disableGlow={props.disableGlow}
-                    disableGlowAndColors={props.disableGlowAndColors}
-                    hideUnread={props.hideUnread}
-                    iconRole={props.iconRole}
-                    initialData={props.initialData}
-                    initialPresenceStatus={props.initialPresenceStatus}
-                    isActive={props.isActive}
-                    joinedAt={props.joinedAt}
-                    nickname={props.nickname}
-                    noFetch={props.noFetch}
-                    role={props.role}
-                    serverData={sharedServerData.data}
-                    serverId={props.serverId}
-                    serverRoles={props.serverRoles}
-                    showPinIcon={props.showPinIcon}
-                    user={props.user}
-                    userId={props.userId}
-                    onClick={props.onClick}
-                />
-            );
-        }
-
-        return (
-            <ServerDataInjector serverId={sid}>
-                {(serverData): ReactNode => (
+        if (isServerContext && sid) {
+            if (sharedServerData?.serverId === sid) {
+                return (
                     <UserItemInner
                         allRoles={props.allRoles}
                         className={props.className}
@@ -1307,11 +1304,12 @@ export const UserItem = React.memo((props: UserItemProps): ReactNode => {
                         initialData={props.initialData}
                         initialPresenceStatus={props.initialPresenceStatus}
                         isActive={props.isActive}
+                        isMobile={props.isMobile}
                         joinedAt={props.joinedAt}
                         nickname={props.nickname}
                         noFetch={props.noFetch}
                         role={props.role}
-                        serverData={serverData}
+                        serverData={sharedServerData.data}
                         serverId={props.serverId}
                         serverRoles={props.serverRoles}
                         showPinIcon={props.showPinIcon}
@@ -1319,36 +1317,99 @@ export const UserItem = React.memo((props: UserItemProps): ReactNode => {
                         userId={props.userId}
                         onClick={props.onClick}
                     />
-                )}
-            </ServerDataInjector>
+                );
+            }
+
+            return (
+                <ServerDataInjector serverId={sid}>
+                    {(serverData): ReactNode => (
+                        <UserItemInner
+                            allRoles={props.allRoles}
+                            className={props.className}
+                            disableColors={props.disableColors}
+                            disableCustomFonts={props.disableCustomFonts}
+                            disableGlow={props.disableGlow}
+                            disableGlowAndColors={props.disableGlowAndColors}
+                            hideUnread={props.hideUnread}
+                            iconRole={props.iconRole}
+                            initialData={props.initialData}
+                            initialPresenceStatus={props.initialPresenceStatus}
+                            isActive={props.isActive}
+                            isMobile={props.isMobile}
+                            joinedAt={props.joinedAt}
+                            nickname={props.nickname}
+                            noFetch={props.noFetch}
+                            role={props.role}
+                            serverData={serverData}
+                            serverId={props.serverId}
+                            serverRoles={props.serverRoles}
+                            showPinIcon={props.showPinIcon}
+                            user={props.user}
+                            userId={props.userId}
+                            onClick={props.onClick}
+                        />
+                    )}
+                </ServerDataInjector>
+            );
+        }
+
+        return (
+            <UserItemInner
+                allRoles={props.allRoles}
+                className={props.className}
+                disableColors={props.disableColors}
+                disableCustomFonts={props.disableCustomFonts}
+                disableGlow={props.disableGlow}
+                disableGlowAndColors={props.disableGlowAndColors}
+                hideUnread={props.hideUnread}
+                iconRole={props.iconRole}
+                initialData={props.initialData}
+                initialPresenceStatus={props.initialPresenceStatus}
+                isActive={props.isActive}
+                isMobile={props.isMobile}
+                joinedAt={props.joinedAt}
+                nickname={props.nickname}
+                noFetch={props.noFetch}
+                role={props.role}
+                serverData={null}
+                serverId={props.serverId}
+                serverRoles={props.serverRoles}
+                showPinIcon={props.showPinIcon}
+                user={props.user}
+                userId={props.userId}
+                onClick={props.onClick}
+            />
         );
+    },
+);
+UserItemWithViewport.displayName = 'UserItemWithViewport';
+
+const UserItemWithViewportContext = ({
+    props,
+}: {
+    props: UserItemProps;
+}): ReactNode => {
+    const isMobile = React.useContext(UserItemViewportContext);
+    if (isMobile === null) return null;
+    return React.createElement(UserItemWithViewport, {
+        ...props,
+        isMobile,
+    });
+};
+
+export const UserItem = React.memo((props: UserItemProps): ReactNode => {
+    const isMobile = React.useContext(UserItemViewportContext);
+    if (isMobile !== null) {
+        return React.createElement(UserItemWithViewport, {
+            ...props,
+            isMobile,
+        });
     }
 
     return (
-        <UserItemInner
-            allRoles={props.allRoles}
-            className={props.className}
-            disableColors={props.disableColors}
-            disableCustomFonts={props.disableCustomFonts}
-            disableGlow={props.disableGlow}
-            disableGlowAndColors={props.disableGlowAndColors}
-            hideUnread={props.hideUnread}
-            iconRole={props.iconRole}
-            initialData={props.initialData}
-            initialPresenceStatus={props.initialPresenceStatus}
-            isActive={props.isActive}
-            joinedAt={props.joinedAt}
-            nickname={props.nickname}
-            noFetch={props.noFetch}
-            role={props.role}
-            serverData={null}
-            serverId={props.serverId}
-            serverRoles={props.serverRoles}
-            showPinIcon={props.showPinIcon}
-            user={props.user}
-            userId={props.userId}
-            onClick={props.onClick}
-        />
+        <UserItemViewportProvider>
+            <UserItemWithViewportContext props={props} />
+        </UserItemViewportProvider>
     );
 });
 

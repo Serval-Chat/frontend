@@ -6,6 +6,8 @@ import { getConfiguredApiBaseUrl } from '@/utils/apiBaseUrl';
 export const resolveApiUrl = (path: string | undefined): string | null => {
     if (!path) return null;
 
+    if (path.startsWith('blob:')) return path;
+
     if (path.startsWith('http')) {
         const apiBaseUrl = getConfiguredApiBaseUrl();
 

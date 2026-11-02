@@ -195,6 +195,13 @@ const ProfilePopupContent = ({
     useEffect((): (() => void) => {
         const handleClickOutside = (event: MouseEvent): void => {
             if (
+                event.target instanceof Element &&
+                event.target.closest('[data-modal-root]')
+            ) {
+                return;
+            }
+
+            if (
                 popupRef.current &&
                 !popupRef.current.contains(event.target as Node)
             ) {
@@ -222,7 +229,7 @@ const ProfilePopupContent = ({
     if (!user && userId === '') return null;
 
     return (
-        <Box className="pointer-events-none fixed inset-0 z-[9999]">
+        <Box className="pointer-events-none fixed inset-0 z-[var(--z-index-profile)]">
             <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="pointer-events-auto"

@@ -1,4 +1,3 @@
-
 import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,6 +9,14 @@ import { MessagesList } from '@/ui/components/chat/MessagesList';
 vi.mock('@/store/hooks', () => ({
     useAppDispatch: vi.fn(),
     useAppSelector: vi.fn(),
+}));
+
+vi.mock('@/api/friends/friends.queries', () => ({
+    useFriends: vi.fn().mockReturnValue({ data: [] }),
+}));
+
+vi.mock('@/hooks/useIsMobile', () => ({
+    useIsMobile: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock('@/store/slices/navSlice', () => ({

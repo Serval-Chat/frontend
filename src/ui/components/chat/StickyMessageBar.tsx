@@ -22,6 +22,7 @@ import { cn } from '@/utils/cn';
 interface StickyMessageBarProps {
     serverId: string;
     channelId: string;
+    onVisibilityChange?: (isVisible: boolean) => void;
 }
 
 type ViewState = 'expanded' | 'compact' | 'hidden';
@@ -42,6 +43,7 @@ const getHighestIconRole = (roles: Role[]): Role | undefined =>
 export const StickyMessageBar = ({
     serverId,
     channelId,
+    onVisibilityChange,
 }: StickyMessageBarProps) => {
     const dispatch = useAppDispatch();
     const [viewState, setViewState] = useState<ViewState>('expanded');
@@ -102,6 +104,17 @@ export const StickyMessageBar = ({
         }
     }, [latestSticky]);
 
+    const hasVisibleStickyMessage = Boolean(
+        latestSticky && viewState !== 'hidden',
+    );
+    const lastReportedVisibility = React.useRef<boolean | null>(null);
+
+    React.useLayoutEffect((): void => {
+        if (lastReportedVisibility.current === hasVisibleStickyMessage) return;
+        lastReportedVisibility.current = hasVisibleStickyMessage;
+        onVisibilityChange?.(hasVisibleStickyMessage);
+    }, [hasVisibleStickyMessage, onVisibilityChange]);
+
     if (!latestSticky) return null;
 
     const isExceeding = (): boolean =>
@@ -126,9 +139,9 @@ export const StickyMessageBar = ({
     return (
         <Box
             className={cn(
-                'group pride-glass relative flex flex-col bg-[var(--bg-secondary)]',
+                'group relative flex flex-col bg-[var(--bg-chat-header)]',
                 viewState === 'hidden'
-                    ? ''
+                    ? 'h-0 min-h-0'
                     : 'border-b border-[var(--divider)]',
             )}
         >
@@ -140,7 +153,7 @@ export const StickyMessageBar = ({
                     viewState === 'compact' &&
                         'max-h-[80px] items-start overflow-hidden opacity-90',
                     viewState === 'hidden' &&
-                        'max-h-0 overflow-hidden opacity-0',
+                        'h-0 max-h-0 min-h-0 overflow-hidden opacity-0',
                 )}
             >
                 <Box className="min-w-0 flex-1" ref={contentRef}>
@@ -181,7 +194,7 @@ export const StickyMessageBar = ({
                         className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 h-8"
                         style={{
                             background:
-                                'linear-gradient(transparent, var(--bg-secondary))',
+                                'linear-gradient(transparent, var(--bg-chat-header))',
                         }}
                     />
                 ) : null}
@@ -190,16 +203,21 @@ export const StickyMessageBar = ({
             <Box
                 className={cn(
                     'absolute left-1/2 z-20 flex -translate-x-1/2',
-                    viewState === 'expanded'
-                        ? '-bottom-[12px]'
-                        : '-bottom-[11px]',
+                    viewState !== 'hidden' && '-bottom-[14px]',
                 )}
+                style={
+                    viewState === 'hidden'
+                        ? {
+                              top: 'calc(0px - var(--chat-header-hidden-tab-offset, 0px))',
+                          }
+                        : undefined
+                }
             >
-                <Box className="pride-glass flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-secondary)]">
+                <Box className="flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-chat-header)]">
                     {viewState === 'compact' || viewState === 'hidden' ? (
                         <button
                             aria-label="Show previous message"
-                            className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            className="flex h-3 w-5 items-center justify-center bg-[var(--background)] text-foreground transition-colors hover:bg-white/5"
                             type="button"
                             onClick={handlePrev}
                         >
@@ -209,7 +227,7 @@ export const StickyMessageBar = ({
                     {viewState === 'compact' || viewState === 'expanded' ? (
                         <button
                             aria-label="Show next message"
-                            className="flex h-3 w-5 items-center justify-center text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            className="flex h-3 w-5 items-center justify-center bg-[var(--background)] text-foreground transition-colors hover:bg-white/5"
                             type="button"
                             onClick={handleNext}
                         >

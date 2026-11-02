@@ -8,7 +8,6 @@ import { ChevronDown, Plus, Settings } from 'lucide-react';
 import { chatApi } from '@/api/chat/chat.api';
 import { CHAT_QUERY_KEYS, LIMIT } from '@/api/chat/chat.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
-import { usePermissionsForActiveServer } from '@/hooks/usePermissions';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
 import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
 import { IconButton } from '@/ui/components/common/IconButton';
@@ -24,6 +23,9 @@ interface ChannelRowProps {
     connectedUserIds: string[] | undefined;
     channelPings: Record<string, number>;
     canManageChannels: boolean;
+    canViewChannels: boolean;
+    canConnect: boolean;
+    isPermissionLoading: boolean;
     handleChannelClick: (channel: Channel) => void;
     setSettingsChannel: (channel: Channel) => void;
     getChannelMenuItems: (channel: Channel) => ContextMenuItem[];
@@ -37,15 +39,14 @@ const ChannelRow = React.memo(
         connectedUserIds,
         channelPings,
         canManageChannels,
+        canViewChannels,
+        canConnect,
+        isPermissionLoading,
         handleChannelClick,
         setSettingsChannel,
         getChannelMenuItems,
     }: ChannelRowProps) => {
         const queryClient = useQueryClient();
-        const { hasPermission, isLoading, permissions } =
-            usePermissionsForActiveServer(selectedServerId, channel.id);
-        const canView = hasPermission('viewChannels');
-        const canConnect = hasPermission('connect');
 
         const handleMouseEnter = React.useCallback((): void => {
             if (channel.type !== 'text' || !selectedServerId) return;
@@ -69,12 +70,11 @@ const ChannelRow = React.memo(
         }, [queryClient, selectedServerId, channel.id, channel.type]);
 
         // Only hide if loading is finished and canView is explicitly false
-        if (!isLoading && !canView) {
+        if (!isPermissionLoading && !canViewChannels) {
             console.warn(
                 `[ChannelRow] Hiding channel "${channel.name}" (${channel.id}) - viewChannels=false.`,
                 {
                     channelPermissionOverrides: channel.permissions,
-                    computedPermissions: permissions,
                     serverId: selectedServerId,
                 },
             );
@@ -194,6 +194,9 @@ interface ChannelListRowProps {
     selectedChannelId: string | null;
     selectedServerId: string | null;
     channelPings: Record<string, number>;
+    canViewChannels: boolean;
+    canConnect: boolean;
+    isPermissionLoading: boolean;
     voiceParticipants: Record<string, string[]>;
     getCategoryMenuItems: (category: Category) => ContextMenuItem[];
     getChannelMenuItems: (channel: Channel) => ContextMenuItem[];
@@ -220,6 +223,9 @@ export const ChannelListRow = React.memo(
         selectedChannelId,
         selectedServerId,
         channelPings,
+        canViewChannels,
+        canConnect,
+        isPermissionLoading,
         voiceParticipants,
         getCategoryMenuItems,
         getChannelMenuItems,
@@ -337,7 +343,9 @@ export const ChannelListRow = React.memo(
                     )}
                 >
                     <ChannelRow
+                        canConnect={canConnect}
                         canManageChannels={canManageChannels}
+                        canViewChannels={canViewChannels}
                         channel={channel}
                         channelPings={channelPings}
                         connectedUserIds={
@@ -348,6 +356,7 @@ export const ChannelListRow = React.memo(
                         getChannelMenuItems={getChannelMenuItems}
                         handleChannelClick={onChannelClick}
                         isActive={selectedChannelId === channel.id}
+                        isPermissionLoading={isPermissionLoading}
                         selectedServerId={selectedServerId}
                         setSettingsChannel={onEditChannel}
                     />

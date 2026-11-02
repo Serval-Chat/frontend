@@ -51,6 +51,7 @@ interface ParsedTextProps {
     condenseFiles?: boolean;
     condenseInvites?: boolean;
     condenseCodeBlocks?: boolean;
+    disableUrlEmbeds?: boolean;
     largeEmojis?: boolean;
     wrap?: TextProps['wrap'];
     isNested?: boolean;
@@ -128,6 +129,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
         condenseFiles,
         condenseInvites,
         condenseCodeBlocks,
+        disableUrlEmbeds,
         largeEmojis,
         wrap,
         isNested,
@@ -192,6 +194,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 condenseFiles,
                 condenseInvites,
                 condenseCodeBlocks,
+                disableUrlEmbeds,
                 largeEmojis,
                 isNested: true,
                 size,
@@ -205,6 +208,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 condenseFiles,
                 condenseInvites,
                 condenseCodeBlocks,
+                disableUrlEmbeds,
                 largeEmojis,
                 size,
                 wrap,
@@ -594,7 +598,11 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                     href={node.url}
                                     key={idx}
                                     size={size}
-                                    variant={variant === 'danger' ? 'danger' : undefined}
+                                    variant={
+                                        variant === 'danger'
+                                            ? 'danger'
+                                            : undefined
+                                    }
                                 >
                                     {typeof node.text === 'string' ? (
                                         node.text || node.url
@@ -761,13 +769,20 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         }
 
                         case 'invite': {
+                            if (disableUrlEmbeds) {
+                                return <span key={idx}>{node.url}</span>;
+                            }
                             if (condenseInvites) {
                                 return (
                                     <Link
                                         href={node.url}
                                         key={idx}
                                         size={size}
-                                        variant={variant === 'danger' ? 'danger' : undefined}
+                                        variant={
+                                            variant === 'danger'
+                                                ? 'danger'
+                                                : undefined
+                                        }
                                     >
                                         {node.url}
                                     </Link>
@@ -783,6 +798,13 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         }
 
                         case 'file': {
+                            if (disableUrlEmbeds) {
+                                return (
+                                    <span className="break-all" key={idx}>
+                                        {node.url}
+                                    </span>
+                                );
+                            }
                             return (
                                 <FileEmbed
                                     key={idx}
@@ -1068,6 +1090,13 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         }
 
                         case 'klipy': {
+                            if (disableUrlEmbeds) {
+                                return (
+                                    <span className="break-all" key={idx}>
+                                        {node.url}
+                                    </span>
+                                );
+                            }
                             return (
                                 <GifPlayer
                                     key={idx}

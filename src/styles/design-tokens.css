@@ -49,6 +49,9 @@
     --z-index-toast: 1060;
     --z-index-tooltip: 10000;
     --z-index-top: 9999;
+    --z-index-profile: var(--z-index-top);
+    --z-index-profile-menu: calc(var(--z-index-tooltip) + 1);
+    --z-index-modal-top: calc(var(--z-index-profile-menu) + 1);
 
     --color-primary: var(--primary);
     --color-primary-hover: var(--primary-hover);

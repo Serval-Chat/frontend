@@ -18,6 +18,7 @@ const createDefaultPermissions = () => ({
     viewBans: false,
     warnUsers: false,
     viewLogs: false,
+    viewReports: false,
     manageServer: false,
     manageInvites: false,
     manageBots: false,

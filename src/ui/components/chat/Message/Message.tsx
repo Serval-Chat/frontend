@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useClickAway, useEvent } from 'react-use';
+import { useEvent } from 'react-use';
 
 import {
     useDeleteMessage,
@@ -8,7 +8,6 @@ import {
     useToggleSticky,
 } from '@/api/chat/chat.queries';
 import {
-    useFriends,
     useRemoveFriend,
     useSendFriendRequest,
 } from '@/api/friends/friends.queries';
@@ -20,9 +19,7 @@ import {
     useRemoveRoleFromMember,
     useTimeoutMember,
 } from '@/api/servers/servers.queries';
-import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import type { QuickReactionEmoji } from '@/hooks/useFrequentlyUsedEmojis';
-import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { InteractionHeader } from '@/ui/components/chat/InteractionHeader';
@@ -33,6 +30,7 @@ import { Reactions } from '@/ui/components/chat/Reactions';
 import { ReplyPreview } from '@/ui/components/chat/ReplyPreview';
 import { CodeModal } from '@/ui/components/common/CodeModal';
 import { ContextMenu } from '@/ui/components/common/ContextMenu';
+import { ReportModal } from '@/ui/components/common/ReportModal';
 import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
@@ -55,6 +53,7 @@ import { useMessageContextMenu } from './MessageContextMenu';
 import { MessageEmojiPicker } from './MessageEmojiPicker';
 
 const EMPTY_REACTIONS: never[] = [];
+const EMPTY_QUICK_REACTIONS: QuickReactionEmoji[] = [];
 
 export const Message = React.memo(
     ({
@@ -71,14 +70,23 @@ export const Message = React.memo(
         disableColors,
         disableGlow,
         disableActions: disableActionsProp = false,
+        isReportPreview = false,
+        reportPoll,
         onResize,
         me: passedMe,
         serverDetails: passedServerDetails,
         senderMember: passedSenderMember,
         senderRoles: passedSenderRoles,
+        interactionMember,
+        mentionsMe: passedMentionsMe,
+        currentUserHighestRolePosition,
+        localNickname,
+        isFriend,
+        isMobileLayout,
+        quickReactions: quickReactionsProp = EMPTY_QUICK_REACTIONS,
+        messageChannelData,
         hasPermission: passedHasPermission,
         isOwner: passedIsOwner,
-        fullMemberMap,
         roleMap,
         retryMessage,
         discardMessage,
@@ -99,9 +107,10 @@ export const Message = React.memo(
             serverDetails: passedServerDetails,
             senderMember: passedSenderMember,
             senderRoles: passedSenderRoles,
+            interactionMember,
+            mentionsMe: passedMentionsMe,
             hasPermission: passedHasPermission,
             isOwner: passedIsOwner,
-            fullMemberMap,
             roleMap,
         });
 
@@ -112,6 +121,7 @@ export const Message = React.memo(
         const [showPicker, setShowPicker] = React.useState(false);
         const [isEditing, setIsEditing] = React.useState(false);
         const [, setIsContextMenuOpen] = React.useState(false);
+        const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
         const [colorResolverReport, setColorResolverReport] = React.useState<
             string | null
         >(null);
@@ -131,24 +141,9 @@ export const Message = React.memo(
         const { mutate: deleteMessage } = useDeleteMessage();
         const { mutate: togglePin } = useTogglePin();
         const { mutate: toggleSticky } = useToggleSticky();
-        const { data: friends } = useFriends();
         const { mutate: sendFriendRequest } = useSendFriendRequest();
         const { mutate: removeFriend } = useRemoveFriend();
-        const { customCategories, hasExternalEmojiPermission } =
-            useCustomEmojis({
-                enabled: showPicker,
-                serverId: message.serverId,
-                channelId: message.channelId,
-            });
-        const { quickReactions, frequentlyUsedCategory } =
-            useFrequentlyUsedEmojis();
-        const pickerCategories = React.useMemo(
-            () =>
-                frequentlyUsedCategory
-                    ? [...customCategories, frequentlyUsedCategory]
-                    : customCategories,
-            [customCategories, frequentlyUsedCategory],
-        );
+        const quickReactions = quickReactionsProp;
 
         const { mutate: addRole } = useAddRoleToMember(message.serverId || '');
         const { mutate: removeRole } = useRemoveRoleFromMember(
@@ -217,10 +212,6 @@ export const Message = React.memo(
             },
             [addReaction, message.id, message.serverId, message.channelId],
         );
-
-        useClickAway(pickerRef, (): void => {
-            setShowPicker(false);
-        });
 
         useEvent('editLastMessage', (event: CustomEvent): void => {
             const { messageId } = event.detail;
@@ -314,13 +305,6 @@ export const Message = React.memo(
             [disableActions, isDeleted, message, onReplyToMessage],
         );
 
-        const localNickname = React.useMemo(
-            (): string | undefined =>
-                friends?.find((f): boolean => f.id === user.id)?.nickname ??
-                undefined,
-            [friends, user.id],
-        );
-
         const isColorsDisabled =
             disableColors ||
             me?.settings?.disableCustomUsernameColors ||
@@ -389,18 +373,7 @@ export const Message = React.memo(
             );
         }, [me, senderRoles, serverDetails, isOwner, checkPermission]);
 
-        const myHighestRolePosition = React.useMemo((): number => {
-            if (!me || !roleMap || !fullMemberMap) return -1;
-            const myMember = fullMemberMap.get(me.id);
-            if (!myMember) return -1;
-
-            const myRoles = myMember.roles
-                .map((id): Role | undefined => roleMap.get(id))
-                .filter((r): r is Role => !!r);
-
-            if (myRoles.length === 0) return -1;
-            return Math.max(...myRoles.map((r): number => r.position));
-        }, [me, roleMap, fullMemberMap]);
+        const myHighestRolePosition = currentUserHighestRolePosition ?? -1;
 
         const targetHighestRolePosition = React.useMemo((): number => {
             if (!senderRoles || senderRoles.length === 0) return -1;
@@ -423,7 +396,7 @@ export const Message = React.memo(
             canDelete,
             canPin,
             canReact: !isDeleted,
-            friends,
+            isFriend,
             onReplyToMessage: isDeleted ? undefined : onReplyToMessage,
             onEdit: handleEdit,
             onDelete: handleDelete,
@@ -468,6 +441,10 @@ export const Message = React.memo(
             onTimeout: !isMessageSender
                 ? (): void => setIsTimeoutModalOpen(true)
                 : undefined,
+            onReport:
+                !isMessageSender && !user.isBot
+                    ? (): void => setIsReportModalOpen(true)
+                    : undefined,
         });
 
         const handleRetry = React.useCallback((): void => {
@@ -489,10 +466,27 @@ export const Message = React.memo(
             [],
         );
 
-        useClickAway(pickerRef, (): void => {
-            if (isMobile) return;
-            setShowPicker(false);
-        });
+        React.useEffect((): (() => void) | undefined => {
+            if (!showPicker || isMobile) return;
+
+            const handleClickAway = (event: Event): void => {
+                const picker = pickerRef.current;
+                if (
+                    picker &&
+                    event.target instanceof Node &&
+                    !picker.contains(event.target)
+                ) {
+                    setShowPicker(false);
+                }
+            };
+
+            document.addEventListener('mousedown', handleClickAway);
+            document.addEventListener('touchstart', handleClickAway);
+            return (): void => {
+                document.removeEventListener('mousedown', handleClickAway);
+                document.removeEventListener('touchstart', handleClickAway);
+            };
+        }, [showPicker, isMobile]);
 
         const timeLabel = React.useMemo(
             (): string =>
@@ -609,8 +603,11 @@ export const Message = React.memo(
                                 isEdited={message.isEdited && !isGroupStart}
                                 isEphemeral={message.isEphemeral}
                                 isFailed={message._pending === 'failed'}
+                                isReportPreview={isReportPreview}
+                                messageChannelData={messageChannelData}
                                 messageId={message.id}
                                 poll={message.poll}
+                                reportPoll={reportPoll}
                                 senderId={message.senderId}
                                 senderMember={senderMember}
                                 senderRoles={senderRoles}
@@ -622,12 +619,18 @@ export const Message = React.memo(
                             />
                         )}
                         <Reactions
+                            canManageReactions={checkPermission(
+                                'manageReactions',
+                            )}
                             channelId={message.channelId}
+                            currentUserId={me?.id}
                             isDeleted={isDeleted}
+                            isMobile={isMobileLayout}
                             messageId={message.id}
                             reactions={message.reactions ?? EMPTY_REACTIONS}
                             serverId={message.serverId}
                             onAddClick={handleAddReactionClick}
+                            onAddReaction={addReaction}
                         />
                         {message.isEphemeral ? (
                             <Text className="mt-1 flex items-center gap-1 text-[11px] text-text-muted italic">
@@ -666,18 +669,17 @@ export const Message = React.memo(
                             onToggleSticky={handleToggleSticky}
                         />
 
-                        <MessageEmojiPicker
-                            coords={pickerCoords}
-                            customCategories={pickerCategories}
-                            hasExternalEmojiPermission={
-                                hasExternalEmojiPermission
-                            }
-                            isOpen={showPicker}
-                            pickerRef={pickerRef}
-                            onClose={handleClosePicker}
-                            onCustomSelect={handleCustomEmojiSelect}
-                            onSelect={handleEmojiSelect}
-                        />
+                        {showPicker ? (
+                            <MessageEmojiPicker
+                                channelId={message.channelId}
+                                coords={pickerCoords}
+                                pickerRef={pickerRef}
+                                serverId={message.serverId}
+                                onClose={handleClosePicker}
+                                onCustomSelect={handleCustomEmojiSelect}
+                                onSelect={handleEmojiSelect}
+                            />
+                        ) : null}
                     </Box>
                 )}
             </>
@@ -726,14 +728,16 @@ export const Message = React.memo(
                     userId={user.id}
                     onClose={handleCloseProfile}
                 />
-                <CodeModal
-                    content={colorResolverReport ?? ''}
-                    isOpen={!!colorResolverReport}
-                    language="json"
-                    onClose={(): void => {
-                        setColorResolverReport(null);
-                    }}
-                />
+                {colorResolverReport ? (
+                    <CodeModal
+                        isOpen
+                        content={colorResolverReport}
+                        language="json"
+                        onClose={(): void => {
+                            setColorResolverReport(null);
+                        }}
+                    />
+                ) : null}
                 {isKickModalOpen ? (
                     <KickUserModal
                         isOpen={isKickModalOpen}
@@ -779,6 +783,14 @@ export const Message = React.memo(
                                 reason,
                             });
                         }}
+                    />
+                ) : null}
+                {isReportModalOpen ? (
+                    <ReportModal
+                        isOpen
+                        targetId={message.id}
+                        targetType="message"
+                        onClose={(): void => setIsReportModalOpen(false)}
                     />
                 ) : null}
             </Box>

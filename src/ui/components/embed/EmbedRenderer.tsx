@@ -862,6 +862,7 @@ export interface EmbedRendererProps {
     isEphemeral?: boolean;
     invocationId?: string;
     isDeleted?: boolean;
+    isReportPreview?: boolean;
     onResize?: () => void;
 }
 
@@ -876,6 +877,7 @@ export const EmbedRenderer = ({
     isEphemeral,
     invocationId,
     isDeleted,
+    isReportPreview,
     onResize,
 }: EmbedRendererProps): ReactNode => {
     const { showToast } = useToast();
@@ -951,6 +953,112 @@ export const EmbedRenderer = ({
         },
         [handleButtonClick],
     );
+
+    if (isReportPreview) {
+        if (!hasAnything) return null;
+
+        return (
+            <div className="mt-2 flex flex-col items-start gap-2">
+                {payload.embeds?.map((embed, index) => (
+                    <div
+                        className="w-full max-w-[520px] rounded-r-sm border-l-4 border-primary bg-embed-bg/70 p-3"
+                        // Duplicate saved embeds can share the same content key.
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${getEmbedKey(embed)}-${index}`}
+                    >
+                        {embed.provider?.name ? (
+                            <div className="text-xs text-text-muted">
+                                {embed.provider.name}
+                            </div>
+                        ) : null}
+                        {embed.author?.name ? (
+                            <div className="mt-1 text-xs font-medium">
+                                {embed.author.name}
+                            </div>
+                        ) : null}
+                        {embed.title ? (
+                            <div className="mt-1 font-semibold">
+                                {embed.title}
+                            </div>
+                        ) : null}
+                        {embed.description ? (
+                            <div className="mt-1 whitespace-pre-wrap">
+                                {embed.description}
+                            </div>
+                        ) : null}
+                        {embed.fields?.map((field) => (
+                            <div
+                                className="mt-2"
+                                key={`${field.name}-${field.value}`}
+                            >
+                                <div className="text-xs font-semibold">
+                                    {field.name}
+                                </div>
+                                <div className="whitespace-pre-wrap">
+                                    {field.value}
+                                </div>
+                            </div>
+                        ))}
+                        {embed.footer?.text ? (
+                            <div className="mt-2 text-xs text-text-muted">
+                                {embed.footer.text}
+                            </div>
+                        ) : null}
+                        {embed.timestamp ? (
+                            <div className="mt-1 text-xs text-text-muted">
+                                {embed.timestamp}
+                            </div>
+                        ) : null}
+                        {embed.url ||
+                        embed.author?.url ||
+                        embed.provider?.url ? (
+                            <div className="mt-2 text-xs break-all text-text-muted">
+                                {[
+                                    embed.url,
+                                    embed.author?.url,
+                                    embed.provider?.url,
+                                ]
+                                    .filter((url): url is string =>
+                                        Boolean(url),
+                                    )
+                                    .join('\n')}
+                            </div>
+                        ) : null}
+                        {embed.image?.url ||
+                        embed.thumbnail?.url ||
+                        embed.video?.url ? (
+                            <div className="mt-2 text-xs break-all text-text-muted">
+                                External media preview omitted
+                                {[
+                                    embed.image?.url,
+                                    embed.thumbnail?.url,
+                                    embed.video?.url,
+                                ]
+                                    .filter((url): url is string =>
+                                        Boolean(url),
+                                    )
+                                    .join('\n')}
+                            </div>
+                        ) : null}
+                    </div>
+                ))}
+                {payload.components?.map((component, index) => (
+                    <span
+                        className="rounded-md border border-border-subtle px-2 py-1 text-sm"
+                        // Components can repeat labels and URLs; preserve each row.
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${component.custom_id ?? component.url ?? component.label ?? 'button'}-${index}`}
+                    >
+                        {component.emoji?.name
+                            ? `${component.emoji.name} `
+                            : ''}
+                        {component.label ?? 'Button'}
+                        {component.url ? ` · ${component.url}` : ''}
+                    </span>
+                ))}
+            </div>
+        );
+    }
 
     if (!hasAnything && variant === 'preview') {
         return (

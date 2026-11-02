@@ -59,7 +59,12 @@ export const UnacknowledgedWarningModal = () => {
                 </div>
 
                 <div className="rounded-2xl border border-border-subtle bg-bg-subtle p-5">
-                    <Text size="sm">{warning.message}</Text>
+                    <Text
+                        className="max-h-[50vh] overflow-y-auto break-words whitespace-pre-wrap"
+                        size="sm"
+                    >
+                        {warning.message}
+                    </Text>
                 </div>
 
                 <Text

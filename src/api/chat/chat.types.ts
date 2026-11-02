@@ -55,6 +55,18 @@ export interface MessagePoll {
     expiresAt?: string;
 }
 
+export interface ReadOnlyMessagePoll {
+    title: string;
+    options: {
+        id: string;
+        text: string;
+        emoji?: string;
+        votes: number;
+    }[];
+    multiSelect: boolean;
+    expiresAt?: string;
+}
+
 export interface OutgoingPollOption {
     text: string;
     emoji?: string;

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { Bug, KeyRound } from 'lucide-react';
+import { Bug, KeyRound, Server } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -46,11 +46,14 @@ export const DeveloperSettings = () => {
     const isConsoleOpen = useAppSelector(
         (state): boolean => state.debugOptions?.isConsoleOpen ?? false,
     );
+    const backendInstanceId = useAppSelector(
+        (state): string | null => state.presence.backendInstanceId,
+    );
 
     const token = getAuthToken();
 
     return (
-        <div className="flex h-full flex-col gap-6">
+        <div className="flex min-h-full flex-col gap-6">
             <div>
                 <Heading level={2} variant="section">
                     Developer Parameters
@@ -70,6 +73,32 @@ export const DeveloperSettings = () => {
             )}
 
             <div className="flex flex-col gap-4">
+                {backendInstanceId ? (
+                    <div className="flex flex-col gap-3 rounded-md border border-border-subtle bg-bg-subtle p-4">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 font-semibold text-foreground">
+                                <Server size={18} />
+                                Backend Instance
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                                Instance serving your current connection.
+                            </span>
+                        </div>
+                        <CopyInput
+                            readOnly
+                            aria-label="Backend instance ID"
+                            copyLabel="Copy instance ID"
+                            copyValue={backendInstanceId}
+                            size="sm"
+                            style={{
+                                backgroundColor: colors.background,
+                                fontFamily: 'var(--font-mono)',
+                            }}
+                            value={backendInstanceId}
+                        />
+                    </div>
+                ) : null}
+
                 {/* User Token */}
                 <div className="flex flex-col gap-3 rounded-md border border-border-subtle bg-bg-subtle p-4">
                     <div className="flex flex-col gap-1">

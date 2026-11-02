@@ -156,7 +156,7 @@ export const ServerMembersSettings = ({
     const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-8">
             <div className="flex items-center gap-3">
                 <Users className="h-6 w-6 shrink-0 text-muted-foreground" />
                 <div className="flex min-w-0 flex-1 flex-col">

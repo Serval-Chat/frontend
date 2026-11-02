@@ -42,7 +42,7 @@ export const BannedScreen = ({
                     <p className="mb-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Reason
                     </p>
-                    <p className="text-foreground">
+                    <p className="max-h-[50vh] overflow-y-auto break-words whitespace-pre-wrap text-foreground">
                         {reason !== undefined && reason !== ''
                             ? reason
                             : 'No reason provided.'}

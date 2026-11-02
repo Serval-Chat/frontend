@@ -1,4 +1,5 @@
 import type { PresenceStatus } from '@/types/presence';
+import type { BadgeIcon } from '@/ui/utils/iconMap';
 
 export type UsernameFont =
     | 'default'
@@ -98,6 +99,7 @@ export interface AdminPermissions {
     viewBans?: boolean;
     warnUsers?: boolean;
     viewLogs?: boolean;
+    viewReports?: boolean;
     manageServer?: boolean;
     manageInvites?: boolean;
     manageBots?: boolean;
@@ -111,8 +113,6 @@ export interface PrivacySettings {
     hideBio: boolean;
     hideStatus: boolean;
 }
-
-import type { BadgeIcon } from '@/ui/utils/iconMap';
 
 export type { BadgeIcon };
 

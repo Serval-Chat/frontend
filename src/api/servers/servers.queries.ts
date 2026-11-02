@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import {
     type UseMutationResult,
@@ -138,8 +138,12 @@ export const SERVERS_QUERY_KEYS = {
     typingIndicators: (
         serverId: string | null,
         channelId: string | null,
-    ): readonly ['servers', 'typing-indicators', string | null, string | null] =>
-        ['servers', 'typing-indicators', serverId, channelId] as const,
+    ): readonly [
+        'servers',
+        'typing-indicators',
+        string | null,
+        string | null,
+    ] => ['servers', 'typing-indicators', serverId, channelId] as const,
 };
 
 export const useDiscoveryServers = (params: {
@@ -363,6 +367,31 @@ export const useMembers = (
             hasAuthToken(),
         placeholderData: keepPreviousData,
     });
+
+export const useMemberByUserId = (
+    serverId: string | null,
+    userId: string | undefined,
+    options: { enabled?: boolean } = {},
+): UseQueryResult<ServerMember | undefined> => {
+    const selectMember = useCallback(
+        (members: ServerMember[]): ServerMember | undefined =>
+            members.find((member): boolean => member.userId === userId),
+        [userId],
+    );
+
+    return useQuery({
+        queryKey: SERVERS_QUERY_KEYS.members(serverId),
+        queryFn: (): Promise<ServerMember[]> =>
+            serversApi.getMembers(serverId!),
+        select: selectMember,
+        enabled:
+            (options.enabled ?? true) &&
+            !!serverId &&
+            isValidId(serverId) &&
+            hasAuthToken(),
+        placeholderData: keepPreviousData,
+    });
+};
 
 export const useRoles = (
     serverId: string | null,
@@ -784,7 +813,8 @@ export const useTypingIndicators = (
             );
             return data.typingUsers;
         },
-        enabled: !!serverId && !!channelId && isValidId(serverId) && hasAuthToken(),
+        enabled:
+            !!serverId && !!channelId && isValidId(serverId) && hasAuthToken(),
         staleTime: 5_000,
         gcTime: 10_000,
         retry: false,
@@ -1193,16 +1223,10 @@ export const useAddRoleToMember = (
                     ) ?? members,
             );
             void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.members(serverId),
-            });
-            void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
-            });
-            void queryClient.invalidateQueries({
-                queryKey: ['tertiary-sidebar-data'],
             });
         },
         onError: (error, _variables, context): void => {
@@ -1272,16 +1296,10 @@ export const useRemoveRoleFromMember = (
                     ) ?? members,
             );
             void queryClient.invalidateQueries({
-                queryKey: SERVERS_QUERY_KEYS.members(serverId),
-            });
-            void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.channels(serverId),
             });
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.categories(serverId),
-            });
-            void queryClient.invalidateQueries({
-                queryKey: ['tertiary-sidebar-data'],
             });
         },
         onError: (error, _variables, context): void => {
@@ -1341,13 +1359,12 @@ export const useBanMember = (
     const { showToast } = useToast();
 
     return useMutation({
-        mutationFn: ({ userId, reason, deleteMessageDuration }): Promise<void> =>
-            serversApi.banUser(
-                serverId,
-                userId,
-                reason,
-                deleteMessageDuration,
-            ),
+        mutationFn: ({
+            userId,
+            reason,
+            deleteMessageDuration,
+        }): Promise<void> =>
+            serversApi.banUser(serverId, userId, reason, deleteMessageDuration),
         onSuccess: (): void => {
             void queryClient.invalidateQueries({
                 queryKey: SERVERS_QUERY_KEYS.members(serverId),

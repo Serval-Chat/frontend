@@ -219,22 +219,6 @@ export const useServerWS = (serverId?: string): void => {
         ),
     );
 
-    // Handle member updates
-    useWebSocket(
-        WsEvents.MEMBER_UPDATED,
-        useCallback(
-            (payload: { serverId: string }): void => {
-                if (payload.serverId === serverId) {
-                    void queryClient.invalidateQueries({
-                        queryKey: SERVERS_QUERY_KEYS.members(payload.serverId),
-                    });
-                    invalidateOnboarding();
-                }
-            },
-            [serverId, queryClient, invalidateOnboarding],
-        ),
-    );
-
     useWebSocket(
         WsEvents.MEMBER_REMOVED,
         useCallback(
