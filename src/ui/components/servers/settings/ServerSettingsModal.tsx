@@ -9,6 +9,7 @@ import {
     Shield,
     Smile,
     Sticker,
+    Timer,
     UserPlus,
     Zap,
 } from 'lucide-react';
@@ -59,6 +60,12 @@ const ServerOverviewSettings = React.lazy(() =>
 const ServerOnboardingSettings = React.lazy(() =>
     import('./ServerOnboardingSettings').then((m) => ({
         default: m.ServerOnboardingSettings,
+    })),
+);
+
+const ServerMessageRetentionSettings = React.lazy(() =>
+    import('./ServerMessageRetentionSettings').then((m) => ({
+        default: m.ServerMessageRetentionSettings,
     })),
 );
 
@@ -141,6 +148,13 @@ const ALL_SECTIONS: {
         label: 'Bans',
         icon: Ban,
         permission: 'banMembers',
+        category: 'Moderation',
+    },
+    {
+        id: 'message-retention',
+        label: 'Message Retention',
+        icon: Timer,
+        permission: 'manageServer',
         category: 'Moderation',
     },
     {
@@ -304,6 +318,11 @@ export const ServerSettingsModal = ({
                                 ) : null}
                                 {activeSection === 'bans' ? (
                                     <ServerBansSettings serverId={serverId} />
+                                ) : null}
+                                {activeSection === 'message-retention' ? (
+                                    <ServerMessageRetentionSettings
+                                        serverId={serverId}
+                                    />
                                 ) : null}
                                 {activeSection === 'audit-log' ? (
                                     <AuditLogSettings serverId={serverId} />

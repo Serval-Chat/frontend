@@ -69,6 +69,7 @@ const getActionDetails = (
         case 'role_removed':
         case 'role_delete':
         case 'delete_message':
+        case 'flush_deleted_messages':
         case 'reactions_removed':
         case 'reaction_clear': {
             return { icon: Trash2, color: 'text-red-500', bg: 'bg-red-500/10' };

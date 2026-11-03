@@ -108,8 +108,7 @@ describe('useChannelMessages', (): void => {
         });
 
         vi.mocked(chatApi.getChannelMessages).mockReturnValueOnce(
-            new Promise(() => {
-            }),
+            new Promise(() => {}),
         );
         rerender({ channelId: 'ch-2' });
 
@@ -173,8 +172,7 @@ describe('useUserMessages', (): void => {
         });
 
         vi.mocked(chatApi.getDmChannelMessages).mockReturnValueOnce(
-            new Promise(() => {
-            }),
+            new Promise(() => {}),
         );
         rerender({ friendId: 'friend-2' });
 

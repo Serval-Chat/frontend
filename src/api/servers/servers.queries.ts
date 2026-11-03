@@ -723,6 +723,31 @@ export const useUpdateServer = (
     });
 };
 
+export const useFlushDeletedMessages = (
+    serverId: string,
+): UseMutationResult<{ deletedCount: number }, Error, void> => {
+    const { showToast } = useToast();
+
+    return useMutation({
+        mutationFn: (): Promise<{ deletedCount: number }> =>
+            serversApi.flushDeletedMessages(serverId),
+        onSuccess: ({ deletedCount }): void => {
+            showToast(
+                deletedCount === 0
+                    ? 'No deleted messages to flush'
+                    : `Permanently deleted ${deletedCount} message${deletedCount === 1 ? '' : 's'}`,
+                'success',
+            );
+        },
+        onError: (error): void => {
+            showToast(
+                extractApiError(error, 'Failed to flush deleted messages'),
+                'error',
+            );
+        },
+    });
+};
+
 export const useUpdateServerIcon = (
     serverId: string,
 ): UseMutationResult<string, Error, File> => {

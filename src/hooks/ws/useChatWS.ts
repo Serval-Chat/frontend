@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { consumeInterceptor } from './debugSendInterceptor';
-
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query';
 
 import { useDmChannel } from '@/api/channels/channels.queries';
@@ -28,6 +26,7 @@ import {
     wsMessages,
 } from '@/ws';
 
+import { consumeInterceptor } from './debugSendInterceptor';
 import { type TypingUser, useTypingIndicator } from './useTypingIndicator';
 import { useWebSocket } from './useWebSocket';
 
@@ -58,15 +57,20 @@ export function useChatWS(
         useTypingIndicator();
     const lastTypingSentRef = useRef<number>(0);
     const prevChannelRef = useRef<string | null>(null);
-    const pendingMapRef = useRef<Map<string, {
-        timeoutId: ReturnType<typeof setTimeout>;
-        text: string;
-        replyToId?: string;
-        stickerId?: string;
-        poll?: OutgoingPoll;
-        attachments?: MessageAttachment[];
-        noEmbedsUrls?: string[];
-    }>>(new Map());
+    const pendingMapRef = useRef<
+        Map<
+            string,
+            {
+                timeoutId: ReturnType<typeof setTimeout>;
+                text: string;
+                replyToId?: string;
+                stickerId?: string;
+                poll?: OutgoingPoll;
+                attachments?: MessageAttachment[];
+                noEmbedsUrls?: string[];
+            }
+        >
+    >(new Map());
 
     const convertDmToChatMessage = useCallback(
         (message: IMessageDm): ChatMessage => ({
@@ -169,7 +173,11 @@ export function useChatWS(
     );
 
     const resolveOptimisticMessage = useCallback(
-        (queryKey: readonly unknown[], confirmedMessage: ChatMessage, localId?: string): void => {
+        (
+            queryKey: readonly unknown[],
+            confirmedMessage: ChatMessage,
+            localId?: string,
+        ): void => {
             let targetLocalId = localId;
 
             if (!targetLocalId && pendingMapRef.current.size > 0) {
@@ -204,15 +212,23 @@ export function useChatWS(
                                 const isMatch = targetLocalId
                                     ? msg._localId === targetLocalId
                                     : !!msg._pending &&
-                                      msg.senderId === confirmedMessage.senderId;
+                                      msg.senderId ===
+                                          confirmedMessage.senderId;
 
                                 if (isMatch) {
                                     replaced = true;
-                                    if (msg._localId && msg._localId !== targetLocalId) {
-                                        const entry = pendingMapRef.current.get(msg._localId);
+                                    if (
+                                        msg._localId &&
+                                        msg._localId !== targetLocalId
+                                    ) {
+                                        const entry = pendingMapRef.current.get(
+                                            msg._localId,
+                                        );
                                         if (entry) {
                                             clearTimeout(entry.timeoutId);
-                                            pendingMapRef.current.delete(msg._localId);
+                                            pendingMapRef.current.delete(
+                                                msg._localId,
+                                            );
                                         }
                                     }
                                     return confirmedMessage;
@@ -223,7 +239,9 @@ export function useChatWS(
                     );
 
                     if (!replaced) {
-                        const alreadyIn = pages[0]?.some((m) => m.id === confirmedMessage.id);
+                        const alreadyIn = pages[0]?.some(
+                            (m) => m.id === confirmedMessage.id,
+                        );
                         if (!alreadyIn) {
                             pages[0] = [...(pages[0] ?? []), confirmedMessage];
                         }
@@ -245,10 +263,11 @@ export function useChatWS(
                     return {
                         ...oldData,
                         pages: oldData.pages.map((page): ChatMessage[] =>
-                            page.map((msg): ChatMessage =>
-                                msg._localId === localId
-                                    ? { ...msg, _pending: 'failed' }
-                                    : msg,
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._localId === localId
+                                        ? { ...msg, _pending: 'failed' }
+                                        : msg,
                             ),
                         ),
                     };
@@ -267,7 +286,9 @@ export function useChatWS(
                     return {
                         ...oldData,
                         pages: oldData.pages.map((page): ChatMessage[] =>
-                            page.filter((msg): boolean => msg._localId !== localId),
+                            page.filter(
+                                (msg): boolean => msg._localId !== localId,
+                            ),
                         ),
                     };
                 },
@@ -275,7 +296,6 @@ export function useChatWS(
         },
         [queryClient],
     );
-
 
     const updateReactionInCache = useCallback(
         (payload: IReactionEventPayload, isRemoval: boolean): void => {
@@ -328,7 +348,11 @@ export function useChatWS(
                 ) {
                     const confirmed = convertDmToChatMessage(message);
                     const qk = CHAT_QUERY_KEYS.userMessages(selectedFriendId);
-                    if (user?.id && message.senderId === user.id && pendingMapRef.current.size > 0) {
+                    if (
+                        user?.id &&
+                        message.senderId === user.id &&
+                        pendingMapRef.current.size > 0
+                    ) {
                         resolveOptimisticMessage(qk, confirmed);
                     } else {
                         addMessageToCache(qk, confirmed);
@@ -359,7 +383,11 @@ export function useChatWS(
                     resolveOptimisticMessage(qk, confirmed);
                 }
             },
-            [selectedFriendId, resolveOptimisticMessage, convertDmToChatMessage],
+            [
+                selectedFriendId,
+                resolveOptimisticMessage,
+                convertDmToChatMessage,
+            ],
         ),
     );
 
@@ -372,13 +400,18 @@ export function useChatWS(
                     selectedServerId &&
                     message.channelId === selectedChannelId
                 ) {
-                    const confirmed = convertServerMessageToChatMessage(message);
+                    const confirmed =
+                        convertServerMessageToChatMessage(message);
                     const qk = CHAT_QUERY_KEYS.channelMessages(
                         selectedServerId,
                         selectedChannelId,
                         null,
                     );
-                    if (user?.id && message.senderId === user.id && pendingMapRef.current.size > 0) {
+                    if (
+                        user?.id &&
+                        message.senderId === user.id &&
+                        pendingMapRef.current.size > 0
+                    ) {
                         resolveOptimisticMessage(qk, confirmed);
                     } else {
                         addMessageToCache(qk, confirmed);
@@ -410,7 +443,8 @@ export function useChatWS(
                         selectedChannelId,
                         null,
                     );
-                    const confirmed = convertServerMessageToChatMessage(message);
+                    const confirmed =
+                        convertServerMessageToChatMessage(message);
                     resolveOptimisticMessage(qk, confirmed);
 
                     queryClient.setQueryData<Channel[]>(
@@ -633,6 +667,66 @@ export function useChatWS(
     );
 
     useWebSocket(
+        WsEvents.SERVER_DELETED_MESSAGES_FLUSHED,
+        useCallback(
+            (payload: { serverId: string }): void => {
+                queryClient.setQueriesData<InfiniteData<ChatMessage[]>>(
+                    {
+                        predicate: (query): boolean =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'messages' &&
+                            query.queryKey[2] === 'channel' &&
+                            query.queryKey[3] === payload.serverId,
+                    },
+                    (
+                        oldData,
+                    ):
+                        | { pages: ChatMessage[][]; pageParams: unknown[] }
+                        | undefined => {
+                        if (!oldData) return oldData;
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page): ChatMessage[] =>
+                                page.filter(
+                                    (message): boolean =>
+                                        message.deletedAt === undefined,
+                                ),
+                            ),
+                        };
+                    },
+                );
+                queryClient.setQueriesData<ChatMessage[]>(
+                    {
+                        predicate: (query): boolean =>
+                            query.queryKey[0] === 'chat' &&
+                            query.queryKey[1] === 'pins' &&
+                            query.queryKey[3] === payload.serverId,
+                    },
+                    (messages): ChatMessage[] | undefined =>
+                        messages?.filter(
+                            (message): boolean =>
+                                message.deletedAt === undefined,
+                        ),
+                );
+                void queryClient.invalidateQueries({
+                    predicate: (query): boolean =>
+                        query.queryKey[0] === 'chat' &&
+                        query.queryKey[1] === 'messages' &&
+                        query.queryKey[2] === 'channel' &&
+                        query.queryKey[3] === payload.serverId,
+                });
+                void queryClient.invalidateQueries({
+                    predicate: (query): boolean =>
+                        query.queryKey[0] === 'chat' &&
+                        query.queryKey[1] === 'pins' &&
+                        query.queryKey[3] === payload.serverId,
+                });
+            },
+            [queryClient],
+        ),
+    );
+
+    useWebSocket(
         WsEvents.MESSAGES_SERVER_BULK_DELETED_BY_AUTHOR,
         useCallback(
             async (payload: {
@@ -667,15 +761,16 @@ export function useChatWS(
                         return {
                             ...oldData,
                             pages: oldData.pages.map((page): ChatMessage[] =>
-                                page.map((msg): ChatMessage =>
-                                    msg.senderId === payload.senderId &&
-                                    new Date(msg.createdAt) >= afterDate
-                                        ? {
-                                              ...msg,
-                                              deletedAt:
-                                                  new Date().toISOString(),
-                                          }
-                                        : msg,
+                                page.map(
+                                    (msg): ChatMessage =>
+                                        msg.senderId === payload.senderId &&
+                                        new Date(msg.createdAt) >= afterDate
+                                            ? {
+                                                  ...msg,
+                                                  deletedAt:
+                                                      new Date().toISOString(),
+                                              }
+                                            : msg,
                                 ),
                             ),
                         };
@@ -1186,19 +1281,29 @@ export function useChatWS(
                 attachments: attachments ?? [],
                 reactions: [],
                 interaction: null,
-                poll: poll ? {
-                    title: poll.title,
-                    options: poll.options.map((o) => ({ ...o, id: localId, votes: [] })),
-                    multiSelect: poll.multiSelect,
-                    expiresAt: poll.expiresAt,
-                } : null,
+                poll: poll
+                    ? {
+                          title: poll.title,
+                          options: poll.options.map((o) => ({
+                              ...o,
+                              id: localId,
+                              votes: [],
+                          })),
+                          multiSelect: poll.multiSelect,
+                          expiresAt: poll.expiresAt,
+                      }
+                    : null,
                 senderIsBot: false,
             };
 
             const qk = selectedFriendId
                 ? CHAT_QUERY_KEYS.userMessages(selectedFriendId)
                 : selectedServerId && selectedChannelId
-                  ? CHAT_QUERY_KEYS.channelMessages(selectedServerId, selectedChannelId, null)
+                  ? CHAT_QUERY_KEYS.channelMessages(
+                        selectedServerId,
+                        selectedChannelId,
+                        null,
+                    )
                   : null;
 
             if (qk) {
@@ -1220,7 +1325,15 @@ export function useChatWS(
                 });
             }
 
-            sendMessageCore(localId, text, replyToId, stickerId, poll, attachments, noEmbedsUrls);
+            sendMessageCore(
+                localId,
+                text,
+                replyToId,
+                stickerId,
+                poll,
+                attachments,
+                noEmbedsUrls,
+            );
         },
         [
             user,
@@ -1239,7 +1352,11 @@ export function useChatWS(
             const qk = selectedFriendId
                 ? CHAT_QUERY_KEYS.userMessages(selectedFriendId)
                 : selectedServerId && selectedChannelId
-                  ? CHAT_QUERY_KEYS.channelMessages(selectedServerId, selectedChannelId, null)
+                  ? CHAT_QUERY_KEYS.channelMessages(
+                        selectedServerId,
+                        selectedChannelId,
+                        null,
+                    )
                   : null;
             if (!qk) return;
 
@@ -1250,10 +1367,16 @@ export function useChatWS(
                     return {
                         ...oldData,
                         pages: oldData.pages.map((page): ChatMessage[] =>
-                            page.map((msg): ChatMessage =>
-                                msg._localId === localId
-                                    ? { ...msg, _pending: 'sending', createdAt: new Date().toISOString() }
-                                    : msg,
+                            page.map(
+                                (msg): ChatMessage =>
+                                    msg._localId === localId
+                                        ? {
+                                              ...msg,
+                                              _pending: 'sending',
+                                              createdAt:
+                                                  new Date().toISOString(),
+                                          }
+                                        : msg,
                             ),
                         ),
                     };
@@ -1268,7 +1391,9 @@ export function useChatWS(
                     .find((m) => m._localId === localId);
                 if (!stub) return;
                 payload = {
-                    timeoutId: undefined as unknown as ReturnType<typeof setTimeout>,
+                    timeoutId: undefined as unknown as ReturnType<
+                        typeof setTimeout
+                    >,
                     text: stub.text,
                     replyToId: stub.replyToId,
                     attachments: stub.attachments,
@@ -1314,11 +1439,20 @@ export function useChatWS(
             const qk = selectedFriendId
                 ? CHAT_QUERY_KEYS.userMessages(selectedFriendId)
                 : selectedServerId && selectedChannelId
-                  ? CHAT_QUERY_KEYS.channelMessages(selectedServerId, selectedChannelId, null)
+                  ? CHAT_QUERY_KEYS.channelMessages(
+                        selectedServerId,
+                        selectedChannelId,
+                        null,
+                    )
                   : null;
             if (qk) removeStubFromCache(qk, localId);
         },
-        [selectedFriendId, selectedServerId, selectedChannelId, removeStubFromCache],
+        [
+            selectedFriendId,
+            selectedServerId,
+            selectedChannelId,
+            removeStubFromCache,
+        ],
     );
 
     const sendTyping = useCallback((): void => {

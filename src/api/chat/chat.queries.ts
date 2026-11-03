@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import {
     type InfiniteData,
     type UseInfiniteQueryResult,
@@ -9,6 +11,11 @@ import {
 } from '@tanstack/react-query';
 
 import { useDmChannel } from '@/api/channels/channels.queries';
+import { useServerDetails } from '@/api/servers/servers.queries';
+import {
+    DEFAULT_DELETED_MESSAGE_RETENTION_MINUTES,
+    isDeletedMessageWithinRetention,
+} from '@/utils/deletedMessageRetention';
 
 import { chatApi } from './chat.api';
 import type {
@@ -643,8 +650,15 @@ export const useMessageSearch = ({
 export const usePinnedMessages = (
     serverId: string | null,
     channelId: string | null,
-): UseQueryResult<ChatMessage[]> =>
-    useQuery({
+): UseQueryResult<ChatMessage[]> => {
+    const { data: server } = useServerDetails(serverId, {
+        enabled: !!serverId,
+    });
+    const retentionMinutes =
+        server?.deletedMessageRetentionMinutes ??
+        DEFAULT_DELETED_MESSAGE_RETENTION_MINUTES;
+    const [retentionClock, setRetentionClock] = useState(Date.now);
+    const query = useQuery({
         queryKey: [...CHAT_QUERY_KEYS.channelPins(channelId), serverId],
         queryFn: (): Promise<ChatMessage[]> => {
             if (serverId === null || channelId === null) {
@@ -653,4 +667,47 @@ export const usePinnedMessages = (
             return chatApi.getPinnedMessages(serverId, channelId);
         },
         enabled: !!serverId && !!channelId,
+        select: (messages) =>
+            messages.filter(
+                (message) =>
+                    !serverId ||
+                    !message.deletedAt ||
+                    isDeletedMessageWithinRetention(
+                        message.deletedAt,
+                        retentionMinutes,
+                        retentionClock,
+                    ),
+            ),
     });
+
+    useEffect(() => {
+        if (!query.data || !serverId) return;
+        const now = Date.now();
+        const nextExpiry = query.data
+            .filter(
+                (message) =>
+                    message.deletedAt &&
+                    isDeletedMessageWithinRetention(
+                        message.deletedAt,
+                        retentionMinutes,
+                        now,
+                    ),
+            )
+            .reduce((earliest, message) => {
+                const deletedAt = Date.parse(message.deletedAt ?? '');
+                return Math.min(
+                    earliest,
+                    deletedAt + retentionMinutes * 60_000,
+                );
+            }, Number.POSITIVE_INFINITY);
+        if (!Number.isFinite(nextExpiry)) return;
+
+        const timer = window.setTimeout(
+            () => setRetentionClock(Date.now()),
+            Math.max(0, nextExpiry - now),
+        );
+        return () => window.clearTimeout(timer);
+    }, [query.data, retentionClock, retentionMinutes, serverId]);
+
+    return query;
+};

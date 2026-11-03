@@ -36,6 +36,7 @@ export interface Server {
     verified?: boolean;
     verificationRequested?: boolean;
     discoveryEnabled?: boolean;
+    deletedMessageRetentionMinutes?: number;
     tags?: string[];
     createdAt?: string;
     updatedAt?: string;

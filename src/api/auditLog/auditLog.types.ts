@@ -35,7 +35,8 @@ export type AuditLogAction =
     | 'pin_message'
     | 'unpin_message'
     | 'sticky_message'
-    | 'unsticky_message';
+    | 'unsticky_message'
+    | 'flush_deleted_messages';
 
 export interface IAuditLogChange {
     field: string;

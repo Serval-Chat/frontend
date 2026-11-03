@@ -153,6 +153,7 @@ export const useMainChatData = ({
         memberMaps.serverMemberMap,
         memberMaps.highestRoleMap,
         memberMaps.iconRoleMap,
+        serverDetails?.deletedMessageRetentionMinutes,
     );
 
     const {

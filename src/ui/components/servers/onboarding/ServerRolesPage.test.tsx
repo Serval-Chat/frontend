@@ -82,7 +82,7 @@ describe('ServerRolesPage', (): void => {
         expect(memberRow).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('preserves the member’s pre-existing self-assignable role when saving after toggling a different role', (): void => {
+    it('preserves the member\'s pre-existing self-assignable role when saving after toggling a different role', (): void => {
         vi.mocked(useOnboarding).mockReturnValue({
             data: onboardingState,
         } as never);

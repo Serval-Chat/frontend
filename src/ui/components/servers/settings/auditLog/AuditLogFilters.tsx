@@ -94,6 +94,11 @@ const ACTION_OPTIONS = [
     { value: 'delete_message', label: 'Delete Message', group: 'Messages' },
     { value: 'edit_message', label: 'Edit Message', group: 'Messages' },
     { value: 'reaction_clear', label: 'Remove Reactions', group: 'Messages' },
+    {
+        value: 'flush_deleted_messages',
+        label: 'Flush Deleted Messages',
+        group: 'Messages',
+    },
 
     { value: 'role_create', label: 'Create Role', group: 'Roles' },
     { value: 'role_delete', label: 'Delete Role', group: 'Roles' },
@@ -127,6 +132,7 @@ const getActionIcon = (action: string): React.ReactNode | undefined => {
         case 'role_removed':
         case 'role_delete':
         case 'delete_message':
+        case 'flush_deleted_messages':
         case 'reactions_removed':
         case 'reaction_clear': {
             return <Trash2 className="h-4 w-4 text-red-500" />;

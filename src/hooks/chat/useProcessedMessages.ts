@@ -1,10 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { ChatMessage } from '@/api/chat/chat.types';
 import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { resolveReplyTo, resolveWebhookUser } from '@/ui/utils/chat';
+import {
+    DEFAULT_DELETED_MESSAGE_RETENTION_MINUTES,
+    isDeletedMessageWithinRetention,
+} from '@/utils/deletedMessageRetention';
 
 /**
  * @description Hook to process raw message data into a flattened, resolved list.
@@ -18,17 +22,55 @@ export const useProcessedMessages = (
     serverMemberMap: Map<string, User>,
     highestRoleMap: Map<string, Role>,
     iconRoleMap: Map<string, Role>,
+    deletedMessageRetentionMinutes: number = DEFAULT_DELETED_MESSAGE_RETENTION_MINUTES,
 ): ProcessedChatMessage[] => {
     const [cache] = useState(
         (): WeakMap<ChatMessage, ProcessedChatMessage> =>
             new WeakMap<ChatMessage, ProcessedChatMessage>(),
     );
+    const [retentionClock, setRetentionClock] = useState(Date.now);
+
+    useEffect(() => {
+        if (!rawMessagesData || !selectedServerId) return;
+
+        const now = Date.now();
+        const nextExpiry = rawMessagesData.pages
+            .flat()
+            .filter(
+                (message) =>
+                    message.deletedAt &&
+                    isDeletedMessageWithinRetention(
+                        message.deletedAt,
+                        deletedMessageRetentionMinutes,
+                        now,
+                    ),
+            )
+            .reduce((earliest, message) => {
+                const deletedAt = Date.parse(message.deletedAt ?? '');
+                return Math.min(
+                    earliest,
+                    deletedAt + deletedMessageRetentionMinutes * 60_000,
+                );
+            }, Number.POSITIVE_INFINITY);
+
+        if (!Number.isFinite(nextExpiry)) return;
+        const timer = window.setTimeout(
+            () => setRetentionClock(Date.now()),
+            Math.max(0, nextExpiry - now),
+        );
+        return () => window.clearTimeout(timer);
+    }, [
+        rawMessagesData,
+        selectedServerId,
+        deletedMessageRetentionMinutes,
+        retentionClock,
+    ]);
 
     return useMemo((): ProcessedChatMessage[] => {
         if (!rawMessagesData) return [];
 
         // Flatten all pages and sort chronologically
-        const allMessages = rawMessagesData.pages
+        const rawMessages = rawMessagesData.pages
             .flat()
             .sort((a, b): 1 | -1 | 0 =>
                 a.createdAt < b.createdAt
@@ -37,6 +79,49 @@ export const useProcessedMessages = (
                       ? 1
                       : 0,
             );
+        const isVisible = (message: ChatMessage): boolean =>
+            !selectedServerId ||
+            !message.deletedAt ||
+            isDeletedMessageWithinRetention(
+                message.deletedAt,
+                deletedMessageRetentionMinutes,
+                retentionClock,
+            );
+        const expiredMessageIds = new Set(
+            rawMessages
+                .filter((message) => !!message.deletedAt && !isVisible(message))
+                .map((message) => message.id.toString()),
+        );
+        const allMessages = rawMessages
+            .filter(isVisible)
+            .map((message): ChatMessage => {
+                const repliedToObject =
+                    typeof message.repliedToMessageId === 'object'
+                        ? message.repliedToMessageId
+                        : undefined;
+                const repliedToId =
+                    repliedToObject?.id ??
+                    (typeof message.repliedToMessageId === 'string'
+                        ? message.repliedToMessageId
+                        : message.replyToId);
+                const referencedMessage = message.referenced_message;
+
+                return {
+                    ...message,
+                    referenced_message:
+                        referencedMessage && isVisible(referencedMessage)
+                            ? referencedMessage
+                            : undefined,
+                    repliedToMessageId:
+                        repliedToObject && !isVisible(repliedToObject)
+                            ? repliedToObject.id
+                            : message.repliedToMessageId,
+                    repliedTo:
+                        repliedToId && expiredMessageIds.has(repliedToId)
+                            ? undefined
+                            : message.repliedTo,
+                };
+            });
         const messageById = new Map<string, ChatMessage>();
         for (const message of allMessages) {
             messageById.set(message.id.toString(), message);
@@ -140,6 +225,8 @@ export const useProcessedMessages = (
         serverMemberMap,
         highestRoleMap,
         iconRoleMap,
+        deletedMessageRetentionMinutes,
+        retentionClock,
         cache,
     ]);
 };

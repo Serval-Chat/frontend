@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
+import type * as ServerQueriesModule from '@/api/servers/servers.queries';
 import { useChatWS } from '@/hooks/ws/useChatWS';
 import { WsEvents } from '@/ws';
 
@@ -48,8 +49,6 @@ vi.mock('@/hooks/ws/useTypingIndicator', () => ({
     }),
 }));
 
-import type * as ServerQueriesModule from '@/api/servers/servers.queries';
-
 vi.mock('@/api/servers/servers.queries', async (importOriginal) => {
     const actual = await importOriginal<typeof ServerQueriesModule>();
     return {
@@ -67,6 +66,7 @@ vi.mock('@/ws', () => ({
         TYPING_DM: 'typing_dm',
         TYPING_SERVER: 'typing_server',
         MESSAGE_SERVER_DELETED: 'message_server_deleted',
+        SERVER_DELETED_MESSAGES_FLUSHED: 'server_deleted_messages_flushed',
         MESSAGES_SERVER_BULK_DELETED_BY_AUTHOR:
             'messages_server_bulk_deleted_by_author',
         MESSAGE_SERVER_EDITED: 'message_server_edited',
@@ -148,11 +148,7 @@ describe('useChatWS bulk delete by author', (): void => {
 
     const wrapperFor = (
         queryClient: QueryClient,
-    ): (({
-        children,
-    }: {
-        children: React.ReactNode;
-    }) => React.JSX.Element) =>
+    ): (({ children }: { children: React.ReactNode }) => React.JSX.Element) =>
         function Wrapper({
             children,
         }: {
@@ -266,6 +262,99 @@ describe('useChatWS bulk delete by author', (): void => {
         expect(channelBData?.pages[0]?.[0]?.deletedAt).toBeUndefined();
         expect(channelBData?.pages[0]?.[1]?.deletedAt).toBeDefined();
         expect(otherServerData?.pages[0]?.[0]?.deletedAt).toBeUndefined();
+    });
+
+    it('flushes deleted messages from caches for only the affected server', async (): Promise<void> => {
+        const queryClient = new QueryClient();
+        const serverMessagesKey = CHAT_QUERY_KEYS.channelMessages(
+            's1',
+            'c1',
+            null,
+        );
+        const otherServerMessagesKey = CHAT_QUERY_KEYS.channelMessages(
+            's2',
+            'c2',
+            null,
+        );
+        const serverPinsKey = [...CHAT_QUERY_KEYS.channelPins('c1'), 's1'];
+        const otherServerPinsKey = [...CHAT_QUERY_KEYS.channelPins('c2'), 's2'];
+
+        queryClient.setQueryData(serverMessagesKey, {
+            pages: [
+                [
+                    seedMessage({
+                        id: 'deleted',
+                        deletedAt: new Date().toISOString(),
+                    }),
+                    seedMessage({ id: 'active' }),
+                ],
+            ],
+            pageParams: [undefined],
+        });
+        queryClient.setQueryData(otherServerMessagesKey, {
+            pages: [
+                [
+                    seedMessage({
+                        id: 'other-server-deleted',
+                        serverId: 's2',
+                        channelId: 'c2',
+                        deletedAt: new Date().toISOString(),
+                    }),
+                ],
+            ],
+            pageParams: [undefined],
+        });
+        queryClient.setQueryData(serverPinsKey, [
+            seedMessage({
+                id: 'deleted-pin',
+                deletedAt: new Date().toISOString(),
+            }),
+            seedMessage({ id: 'active-pin' }),
+        ]);
+        queryClient.setQueryData(otherServerPinsKey, [
+            seedMessage({
+                id: 'other-server-pin',
+                serverId: 's2',
+                channelId: 'c2',
+                deletedAt: new Date().toISOString(),
+            }),
+        ]);
+
+        renderHook(() => useChatWS(undefined, 's1', 'c1'), {
+            wrapper: wrapperFor(queryClient),
+        });
+
+        const handler = webSocketHandlers.get(
+            WsEvents.SERVER_DELETED_MESSAGES_FLUSHED,
+        );
+        expect(handler).toBeDefined();
+
+        await act(async (): Promise<void> => {
+            await handler?.({ serverId: 's1' });
+        });
+
+        expect(
+            queryClient
+                .getQueryData<{ pages: ChatMessage[][] }>(serverMessagesKey)
+                ?.pages[0]?.map((message) => message.id),
+        ).toEqual(['active']);
+        expect(
+            queryClient
+                .getQueryData<{
+                    pages: ChatMessage[][];
+                }>(otherServerMessagesKey)
+                ?.pages[0]?.map((message) => message.id),
+        ).toEqual(['other-server-deleted']);
+        expect(
+            queryClient
+                .getQueryData<ChatMessage[]>(serverPinsKey)
+                ?.map((message) => message.id),
+        ).toEqual(['active-pin']);
+        expect(
+            queryClient
+                .getQueryData<ChatMessage[]>(otherServerPinsKey)
+                ?.map((message) => message.id),
+        ).toEqual(['other-server-pin']);
     });
 
     it('cancels in-flight queries before applying the optimistic update so a stale refetch cannot overwrite it', async (): Promise<void> => {

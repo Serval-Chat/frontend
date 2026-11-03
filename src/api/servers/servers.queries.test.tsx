@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     SERVERS_QUERY_KEYS,
     useAddRoleToMember,
+    useFlushDeletedMessages,
     useRemoveRoleFromMember,
 } from '@/api/servers/servers.queries';
 import type { ServerMember } from '@/api/servers/servers.types';
@@ -16,6 +17,7 @@ import { serversApi } from './servers.api';
 vi.mock('@/api/servers/servers.api', () => ({
     serversApi: {
         addRoleToMember: vi.fn(),
+        flushDeletedMessages: vi.fn(),
         removeRoleFromMember: vi.fn(),
     },
 }));
@@ -136,5 +138,28 @@ describe('server role member mutations', (): void => {
         expect(invalidateSpy).toHaveBeenCalledWith({
             queryKey: SERVERS_QUERY_KEYS.categories(serverId),
         });
+    });
+
+    it('flushes deleted messages and leaves cache cleanup to the broadcast event', async (): Promise<void> => {
+        const { queryClient, wrapper } = makeHarness();
+        const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+        vi.mocked(serversApi.flushDeletedMessages).mockResolvedValue({
+            deletedCount: 3,
+        });
+
+        const { result } = renderHook(() => useFlushDeletedMessages(serverId), {
+            wrapper,
+        });
+
+        act((): void => {
+            result.current.mutate();
+        });
+
+        await waitFor((): void => {
+            expect(result.current.isSuccess).toBe(true);
+        });
+
+        expect(serversApi.flushDeletedMessages).toHaveBeenCalledWith(serverId);
+        expect(invalidateSpy).not.toHaveBeenCalled();
     });
 });

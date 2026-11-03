@@ -397,6 +397,15 @@ export const serversApi = {
         return response.data;
     },
 
+    flushDeletedMessages: async (
+        serverId: string,
+    ): Promise<{ deletedCount: number }> => {
+        const response = await apiClient.delete<{ deletedCount: number }>(
+            `/api/v1/servers/${serverId}/deleted-messages`,
+        );
+        return response.data;
+    },
+
     uploadServerIcon: async (serverId: string, icon: File): Promise<string> => {
         const formData = new FormData();
         formData.append('icon', icon);
@@ -657,10 +666,18 @@ export const serversApi = {
     getTypingIndicators: async (
         serverId: string,
         channelId: string,
-    ): Promise<{ typingUsers: { userId: string; username: string; expiresAt: string }[] }> => {
+    ): Promise<{
+        typingUsers: { userId: string; username: string; expiresAt: string }[];
+    }> => {
         const response = await apiClient.get<{
-            typingUsers: { userId: string; username: string; expiresAt: string }[];
-        }>(`/api/v1/servers/${serverId}/channels/${channelId}/typing-indicators`);
+            typingUsers: {
+                userId: string;
+                username: string;
+                expiresAt: string;
+            }[];
+        }>(
+            `/api/v1/servers/${serverId}/channels/${channelId}/typing-indicators`,
+        );
         return response.data;
     },
 };
