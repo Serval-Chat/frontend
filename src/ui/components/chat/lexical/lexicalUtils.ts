@@ -20,54 +20,9 @@ export function $getRawMessageText(): string {
 
     const traverse = (node: LexicalNode): void => {
         if ($isTextNode(node)) {
-            let text = node.getTextContent();
-            if (node.hasFormat('code')) {
-                text = `\`${text}\``;
-            } else {
-                const prev = node.getPreviousSibling();
-                const next = node.getNextSibling();
-                const prevText = $isTextNode(prev) ? prev.getTextContent() : '';
-                const nextText = $isTextNode(next) ? next.getTextContent() : '';
-
-                const hasDelimiterSiblings = (delim: string): boolean =>
-                    prevText.endsWith(delim) && nextText.startsWith(delim);
-
-                const isBold = node.hasFormat('bold');
-                const isItalic = node.hasFormat('italic');
-                const isStrike = node.hasFormat('strikethrough');
-                const isUnderline = node.hasFormat('underline');
-
-                if (
-                    !(
-                        isBold &&
-                        isItalic &&
-                        (hasDelimiterSiblings('***') ||
-                            hasDelimiterSiblings('___'))
-                    )
-                ) {
-                    if (
-                        isBold &&
-                        !hasDelimiterSiblings('**') &&
-                        !hasDelimiterSiblings('__')
-                    ) {
-                        text = `**${text}**`;
-                    }
-                    if (
-                        isItalic &&
-                        !hasDelimiterSiblings('*') &&
-                        !hasDelimiterSiblings('_')
-                    ) {
-                        text = `*${text}*`;
-                    }
-                    if (isStrike && !hasDelimiterSiblings('~~')) {
-                        text = `~~${text}~~`;
-                    }
-                    if (isUnderline) {
-                        text = `__${text}__`;
-                    }
-                }
-            }
-            rawText += text;
+            // Formatting is only ever derived from the delimiters, which are
+            // already part of the text
+            rawText += node.getTextContent();
         } else if ($isLineBreakNode(node)) {
             rawText += '\n';
         } else if ($isSlashCommandChipNode(node)) {

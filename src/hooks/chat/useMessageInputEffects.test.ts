@@ -21,6 +21,11 @@ vi.mock('lexical', () => ({
     $getSelection: () => ({ insertText }),
     $isRangeSelection: (): true => true,
     CLEAR_EDITOR_COMMAND: Symbol('clear-editor'),
+    HISTORY_MERGE_TAG: 'history-merge',
+}));
+
+vi.mock('@/ui/components/chat/lexical/markdownFormatting', () => ({
+    $reformatAll: vi.fn(),
 }));
 
 const createFakeEditor = () => ({

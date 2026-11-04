@@ -15,6 +15,20 @@ const featureSetCache = new WeakMap<
 >();
 let cachedBaseUrlPattern: string | null = null;
 
+export interface SourceSpan {
+    readonly start: number;
+    readonly end: number;
+}
+
+export interface SourceMap {
+    /** Span of each node, relative to the string its own parse ran over. */
+    readonly spans: WeakMap<ASTNode, SourceSpan>;
+    /** The string each nested node array was parsed from. */
+    readonly sources: WeakMap<ASTNode[], string>;
+}
+
+let activeSourceMap: SourceMap | null = null;
+
 const getFeatureSet = (
     features: readonly ParserFeatureType[],
 ): ReadonlySet<ParserFeatureType> => {
@@ -282,8 +296,20 @@ class TextParser {
     public parse(): ASTNode[] {
         const nodes: ASTNode[] = [];
         let currentText = '';
+        let textStart = 0;
+        let iterationStart = 0;
+        let recorded = 0;
 
         while (this.index < this.text.length) {
+            if (activeSourceMap) {
+                recorded = this.recordSpans(
+                    nodes,
+                    recorded,
+                    textStart,
+                    iterationStart,
+                );
+            }
+            iterationStart = this.index;
             const char = this.text.charAt(this.index);
             const charCode = char.charCodeAt(0);
 
@@ -772,13 +798,46 @@ class TextParser {
                 }
             }
 
+            if (!currentText) textStart = this.index;
             currentText += char;
             this.index++;
         }
 
+        if (activeSourceMap) {
+            recorded = this.recordSpans(
+                nodes,
+                recorded,
+                textStart,
+                iterationStart,
+            );
+        }
         currentText = this.flushText(nodes, currentText);
+        if (activeSourceMap) {
+            this.recordSpans(nodes, recorded, textStart, textStart);
+        }
 
         return nodes;
+    }
+
+    /**
+     * Each loop iteration pushes at most a flushed text run followed by the
+     * node it parsed, so the last new node spans the iteration and anything
+     * before it is the text that led up to it.
+     */
+    private recordSpans(
+        nodes: ASTNode[],
+        from: number,
+        textStart: number,
+        nodeStart: number,
+    ): number {
+        for (let i = from; i < nodes.length; i++) {
+            const span =
+                i === nodes.length - 1
+                    ? { start: nodeStart, end: this.index }
+                    : { start: textStart, end: nodeStart };
+            activeSourceMap?.spans.set(nodes[i]!, span);
+        }
+        return nodes.length;
     }
 
     private flushText(nodes: ASTNode[], currentText: string): string {
@@ -1712,7 +1771,9 @@ class TextParser {
         const schemeMatch = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(normalized);
         const scheme = schemeMatch?.[1];
         if (!scheme) return true;
-        return scheme.toLowerCase() === 'http' || scheme.toLowerCase() === 'https';
+        return (
+            scheme.toLowerCase() === 'http' || scheme.toLowerCase() === 'https'
+        );
     }
 
     private tryParseNamedLink(): ASTNode | null {
@@ -1771,6 +1832,7 @@ class TextParser {
             };
         }
         const nodes = parseText(content, options);
+        activeSourceMap?.sources.set(nodes, content);
         // nodes.length === 1 guarantees nodes[0] is defined.
         if (nodes.length === 1 && nodes[0]!.type === 'text') {
             return nodes[0]!.content;
@@ -2568,4 +2630,27 @@ class TextParser {
 export function parseText(text: string, options: ParserOptions): ASTNode[] {
     const parser = new TextParser(text, options);
     return parser.parse();
+}
+
+/**
+ * Same parse, plus where every node came from in the source. Nested content
+ * spans are relative to `sources.get(contentArray)`, not to `text`.
+ */
+export function parseTextWithSourceMap(
+    text: string,
+    options: ParserOptions,
+): { nodes: ASTNode[]; sourceMap: SourceMap } {
+    const sourceMap: SourceMap = {
+        spans: new WeakMap(),
+        sources: new WeakMap(),
+    };
+    const previous = activeSourceMap;
+    activeSourceMap = sourceMap;
+    try {
+        const nodes = parseText(text, options);
+        sourceMap.sources.set(nodes, text);
+        return { nodes, sourceMap };
+    } finally {
+        activeSourceMap = previous;
+    }
 }

@@ -5,12 +5,14 @@ import {
     $getSelection,
     $isRangeSelection,
     CLEAR_EDITOR_COMMAND,
+    HISTORY_MERGE_TAG,
     type LexicalEditor,
 } from 'lexical';
 
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import type { KeybindManager } from '@/keybinds/KeybindManager';
+import { $reformatAll } from '@/ui/components/chat/lexical/markdownFormatting';
 import { getDraft } from '@/utils/drafts';
 import { WsEvents } from '@/ws';
 
@@ -117,6 +119,9 @@ export const useMessageInputEffects = ({
             try {
                 const parsedState = editor.parseEditorState(draftJson);
                 editor.setEditorState(parsedState);
+                // Drafts saved by older builds can carry formatting that no
+                // longer matches their text
+                editor.update($reformatAll, { tag: HISTORY_MERGE_TAG });
             } catch (error) {
                 console.error('Failed to parse draft state:', error);
                 editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);

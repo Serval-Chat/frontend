@@ -405,6 +405,8 @@ export const MessageEdit = ({
                 italic: 'italic',
                 underline: 'underline',
                 strikethrough: 'line-through',
+                code: 'rounded-sm bg-bg-secondary px-0.5 font-mono',
+                highlight: 'rounded-sm bg-spoiler text-inherit',
             },
         },
     };

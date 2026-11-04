@@ -2,257 +2,354 @@ import {
     $createTextNode,
     $getRoot,
     $getSelection,
-    $isElementNode,
+    $isLineBreakNode,
+    $isParagraphNode,
     $isRangeSelection,
     $isTextNode,
-    COLLABORATION_TAG,
-    HISTORIC_TAG,
+    COMMAND_PRIORITY_LOW,
+    COMPOSITION_END_TAG,
+    FORMAT_TEXT_COMMAND,
+    HISTORY_MERGE_TAG,
+    IS_BOLD,
+    IS_CODE,
+    IS_HIGHLIGHT,
+    IS_ITALIC,
+    IS_STRIKETHROUGH,
+    IS_UNDERLINE,
     type LexicalEditor,
     type LexicalNode,
+    ParagraphNode,
+    type PointType,
     type TextFormatType,
+    TextNode,
 } from 'lexical';
 
-import { $createSpoilerChipNode, $isSpoilerChipNode } from './SpoilerChipNode';
+import {
+    ParserPresets,
+    type SourceMap,
+    parseTextWithSourceMap,
+} from '@/utils/textParser/parser';
+import type { ASTNode } from '@/utils/textParser/types';
 
-interface TextFormatTransformer {
-    tag: string;
-    formats: TextFormatType[] | null;
+import { $isSpoilerChipNode } from './SpoilerChipNode';
+
+interface DelimitedFormat {
+    open: number;
+    close: number;
+    format: number;
 }
 
-const TRANSFORMERS: TextFormatTransformer[] = [
-    { tag: '***', formats: ['bold', 'italic'] },
-    { tag: '**', formats: ['bold'] },
-    { tag: '*', formats: ['italic'] },
-    { tag: '__', formats: ['underline'] },
-    { tag: '~~', formats: ['strikethrough'] },
-    { tag: '`', formats: ['code'] },
-    { tag: '||', formats: null },
-];
+const DELIMITED_FORMATS: Partial<Record<ASTNode['type'], DelimitedFormat>> = {
+    bold: { open: 2, close: 2, format: IS_BOLD },
+    italic: { open: 1, close: 1, format: IS_ITALIC },
+    bold_italic: { open: 3, close: 3, format: IS_BOLD | IS_ITALIC },
+    underline: { open: 2, close: 2, format: IS_UNDERLINE },
+    double_underline: { open: 3, close: 3, format: IS_UNDERLINE },
+    strikethrough: { open: 2, close: 2, format: IS_STRIKETHROUGH },
+    spoiler: { open: 2, close: 2, format: IS_HIGHLIGHT },
+    inline_code: { open: 1, close: 1, format: IS_CODE },
+};
 
-const FORMAT_TYPES: TextFormatType[] = [
-    'bold',
-    'italic',
-    'underline',
-    'strikethrough',
-    'code',
-];
+const SHORTCUT_DELIMITERS: Partial<Record<TextFormatType, string>> = {
+    bold: '**',
+    italic: '*',
+    underline: '__',
+    strikethrough: '~~',
+    code: '`',
+};
 
-function $createContentNode(
-    transformer: TextFormatTransformer,
-    content: string,
-): LexicalNode {
-    if (transformer.formats === null) return $createSpoilerChipNode(content);
-    const node = $createTextNode(content);
-    for (const fmt of transformer.formats) node.toggleFormat(fmt);
-    return node;
+const CHIP_PLACEHOLDER = '￼';
+
+function paintFormats(
+    nodes: ASTNode[],
+    base: number,
+    text: string,
+    sourceMap: SourceMap,
+    formats: number[],
+): void {
+    for (const node of nodes) {
+        const span = sourceMap.spans.get(node);
+        if (!span) continue;
+        const start = base + span.start;
+        const end = base + span.end;
+
+        const delimited = DELIMITED_FORMATS[node.type];
+        if (delimited) {
+            const contentStart = start + delimited.open;
+            for (let i = contentStart; i < end - delimited.close; i++) {
+                formats[i] = (formats[i] ?? 0) | delimited.format;
+            }
+            if ('content' in node && Array.isArray(node.content)) {
+                paintFormats(
+                    node.content,
+                    contentStart,
+                    text,
+                    sourceMap,
+                    formats,
+                );
+            }
+            continue;
+        }
+
+        for (const value of Object.values(node)) {
+            if (!Array.isArray(value)) continue;
+            const source = sourceMap.sources.get(value as ASTNode[]);
+            if (source === undefined) continue;
+            const offset = text.indexOf(source, start);
+            if (offset < 0 || offset + source.length > end) continue;
+            paintFormats(value as ASTNode[], offset, text, sourceMap, formats);
+        }
+    }
 }
 
-const TRANSFORMERS_BY_TRIGGER: Record<string, TextFormatTransformer[]> = {};
-for (const t of TRANSFORMERS) {
-    const trigger = t.tag.at(-1);
-    if (trigger === undefined) continue;
-    (TRANSFORMERS_BY_TRIGGER[trigger] ??= []).push(t);
+let lastComputed: { text: string; formats: number[] } | null = null;
+
+export function computeFormats(text: string): number[] {
+    if (lastComputed?.text === text) return lastComputed.formats;
+
+    const formats = Array.from<number>({ length: text.length }).fill(0);
+    const { nodes, sourceMap } = parseTextWithSourceMap(
+        text,
+        ParserPresets.MESSAGE,
+    );
+    paintFormats(nodes, 0, text, sourceMap, formats);
+
+    lastComputed = { text, formats };
+    return formats;
 }
 
-function isEqualSubString(
-    strA: string,
-    aStart: number,
-    strB: string,
-    bStart: number,
-    length: number,
-): boolean {
-    for (let i = 0; i < length; i++) {
-        if (strA[aStart + i] !== strB[bStart + i]) return false;
+interface Piece {
+    node: LexicalNode;
+    start: number;
+    length: number;
+    editable: boolean;
+}
+
+function $collectPieces(paragraph: ParagraphNode): {
+    pieces: Piece[];
+    text: string;
+} {
+    const pieces: Piece[] = [];
+    let text = '';
+
+    for (const node of paragraph.getChildren()) {
+        let content = CHIP_PLACEHOLDER;
+        let editable = false;
+        if ($isTextNode(node) && node.isSimpleText()) {
+            content = node.getTextContent();
+            editable = true;
+        } else if ($isSpoilerChipNode(node)) {
+            content = node.getContent();
+            editable = true;
+        } else if ($isLineBreakNode(node)) {
+            content = '\n';
+        }
+        pieces.push({
+            node,
+            start: text.length,
+            length: content.length,
+            editable,
+        });
+        text += content;
+    }
+
+    return { pieces, text };
+}
+
+function isPieceFormatted(piece: Piece, formats: number[]): boolean {
+    if (!$isTextNode(piece.node)) return piece.length === 0;
+    const format = piece.node.getFormat();
+    for (let i = piece.start; i < piece.start + piece.length; i++) {
+        if (formats[i] !== format) return false;
     }
     return true;
 }
 
-function getOpenTagStartIndex(
-    str: string,
-    maxIndex: number,
-    tag: string,
-): number {
-    const tagLen = tag.length;
-    for (let i = maxIndex; i >= tagLen; i--) {
-        const start = i - tagLen;
-        if (
-            isEqualSubString(str, start, tag, 0, tagLen) &&
-            str[start + tagLen] !== ' '
-        ) {
-            return start;
-        }
+function $rebuildRun(run: Piece[], text: string, formats: number[]): void {
+    const first = run[0]!;
+    const last = run.at(-1)!;
+    const end = last.start + last.length;
+    if (end === first.start) return;
+
+    const segments: { text: string; format: number }[] = [];
+    for (let i = first.start; i < end; i++) {
+        const current = segments.at(-1);
+        if (current && current.format === formats[i]) current.text += text[i];
+        else segments.push({ text: text[i]!, format: formats[i]! });
     }
-    return -1;
+
+    const reusable = run
+        .map((piece) => piece.node)
+        .filter((node): node is TextNode => $isTextNode(node));
+    let previous: LexicalNode | null = null;
+
+    for (const [i, segment] of segments.entries()) {
+        const existing = reusable[i];
+        const node = existing ?? $createTextNode();
+        node.setTextContent(segment.text);
+        node.setFormat(segment.format);
+        if (!existing) {
+            if (previous) previous.insertAfter(node);
+            else first.node.insertBefore(node);
+        }
+        previous = node;
+    }
+
+    const kept = new Set<LexicalNode>(reusable.slice(0, segments.length));
+    for (const piece of run) {
+        if (!kept.has(piece.node)) piece.node.remove();
+    }
 }
 
-function $applyVisualFormatting(
-    anchorNode: TextNode,
-    anchorOffset: number,
-): boolean {
-    const text = anchorNode.getTextContent();
-    const closeTagEndIndex = anchorOffset - 1;
-    const closeChar = text[closeTagEndIndex];
-    if (closeChar === undefined) return false;
-    const matchers = TRANSFORMERS_BY_TRIGGER[closeChar];
-    if (!matchers) return false;
-
-    for (const matcher of matchers) {
-        const { tag } = matcher;
-        const tagLen = tag.length;
-        const closeTagStartIndex = closeTagEndIndex - tagLen + 1;
-        if (closeTagStartIndex < 0) continue;
-
-        if (
-            tagLen > 1 &&
-            !isEqualSubString(text, closeTagStartIndex, tag, 0, tagLen)
-        )
-            continue;
-        if (text[closeTagStartIndex - 1] === ' ') continue;
-
-        const openTagStartIndex = getOpenTagStartIndex(
-            text,
-            closeTagStartIndex,
-            tag,
-        );
-        if (openTagStartIndex < 0) continue;
-        if (openTagStartIndex + tagLen === closeTagStartIndex) continue;
-
-        if (openTagStartIndex > 0 && text[openTagStartIndex - 1] === closeChar)
-            continue;
-
-        const content = text.slice(
-            openTagStartIndex + tagLen,
-            closeTagStartIndex,
-        );
-        if (!content.trim()) continue;
-
-        const before = text.slice(0, openTagStartIndex);
-        const after = text.slice(closeTagEndIndex + 1);
-
-        const newNodes: LexicalNode[] = [];
-        if (before) newNodes.push($createTextNode(before));
-
-        newNodes.push($createTextNode(tag));
-        newNodes.push($createContentNode(matcher, content));
-
-        const closingDelim = $createTextNode(tag);
-        newNodes.push(closingDelim);
-
-        const afterNode = after ? $createTextNode(after) : null;
-        if (afterNode) newNodes.push(afterNode);
-
-        anchorNode.replace(newNodes[0]!);
-        let cur = newNodes[0]!;
-        for (let i = 1; i < newNodes.length; i++) {
-            const next = newNodes[i]!;
-            cur.insertAfter(next);
-            cur = next;
-        }
-
-        const focusNode = afterNode ?? closingDelim;
-        const focusOffset = afterNode ? 0 : tag.length;
-        focusNode.select(focusOffset, focusOffset);
-
-        return true;
+function offsetOfPoint(
+    point: PointType,
+    paragraph: ParagraphNode,
+    pieces: Piece[],
+    textLength: number,
+): number | null {
+    if (point.type === 'text') {
+        const piece = pieces.find((p) => p.node.getKey() === point.key);
+        return piece ? piece.start + point.offset : null;
     }
-    return false;
+    if (point.key !== paragraph.getKey()) return null;
+    return pieces[point.offset]?.start ?? textLength;
+}
+
+function $placePoint(
+    point: PointType,
+    offset: number,
+    paragraph: ParagraphNode,
+    pieces: Piece[],
+): void {
+    // At a boundary, stay at the end of the earlier node so typing extends it
+    const target = pieces.find(
+        (p) =>
+            $isTextNode(p.node) &&
+            offset >= p.start &&
+            offset <= p.start + p.length,
+    );
+    if (target) {
+        point.set(target.node.getKey(), offset - target.start, 'text');
+        return;
+    }
+    const index = pieces.filter((p) => p.start + p.length <= offset).length;
+    point.set(paragraph.getKey(), index, 'element');
+}
+
+function $reformatParagraph(paragraph: ParagraphNode): void {
+    const { pieces, text } = $collectPieces(paragraph);
+    const formats = computeFormats(text);
+
+    const runs: Piece[][] = [];
+    let run: Piece[] = [];
+    for (const piece of pieces) {
+        if (piece.editable) {
+            run.push(piece);
+            continue;
+        }
+        if (run.length > 0) runs.push(run);
+        run = [];
+    }
+    if (run.length > 0) runs.push(run);
+
+    const stale = runs.filter(
+        (r) => !r.every((piece) => isPieceFormatted(piece, formats)),
+    );
+    if (stale.length === 0) return;
+
+    const selection = $getSelection();
+    const range = $isRangeSelection(selection) ? selection : null;
+    const anchorOffset = range
+        ? offsetOfPoint(range.anchor, paragraph, pieces, text.length)
+        : null;
+    const focusOffset = range
+        ? offsetOfPoint(range.focus, paragraph, pieces, text.length)
+        : null;
+
+    for (const r of stale) $rebuildRun(r, text, formats);
+
+    if (!range) return;
+    const rebuilt = $collectPieces(paragraph).pieces;
+    if (anchorOffset !== null)
+        $placePoint(range.anchor, anchorOffset, paragraph, rebuilt);
+    if (focusOffset !== null)
+        $placePoint(range.focus, focusOffset, paragraph, rebuilt);
+    if (range.isCollapsed() && range.anchor.type === 'text') {
+        range.format = range.anchor.getNode().getFormat();
+    }
+}
+
+export function $reformatAll(): void {
+    for (const block of $getRoot().getChildren()) {
+        if ($isParagraphNode(block)) $reformatParagraph(block);
+    }
 }
 
 /**
- * The tag whose delimiters would have produced this node, or null if the node
- * isn't something this plugin formats.
+ * Keyboard shortcuts insert the delimiters rather than formatting invisibly,
+ * because only the delimiters survive into the sent message.
  */
-function $tagForContentNode(node: LexicalNode): string | null {
-    if ($isSpoilerChipNode(node)) return '||';
-    if (!$isTextNode(node)) return null;
+function $wrapSelection(format: TextFormatType): void {
+    const delimiter = SHORTCUT_DELIMITERS[format];
+    const selection = $getSelection();
+    if (!delimiter || !$isRangeSelection(selection)) return;
 
-    const active = FORMAT_TYPES.filter((fmt) => node.hasFormat(fmt));
-    if (active.length === 0) return null;
+    const [start, end] = selection.isBackward()
+        ? [selection.focus, selection.anchor]
+        : [selection.anchor, selection.focus];
 
-    const match = TRANSFORMERS.find(
-        (transformer) =>
-            transformer.formats !== null &&
-            transformer.formats.length === active.length &&
-            transformer.formats.every((fmt) => active.includes(fmt)),
+    if (start.type !== 'text' || end.type !== 'text') {
+        selection.insertText(
+            delimiter + selection.getTextContent() + delimiter,
+        );
+        return;
+    }
+
+    const startNode = start.getNode() as TextNode;
+    const endNode = end.getNode() as TextNode;
+    const startOffset = start.offset;
+    const endOffset = end.offset;
+
+    endNode.spliceText(endOffset, 0, delimiter);
+    startNode.spliceText(startOffset, 0, delimiter);
+
+    const shift = startNode.is(endNode) ? delimiter.length : 0;
+    selection.setTextNodeRange(
+        startNode,
+        startOffset + delimiter.length,
+        endNode,
+        endOffset + shift,
     );
-    return match?.tag ?? null;
-}
-
-function $findBrokenFormatting(): LexicalNode[] {
-    const broken: LexicalNode[] = [];
-
-    for (const block of $getRoot().getChildren()) {
-        if (!$isElementNode(block)) continue;
-
-        for (const node of block.getChildren()) {
-            const tag = $tagForContentNode(node);
-            if (tag === null) continue;
-
-            const prev = node.getPreviousSibling();
-            const next = node.getNextSibling();
-            const openOk =
-                $isTextNode(prev) && prev.getTextContent().endsWith(tag);
-            const closeOk =
-                $isTextNode(next) && next.getTextContent().startsWith(tag);
-
-            if (openOk !== closeOk) broken.push(node);
-        }
-    }
-
-    return broken;
-}
-
-function $stripFormatting(node: LexicalNode): void {
-    if ($isSpoilerChipNode(node)) {
-        node.replace($createTextNode(node.getContent()));
-    } else if ($isTextNode(node)) {
-        node.setFormat(0);
-    }
 }
 
 export function registerMarkdownFormatting(editor: LexicalEditor): () => void {
-    return editor.registerUpdateListener(
-        ({ tags, dirtyLeaves, editorState, prevEditorState }) => {
-            if (tags.has(COLLABORATION_TAG) || tags.has(HISTORIC_TAG)) return;
-            if (editor.isComposing()) return;
+    const $reformatParent = (node: TextNode): void => {
+        if (editor.isComposing()) return;
+        const parent = node.getParent();
+        if ($isParagraphNode(parent)) $reformatParagraph(parent);
+    };
 
-            // Editing a delimiter has to be able to take formatting back off
-            if (editorState.read(() => $findBrokenFormatting().length > 0)) {
-                editor.update(() => {
-                    for (const node of $findBrokenFormatting()) {
-                        $stripFormatting(node);
-                    }
-                });
-            }
+    const unregisters = [
+        editor.registerNodeTransform(TextNode, $reformatParent),
+        editor.registerNodeTransform(ParagraphNode, (paragraph): void => {
+            if (!editor.isComposing()) $reformatParagraph(paragraph);
+        }),
+        editor.registerCommand(
+            FORMAT_TEXT_COMMAND,
+            (format): boolean => {
+                $wrapSelection(format);
+                return true;
+            },
+            COMMAND_PRIORITY_LOW,
+        ),
+        // Transforms were skipped while the IME was composing
+        editor.registerUpdateListener(({ tags }): void => {
+            if (!tags.has(COMPOSITION_END_TAG)) return;
+            editor.update($reformatAll, { tag: HISTORY_MERGE_TAG });
+        }),
+    ];
 
-            const selection = editorState.read($getSelection);
-            const prevSelection = prevEditorState.read($getSelection);
-
-            if (
-                !$isRangeSelection(prevSelection) ||
-                !$isRangeSelection(selection) ||
-                !selection.isCollapsed() ||
-                selection.is(prevSelection)
-            )
-                return;
-
-            const anchorKey = selection.anchor.key;
-            const anchorOffset = selection.anchor.offset;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const anchorNode = (editorState as any)._nodeMap.get(anchorKey);
-
-            if (
-                !$isTextNode(anchorNode) ||
-                !dirtyLeaves.has(anchorKey) ||
-                (anchorOffset !== 1 &&
-                    anchorOffset > prevSelection.anchor.offset + 1)
-            )
-                return;
-
-            editor.update(() => {
-                if (anchorNode.getParent() === null) return;
-                $applyVisualFormatting(anchorNode, selection.anchor.offset);
-            });
-        },
-    );
+    return (): void => {
+        for (const unregister of unregisters) unregister();
+    };
 }

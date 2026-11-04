@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { ParserPresets, parseText } from './parser';
-import { type AdmonitionNode, ParserFeature } from './types';
+import { ParserPresets, parseText, parseTextWithSourceMap } from './parser';
+import { type ASTNode, type AdmonitionNode, ParserFeature } from './types';
 
 describe('TextParser', (): void => {
     it('should parse bold text', (): void => {
@@ -383,8 +383,7 @@ describe('TextParser', (): void => {
         expect(nodes).toEqual([
             {
                 type: 'text',
-                content:
-                    'Click [here](javascript:alert(document.cookie)) now',
+                content: 'Click [here](javascript:alert(document.cookie)) now',
             },
         ]);
     });
@@ -2033,7 +2032,8 @@ describe('TextParser', (): void => {
 
     describe('Decoration Parsing', (): void => {
         it('should parse decoration URLs as decoration nodes in MESSAGE preset', (): void => {
-            const text = 'https://rolling.catfla.re/decorations/123456789012345678';
+            const text =
+                'https://rolling.catfla.re/decorations/123456789012345678';
             const nodes = parseText(text, ParserPresets.MESSAGE);
             expect(nodes).toEqual([
                 {
@@ -2044,7 +2044,8 @@ describe('TextParser', (): void => {
         });
 
         it('should NOT embed decoration blocks in REPLY_PREVIEW preset', (): void => {
-            const text = 'https://rolling.catfla.re/decorations/123456789012345678';
+            const text =
+                'https://rolling.catfla.re/decorations/123456789012345678';
             const nodes = parseText(text, ParserPresets.REPLY_PREVIEW);
             expect(nodes).toEqual([
                 {
@@ -2053,6 +2054,56 @@ describe('TextParser', (): void => {
                     text: 'https://rolling.catfla.re/decorations/123456789012345678',
                 },
             ]);
+        });
+    });
+
+    describe('parseTextWithSourceMap', (): void => {
+        const spansOf = (text: string): [string, string][] => {
+            const { nodes, sourceMap } = parseTextWithSourceMap(
+                text,
+                ParserPresets.MESSAGE,
+            );
+            return nodes.map((node): [string, string] => {
+                const span = sourceMap.spans.get(node)!;
+                return [node.type, text.slice(span.start, span.end)];
+            });
+        };
+
+        it('returns the same nodes as parseText', (): void => {
+            const text = '# hi **b** \\* `c` https://x.com/a_b_ ||s||\n> q';
+            expect(
+                parseTextWithSourceMap(text, ParserPresets.MESSAGE).nodes,
+            ).toEqual(parseText(text, ParserPresets.MESSAGE));
+        });
+
+        it('maps every top-level node to the source it came from', (): void => {
+            expect(spansOf('a **b** \\*c `d` ~~e~~ end')).toEqual([
+                ['text', 'a '],
+                ['bold', '**b**'],
+                ['text', ' '],
+                ['text', '\\*'],
+                ['text', 'c '],
+                ['inline_code', '`d`'],
+                ['text', ' '],
+                ['strikethrough', '~~e~~'],
+                ['text', ' end'],
+            ]);
+        });
+
+        it('records nested spans relative to their own content', (): void => {
+            const text = '**a *b* c**';
+            const { nodes, sourceMap } = parseTextWithSourceMap(
+                text,
+                ParserPresets.MESSAGE,
+            );
+            const content = (nodes[0] as { content: ASTNode[] }).content;
+            const source = sourceMap.sources.get(content)!;
+            const italic = content[1]!;
+
+            expect(source).toBe('a *b* c');
+            expect(italic.type).toBe('italic');
+            const span = sourceMap.spans.get(italic)!;
+            expect(source.slice(span.start, span.end)).toBe('*b*');
         });
     });
 });
