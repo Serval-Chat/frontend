@@ -395,16 +395,16 @@ export const CreatePollModal = ({
                 setActiveEmojiOption(null);
             };
 
-            window.addEventListener('scroll', handleScroll, true);
-            window.addEventListener('resize', (): void => {
+            const handleResize = (): void => {
                 updatePickerPosition(activeEmojiOption);
-            });
+            };
+
+            window.addEventListener('scroll', handleScroll, true);
+            window.addEventListener('resize', handleResize);
 
             return (): void => {
                 window.removeEventListener('scroll', handleScroll, true);
-                window.removeEventListener('resize', (): void => {
-                    updatePickerPosition(activeEmojiOption);
-                });
+                window.removeEventListener('resize', handleResize);
             };
         }
     }, [activeEmojiOption]);

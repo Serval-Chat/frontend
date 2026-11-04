@@ -57,4 +57,35 @@ describe('CreatePollModal', (): void => {
             new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString(),
         );
     });
+
+    it('removes the emoji picker resize listener it added', (): void => {
+        const addSpy = vi.spyOn(window, 'addEventListener');
+        const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+        const { unmount } = render(
+            <CreatePollModal isOpen onClose={vi.fn()} onSubmit={vi.fn()} />,
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Choose emoji for option 1' }),
+        );
+
+        const addedResizeHandlers = addSpy.mock.calls
+            .filter(([type]): boolean => type === 'resize')
+            .map(([, handler]): unknown => handler);
+        expect(addedResizeHandlers.length).toBeGreaterThan(0);
+
+        unmount();
+
+        const removedResizeHandlers = new Set(
+            removeSpy.mock.calls
+                .filter(([type]): boolean => type === 'resize')
+                .map(([, handler]): unknown => handler),
+        );
+        for (const handler of addedResizeHandlers) {
+            expect(removedResizeHandlers.has(handler)).toBe(true);
+        }
+
+        addSpy.mockRestore();
+        removeSpy.mockRestore();
+    });
 });

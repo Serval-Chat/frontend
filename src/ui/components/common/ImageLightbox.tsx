@@ -56,7 +56,7 @@ export const ImageLightbox = ({
                 await downloadImage(src, alt);
             } catch (error) {
                 console.error('Tauri download error:', error);
-                window.open(src, '_blank');
+                window.open(src, '_blank', 'noopener,noreferrer');
             }
         } else {
             const link = document.createElement('a');

@@ -122,14 +122,18 @@ export const ImageCropper = ({
     });
 
     // Load image and initialize selection
-    useEffect((): void => {
+    useEffect((): (() => void) => {
         const img = new Image();
         const url = URL.createObjectURL(imageFile);
-        img.addEventListener('load', (): void => {
+        const handleLoad = (): void => {
             setImage(img);
-            URL.revokeObjectURL(url);
-        });
+        };
+        img.addEventListener('load', handleLoad);
         img.src = url;
+        return (): void => {
+            img.removeEventListener('load', handleLoad);
+            URL.revokeObjectURL(url);
+        };
     }, [imageFile]);
 
     // Handle initial sizing and resize
