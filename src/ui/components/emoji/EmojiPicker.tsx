@@ -66,6 +66,43 @@ const PICKER_HEIGHT = 500;
 const EMOJI_BUTTON_SIZE = 52;
 const EMOJI_ICON_SIZE = 42;
 
+const CustomEmojiImage = ({
+    name,
+    url,
+}: {
+    name: string;
+    url: string;
+}): React.JSX.Element => {
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
+        'loading',
+    );
+    return (
+        <span
+            className={cn(
+                'relative block overflow-hidden rounded-md',
+                status === 'loading' && 'animate-pulse bg-bg-subtle',
+            )}
+            style={{ width: EMOJI_ICON_SIZE, height: EMOJI_ICON_SIZE }}
+        >
+            <img
+                alt={status === 'error' ? name : ''}
+                className={cn(
+                    'h-full w-full object-contain transition-opacity',
+                    status === 'loaded' ? 'opacity-100' : 'opacity-0',
+                )}
+                decoding="async"
+                src={url}
+                onError={(): void => {
+                    setStatus('error');
+                }}
+                onLoad={(): void => {
+                    setStatus('loaded');
+                }}
+            />
+        </span>
+    );
+};
+
 const SIDEBAR_CATEGORY_SIZE = 29;
 const SIDEBAR_WIDTH = 48;
 
@@ -319,14 +356,9 @@ const EmojiPickerRow = ({
                                 }}
                                 onMouseDown={(e): void => e.preventDefault()}
                             >
-                                <img
-                                    alt={custom.name}
-                                    className="object-contain"
-                                    src={resolveApiUrl(custom.url) || ''}
-                                    style={{
-                                        width: EMOJI_ICON_SIZE,
-                                        height: EMOJI_ICON_SIZE,
-                                    }}
+                                <CustomEmojiImage
+                                    name={custom.name}
+                                    url={resolveApiUrl(custom.url) || ''}
                                 />
                             </Button>
                         </Tooltip>
@@ -747,11 +779,7 @@ const EmojiPickerContent = ({
 
                 {!hasExternalEmojiPermission ? (
                     <Box className="pointer-events-none absolute right-0 bottom-0 left-0 border-t border-divider/50 bg-background/95 px-3 py-1.5 backdrop-blur-sm">
-                        <Text
-                            className="text-center"
-                            size="xs"
-                            variant="muted"
-                        >
+                        <Text className="text-center" size="xs" variant="muted">
                             Only this server's emojis are available. Ask an
                             admin for the &quot;Use External Emojis &amp;
                             Stickers&quot; permission to use others.
@@ -839,9 +867,7 @@ export const EmojiPicker = ({
                 >
                     <EmojiPickerContent
                         customCategories={customCategories}
-                        hasExternalEmojiPermission={
-                            hasExternalEmojiPermission
-                        }
+                        hasExternalEmojiPermission={hasExternalEmojiPermission}
                         height={height}
                         width={windowWidth}
                         onCustomEmojiSelect={onCustomEmojiSelect}

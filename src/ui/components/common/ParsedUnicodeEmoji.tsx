@@ -1,3 +1,4 @@
+import { useEmojiSheetLoaded } from '@/hooks/useEmojiSheetLoaded';
 import { cn } from '@/utils/cn';
 import { emojiMap, getSpriteStyle } from '@/utils/emoji';
 
@@ -14,6 +15,7 @@ export const ParsedUnicodeEmoji = ({
     isLarge,
     style,
 }: ParsedUnicodeEmojiProps) => {
+    const sheetLoaded = useEmojiSheetLoaded();
     const emojiData = emojiMap.get(content);
 
     if (!emojiData) {
@@ -30,13 +32,14 @@ export const ParsedUnicodeEmoji = ({
             className={cn(
                 'inline-block shrink-0 overflow-hidden align-text-bottom',
                 isLarge ? 'h-16 w-16' : 'h-[1.5em] w-[1.5em]',
+                !sheetLoaded && 'animate-pulse rounded-full bg-bg-subtle',
                 className,
             )}
             role="img"
             style={style}
             title={emojiData.short_name}
         >
-            <span style={getSpriteStyle(emojiData)} />
+            <span style={sheetLoaded ? getSpriteStyle(emojiData) : undefined} />
         </span>
     );
 };

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
+import { EmojiPickerSkeleton } from '@/ui/components/emoji/EmojiPickerSkeleton';
 import { Box } from '@/ui/components/layout/Box';
 
 const EmojiPicker = React.lazy(() =>
@@ -54,13 +55,7 @@ export const MessageEmojiPicker = React.memo(
                     top: coords.y,
                 }}
             >
-                <React.Suspense
-                    fallback={
-                        <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
-                            Loading emojis...
-                        </div>
-                    }
-                >
+                <React.Suspense fallback={<EmojiPickerSkeleton />}>
                     <EmojiPicker
                         customCategories={pickerCategories}
                         hasExternalEmojiPermission={hasExternalEmojiPermission}

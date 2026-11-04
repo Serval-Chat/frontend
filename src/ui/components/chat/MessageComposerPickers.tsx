@@ -15,6 +15,7 @@ import {
     type CustomEmojiCategory,
     EmojiPicker,
 } from '@/ui/components/emoji/EmojiPicker';
+import { EmojiPickerSkeleton } from '@/ui/components/emoji/EmojiPickerSkeleton';
 import {
     type StickerCategory,
     StickerPicker,
@@ -120,13 +121,7 @@ export const MessageComposerPickers = ({
             ref={pickerRef}
         >
             {showEmojiPicker ? (
-                <React.Suspense
-                    fallback={
-                        <div className="flex h-[400px] w-[320px] items-center justify-center rounded-lg border border-border-subtle bg-bg-primary text-muted-foreground shadow-xl">
-                            Loading emojis...
-                        </div>
-                    }
-                >
+                <React.Suspense fallback={<EmojiPickerSkeleton />}>
                     <EmojiPicker
                         customCategories={pickerCategories}
                         hasExternalEmojiPermission={hasExternalEmojiPermission}
