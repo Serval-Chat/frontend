@@ -153,7 +153,7 @@ const MeasuredReplyText = React.memo(({ text }: MeasuredReplyTextProps) => {
 
     return (
         <span
-            className="block min-w-0 overflow-hidden leading-normal"
+            className="block min-w-0 overflow-hidden leading-5"
             ref={containerRef}
         >
             <ParsedText
@@ -200,7 +200,7 @@ export const ReplyPreview = React.memo(
                 }
             >
                 {/* Spine */}
-                <Box className="mt-[11px] h-[18px] w-[36px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />
+                <Box className="mt-[11px] h-[18px] w-[20px] flex-shrink-0 rounded-tl-lg border-t-2 border-l-2 border-border-subtle" />
 
                 <Box className="flex h-5 min-w-0 items-center gap-1.5 overflow-hidden">
                     <UserProfilePicture
@@ -236,7 +236,7 @@ export const ReplyPreview = React.memo(
                     ) : null}
                     <Text
                         as="span"
-                        className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-foreground"
+                        className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-text-muted"
                     >
                         {command && !text ? (
                             <span className="mr-1 opacity-70">
