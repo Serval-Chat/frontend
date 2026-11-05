@@ -50,7 +50,7 @@ export const BioEditor = ({
             >
                 About Me
             </Text>
-            <div className="relative flex min-h-[100px] items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
+            <div className="relative flex min-h-[100px] items-start rounded-md border border-border-subtle bg-bg-secondary transition duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer
                     initialConfig={{
                         namespace: 'BioEditor',

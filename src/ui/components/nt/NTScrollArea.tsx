@@ -227,6 +227,7 @@ export const NTScrollArea = ({
                     <button
                         aria-label="Scroll up"
                         className="nt-scroll-area__button nt-scroll-area__button--up"
+                        tabIndex={-1}
                         type="button"
                         onClick={(): void => {
                             scrollBy(0, -SCROLL_STEP);
@@ -236,6 +237,7 @@ export const NTScrollArea = ({
                     <button
                         aria-label="Scroll down"
                         className="nt-scroll-area__button nt-scroll-area__button--down"
+                        tabIndex={-1}
                         type="button"
                         onClick={(): void => {
                             scrollBy(0, SCROLL_STEP);
@@ -264,6 +266,7 @@ export const NTScrollArea = ({
                     <button
                         aria-label="Scroll left"
                         className="nt-scroll-area__button nt-scroll-area__button--left"
+                        tabIndex={-1}
                         type="button"
                         onClick={(): void => {
                             scrollBy(-SCROLL_STEP, 0);
@@ -273,6 +276,7 @@ export const NTScrollArea = ({
                     <button
                         aria-label="Scroll right"
                         className="nt-scroll-area__button nt-scroll-area__button--right"
+                        tabIndex={-1}
                         type="button"
                         onClick={(): void => {
                             scrollBy(SCROLL_STEP, 0);

@@ -200,6 +200,7 @@ export const AvatarDecorationPicker = ({
                                         size={14}
                                     />
                                     <input
+                                        aria-label="Search decorations"
                                         className="w-full rounded-md border border-border-subtle bg-bg-subtle py-1.5 pr-2 pl-8 text-sm focus:border-primary focus:outline-none"
                                         placeholder="Search decorations..."
                                         type="text"

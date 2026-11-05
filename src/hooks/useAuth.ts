@@ -1,28 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { hasAuthToken } from '@/utils/authToken';
+
+const subscribe = (onChange: () => void): (() => void) => {
+    globalThis.addEventListener('auth-change', onChange);
+    globalThis.addEventListener('storage', onChange);
+
+    return (): void => {
+        globalThis.removeEventListener('auth-change', onChange);
+        globalThis.removeEventListener('storage', onChange);
+    };
+};
 
 /**
  * @description Hook for managing and listening to authentication state.
  */
 export const useAuth = (): { isAuthenticated: boolean } => {
-    const [isAuthenticated, setIsAuthenticated] = useState((): boolean =>
-        hasAuthToken(),
-    );
-
-    useEffect((): (() => void) => {
-        const handleAuthChange = (): void => {
-            setIsAuthenticated(hasAuthToken());
-        };
-
-        globalThis.addEventListener('auth-change', handleAuthChange);
-        globalThis.addEventListener('storage', handleAuthChange);
-
-        return (): void => {
-            globalThis.removeEventListener('auth-change', handleAuthChange);
-            globalThis.removeEventListener('storage', handleAuthChange);
-        };
-    }, []);
+    const isAuthenticated = useSyncExternalStore(subscribe, hasAuthToken);
 
     return { isAuthenticated };
 };

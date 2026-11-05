@@ -41,7 +41,7 @@ export const InviteLinkSkeleton = ({
     tagCount?: number;
 }) => (
     <Box
-        className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all"
+        className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition"
         ref={containerRef}
     >
         {hasBanner ? (
@@ -151,7 +151,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
                     maximum uses.
                 </Text>
                 <a
-                    className="mt-3 text-xs text-primary transition-all hover:underline"
+                    className="mt-3 text-xs text-primary transition hover:underline"
                     href={url}
                     rel="noopener noreferrer"
                     target="_blank"
@@ -176,12 +176,12 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
             : null;
 
     return (
-        <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition-all">
+        <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition">
             {/* Copy server link button */}
             <div className="relative">
                 <button
                     aria-label="Copy invite link"
-                    className="hover:bg-bg-tertiary absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition-all hover:opacity-100"
+                    className="hover:bg-bg-tertiary absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition hover:opacity-100"
                     type="button"
                     onClick={handleCopy}
                 >

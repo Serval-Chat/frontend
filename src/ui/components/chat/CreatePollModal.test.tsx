@@ -58,6 +58,34 @@ describe('CreatePollModal', (): void => {
         );
     });
 
+    it('clears the draft when closed via Cancel', (): void => {
+        const onClose = vi.fn();
+        const { rerender } = render(
+            <CreatePollModal isOpen onClose={onClose} onSubmit={vi.fn()} />,
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Ask a question...'), {
+            target: { value: 'Draft question' },
+        });
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+        expect(onClose).toHaveBeenCalledOnce();
+
+        rerender(
+            <CreatePollModal
+                isOpen={false}
+                onClose={onClose}
+                onSubmit={vi.fn()}
+            />,
+        );
+        rerender(
+            <CreatePollModal isOpen onClose={onClose} onSubmit={vi.fn()} />,
+        );
+
+        expect(screen.getByPlaceholderText('Ask a question...')).toHaveValue(
+            '',
+        );
+    });
+
     it('removes the emoji picker resize listener it added', (): void => {
         const addSpy = vi.spyOn(window, 'addEventListener');
         const removeSpy = vi.spyOn(window, 'removeEventListener');

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { type WsConnectionState, wsClient } from '@/ws/client';
 
@@ -41,30 +41,23 @@ const deriveStatus = (
     }
 };
 
+const subscribe = (onChange: () => void): (() => void) => {
+    const unsubscribe = wsClient.onStatusChange(onChange);
+    globalThis.addEventListener('online', onChange);
+    globalThis.addEventListener('offline', onChange);
+
+    return (): void => {
+        unsubscribe();
+        globalThis.removeEventListener('online', onChange);
+        globalThis.removeEventListener('offline', onChange);
+    };
+};
+
+const getSnapshot = (): ConnectivityState['status'] =>
+    deriveStatus(wsClient.getStatus(), isBrowserOnline());
+
 export function useConnectivity(): ConnectivityState {
-    const [status, setStatus] = useState<ConnectivityState['status']>(
-        (): ConnectivityState['status'] =>
-            deriveStatus(wsClient.getStatus(), isBrowserOnline()),
-    );
-
-    useEffect((): (() => void) => {
-        const update = (): void => {
-            setStatus(deriveStatus(wsClient.getStatus(), isBrowserOnline()));
-        };
-
-        const unsubscribe = wsClient.onStatusChange(update);
-        globalThis.addEventListener('online', update);
-        globalThis.addEventListener('offline', update);
-
-        // Re-sync once in case the state changed between render and effect setup.
-        update();
-
-        return (): void => {
-            unsubscribe();
-            globalThis.removeEventListener('online', update);
-            globalThis.removeEventListener('offline', update);
-        };
-    }, []);
+    const status = useSyncExternalStore(subscribe, getSnapshot);
 
     return { status };
 }

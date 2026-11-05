@@ -16,26 +16,16 @@ export const MarqueeText = ({
 }: MarqueeTextProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLSpanElement>(null);
-    const [overflow, setOverflow] = useState(false);
-    const [duration, setDuration] = useState(5);
     const [shift, setShift] = useState(0);
+    const overflow = shift > 0;
+    const duration = shift / speed / 0.35;
 
     useLayoutEffect((): (() => void) => {
         const measure = (): void => {
             if (!containerRef.current || !textRef.current) return;
             const cw = containerRef.current.offsetWidth;
             const tw = textRef.current.scrollWidth;
-            if (tw > cw) {
-                const overflowPx = tw - cw;
-                setOverflow(true);
-                setShift(overflowPx);
-                const scrollTime = overflowPx / speed;
-                const totalDuration = scrollTime / 0.35;
-                setDuration(totalDuration);
-            } else {
-                setOverflow(false);
-                setShift(0);
-            }
+            setShift(Math.max(0, tw - cw));
         };
 
         measure();
@@ -45,7 +35,7 @@ export const MarqueeText = ({
         return (): void => {
             ro.disconnect();
         };
-    }, [children, speed]);
+    }, [children]);
 
     return (
         <div

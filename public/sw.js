@@ -54,6 +54,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
             if (!newSub && !options) {
                 try {
                     const res = await fetch('/api/v1/push/vapid-public-key');
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const { publicKey } = await res.json();
                     options = {
                         userVisibleOnly: true,

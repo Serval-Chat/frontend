@@ -481,7 +481,9 @@ export const Message = React.memo(
             };
 
             document.addEventListener('mousedown', handleClickAway);
-            document.addEventListener('touchstart', handleClickAway);
+            document.addEventListener('touchstart', handleClickAway, {
+                passive: true,
+            });
             return (): void => {
                 document.removeEventListener('mousedown', handleClickAway);
                 document.removeEventListener('touchstart', handleClickAway);

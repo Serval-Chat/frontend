@@ -304,8 +304,6 @@ export const CreatePollModal = ({
     onClose,
     onSubmit,
 }: CreatePollModalProps) => {
-    // Already reset via the isOpen-transition guard below on every reopen
-    const [syncedIsOpen, setSyncedIsOpen] = useState(isOpen);
     const isMobile = useIsMobile();
     interface PollForm {
         title: string;
@@ -349,21 +347,18 @@ export const CreatePollModal = ({
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-    if (isOpen !== syncedIsOpen) {
-        setSyncedIsOpen(isOpen);
-
-        if (!isOpen) {
-            setTitle('');
-            setOptions([
-                { id: '1', text: '' },
-                { id: '2', text: '' },
-            ]);
-            setMultiSelect(false);
-            setDurationValue(1);
-            setDurationUnit('hours');
-            setActiveEmojiOption(null);
-        }
-    }
+    const handleClose = (): void => {
+        setTitle('');
+        setOptions([
+            { id: '1', text: '' },
+            { id: '2', text: '' },
+        ]);
+        setMultiSelect(false);
+        setDurationValue(1);
+        setDurationUnit('hours');
+        setActiveEmojiOption(null);
+        onClose();
+    };
 
     const updatePickerPosition = (id: string): void => {
         const trigger = triggerRefs.current[id];
@@ -504,7 +499,7 @@ export const CreatePollModal = ({
             multiSelect,
             expiresAt,
         });
-        onClose();
+        handleClose();
     };
 
     const isValid =
@@ -517,7 +512,7 @@ export const CreatePollModal = ({
             className="w-full max-w-md"
             isOpen={isOpen}
             title="Create Poll"
-            onClose={onClose}
+            onClose={handleClose}
         >
             <Box className="flex flex-col gap-4">
                 <Box>
@@ -568,7 +563,7 @@ export const CreatePollModal = ({
                 />
 
                 <Box className="mt-4 flex justify-end gap-2">
-                    <Button variant="ghost" onClick={onClose}>
+                    <Button variant="ghost" onClick={handleClose}>
                         Cancel
                     </Button>
                     <Button

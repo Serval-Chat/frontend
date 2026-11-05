@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 
 import { Check, Eye, EyeOff, X } from 'lucide-react';
 import { getIcon } from 'material-file-icons';
@@ -9,6 +9,7 @@ import { Button } from '@/ui/components/common/Button';
 import { Text } from '@/ui/components/common/Text';
 import { Tooltip } from '@/ui/components/common/Tooltip';
 import { Box } from '@/ui/components/layout/Box';
+import { svgDataUrl } from '@/utils/svgDataUrl';
 
 interface FileQueueProps {
     files: QueuedFile[];
@@ -51,32 +52,32 @@ const FileQueueItem = ({
     onToggleSpoiler: () => void;
 }) => {
     const isImage = file.file.type.startsWith('image/');
-    const previewUrl = useMemo((): string | null => {
-        if (!isImage) return null;
-        return URL.createObjectURL(file.file);
-    }, [file.file, isImage]);
+    const previewRef = useRef<HTMLImageElement>(null);
     const fileTypeIcon = useMemo(
         (): ReturnType<typeof getIcon> | undefined =>
             isImage ? undefined : getIcon(file.file.name),
         [file.file.name, isImage],
     );
 
-    React.useEffect(
-        (): (() => void) => (): void => {
-            if (previewUrl) URL.revokeObjectURL(previewUrl);
-        },
-        [previewUrl],
-    );
+    React.useLayoutEffect((): (() => void) | undefined => {
+        const img = previewRef.current;
+        if (!img) return undefined;
+        const url = URL.createObjectURL(file.file);
+        img.src = url;
+        return (): void => {
+            URL.revokeObjectURL(url);
+        };
+    }, [file.file, isImage]);
 
     return (
         <Box className="group relative h-24 w-24 overflow-hidden rounded-lg border border-border-subtle bg-bg-primary">
-            {isImage && previewUrl ? (
+            {isImage ? (
                 <img
                     alt={file.file.name}
                     className={`h-full w-full object-cover transition-all duration-300 ${
                         file.isSpoiler ? 'blur-md' : ''
                     } ${file.status === 'uploading' ? 'opacity-50' : ''}`}
-                    src={previewUrl}
+                    ref={previewRef}
                 />
             ) : (
                 <div
@@ -85,11 +86,10 @@ const FileQueueItem = ({
                     }`}
                 >
                     {fileTypeIcon ? (
-                        <div
+                        <img
+                            alt=""
                             className="h-8 w-8 shrink-0"
-                            dangerouslySetInnerHTML={{
-                                __html: fileTypeIcon.svg,
-                            }}
+                            src={svgDataUrl(fileTypeIcon.svg)}
                         />
                     ) : null}
                     <Tooltip fullWidth content={file.file.name} position="top">
@@ -145,8 +145,8 @@ const FileQueueItem = ({
             {file.status === 'uploading' ? (
                 <div className="absolute inset-x-2 bottom-2 h-1 overflow-hidden rounded-full bg-white/20">
                     <div
-                        className="h-full bg-primary transition-all duration-300"
-                        style={{ width: `${file.progress}%` }}
+                        className="h-full w-full origin-left bg-primary transition-transform duration-300"
+                        style={{ transform: `scaleX(${file.progress / 100})` }}
                     />
                 </div>
             ) : null}

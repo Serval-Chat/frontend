@@ -319,7 +319,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
 
                 {showVotersButton ? (
                     <button
-                        className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition-all hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
+                        className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
                         type="button"
                         onClick={(): void => {
                             setIsVotersModalOpen(true);

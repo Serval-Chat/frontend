@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 import { Reorder, useDragControls } from 'framer-motion';
 import { GripVertical, Trash2 } from 'lucide-react';
@@ -145,10 +145,8 @@ const ReportReasonEditor = ({
         ),
     );
     const [draft, setDraft] = useState<ReportReasonDraft[]>(saved);
-    const [deleteReasonIds, setDeleteReasonIds] = useState<string[]>([]);
-    const [deleteSubcategoryIds, setDeleteSubcategoryIds] = useState<string[]>(
-        [],
-    );
+    const deleteReasonIds = useRef<string[]>([]);
+    const deleteSubcategoryIds = useRef<string[]>([]);
 
     const hasChanges = JSON.stringify(draft) !== JSON.stringify(saved);
     const canSave =
@@ -231,9 +229,9 @@ const ReportReasonEditor = ({
     const removeOption = (index: number): void => {
         const id = draft[index]?.id;
         if (id) {
-            setDeleteReasonIds((current) =>
-                current.includes(id) ? current : [...current, id],
-            );
+            if (!deleteReasonIds.current.includes(id)) {
+                deleteReasonIds.current.push(id);
+            }
         }
         setDraft((current) =>
             current.filter((_, itemIndex) => itemIndex !== index),
@@ -246,9 +244,9 @@ const ReportReasonEditor = ({
     ): void => {
         const id = draft[optionIndex]?.subcategories[subcategoryIndex]?.id;
         if (id) {
-            setDeleteSubcategoryIds((current) =>
-                current.includes(id) ? current : [...current, id],
-            );
+            if (!deleteSubcategoryIds.current.includes(id)) {
+                deleteSubcategoryIds.current.push(id);
+            }
         }
         setDraft((current) =>
             current.map((option, index) =>
@@ -302,13 +300,20 @@ const ReportReasonEditor = ({
             );
             setDraft(next);
             setSaved(next);
-            setDeleteReasonIds([]);
-            setDeleteSubcategoryIds([]);
+            deleteReasonIds.current = [];
+            deleteSubcategoryIds.current = [];
         };
 
-        if (deleteReasonIds.length > 0 || deleteSubcategoryIds.length > 0) {
+        if (
+            deleteReasonIds.current.length > 0 ||
+            deleteSubcategoryIds.current.length > 0
+        ) {
             update.mutateWithDeletions(
-                { options, deleteReasonIds, deleteSubcategoryIds },
+                {
+                    options,
+                    deleteReasonIds: deleteReasonIds.current,
+                    deleteSubcategoryIds: deleteSubcategoryIds.current,
+                },
                 { onSuccess },
             );
         } else {
@@ -542,8 +547,8 @@ const ReportReasonEditor = ({
                     variant="ghost"
                     onClick={(): void => {
                         setDraft(saved);
-                        setDeleteReasonIds([]);
-                        setDeleteSubcategoryIds([]);
+                        deleteReasonIds.current = [];
+                        deleteSubcategoryIds.current = [];
                     }}
                 >
                     Discard

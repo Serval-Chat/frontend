@@ -59,7 +59,7 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
 
     return (
         <>
-            <div className="max-w-6xl pb-20 transition-all duration-500 ease-in-out">
+            <div className="max-w-6xl pb-20 transition duration-500 ease-in-out">
                 <div className="mb-6 flex items-center justify-between">
                     <Heading level={3}>Appearance</Heading>
                     <Button
@@ -72,7 +72,7 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                 </div>
 
                 <div className="flex flex-col items-start md:flex-row">
-                    <div className="w-full min-w-0 flex-1 pb-8 transition-all duration-500 ease-in-out md:pr-8 md:pb-0">
+                    <div className="w-full min-w-0 flex-1 pb-8 transition duration-500 ease-in-out md:pr-8 md:pb-0">
                         <div className="grid grid-cols-1 gap-8">
                             <ProfileColorsSection
                                 accentColor={f.profileAccentColor}
@@ -248,7 +248,7 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                     </div>
 
                     <div
-                        className="w-full shrink-0 overflow-hidden transition-all duration-500 ease-in-out md:sticky md:top-4 md:w-auto"
+                        className="w-full shrink-0 overflow-hidden transition duration-500 ease-in-out md:sticky md:top-4 md:w-auto"
                         style={{
                             width: '340px',
                             maxHeight: '1000px',

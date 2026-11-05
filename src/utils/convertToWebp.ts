@@ -8,6 +8,7 @@ export const convertToWebp = (blob: Blob, fileName: string): Promise<File> =>
             canvas.height = img.height;
             const ctx = canvas.getContext('2d');
             if (!ctx) {
+                URL.revokeObjectURL(url);
                 reject(new Error('Failed to get canvas context'));
                 return;
             }

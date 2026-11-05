@@ -105,7 +105,7 @@ export const AdminErrorDisplay = ({
 
             {reset ? (
                 <Button
-                    className="mt-8 rounded-xl px-6 py-2.5 transition-all hover:scale-105 active:scale-95"
+                    className="mt-8 rounded-xl px-6 py-2.5 transition hover:scale-105 active:scale-95"
                     variant="primary"
                     onClick={reset}
                 >

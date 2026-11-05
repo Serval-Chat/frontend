@@ -28,6 +28,7 @@ import { Box } from '@/ui/components/layout/Box';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { cn } from '@/utils/cn';
 import { getSafeUrl, isInternalUrl } from '@/utils/proxy';
+import { svgDataUrl } from '@/utils/svgDataUrl';
 
 interface FileEmbedProps {
     url?: string;
@@ -287,12 +288,13 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
             : undefined;
 
     return (
-        <Box className="my-2 flex w-75 items-center gap-3 rounded-lg bg-bg-secondary p-3 transition-all">
+        <Box className="my-2 flex w-75 items-center gap-3 rounded-lg bg-bg-secondary p-3 transition">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 {fileTypeIcon ? (
-                    <div
+                    <img
+                        alt=""
                         className="h-6 w-6"
-                        dangerouslySetInnerHTML={{ __html: fileTypeIcon.svg }}
+                        src={svgDataUrl(fileTypeIcon.svg)}
                     />
                 ) : (
                     <FileIcon size={20} />

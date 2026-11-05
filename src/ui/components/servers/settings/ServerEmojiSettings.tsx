@@ -38,7 +38,7 @@ const EmojiGridItem = ({
     onDelete: () => void;
 }) => (
     <div
-        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition hover:border-primary"
         onMouseEnter={onHover}
         onMouseLeave={onLeave}
     >
@@ -224,7 +224,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                     <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
                         {/* Upload Box */}
                         <button
-                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={
                                 isUploading || isBulkUploading || !emojiName
                             }
@@ -250,7 +250,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
                         {/* Bulk Upload Box */}
                         <button
-                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
                             type="button"
                             onClick={(): void | undefined =>

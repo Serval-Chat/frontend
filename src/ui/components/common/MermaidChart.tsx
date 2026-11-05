@@ -106,7 +106,9 @@ const MermaidChartRenderer = ({
 
     const { theme } = useTheme();
 
-    useEffect((): void => {
+    useEffect((): (() => void) => {
+        let cancelled = false;
+
         const renderChart = async (): Promise<void> => {
             try {
                 mermaid.initialize({
@@ -119,9 +121,11 @@ const MermaidChartRenderer = ({
 
                 const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
                 const { svg } = await mermaid.render(id, content);
+                if (cancelled) return;
                 setSvgContent(svg);
                 setError(null);
             } catch (error_: unknown) {
+                if (cancelled) return;
                 console.error('Mermaid render error:', error_);
                 setError(
                     error_ instanceof Error
@@ -132,6 +136,10 @@ const MermaidChartRenderer = ({
         };
 
         void renderChart();
+
+        return (): void => {
+            cancelled = true;
+        };
     }, [content, theme]);
 
     useEffect((): void => {
@@ -472,7 +480,7 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
     return (
         <>
             <button
-                className="group my-2 inline-flex items-center gap-3 rounded-lg border border-border-subtle bg-bg-secondary p-3 text-left shadow-sm transition-all hover:border-primary/40 hover:bg-bg-secondary/80"
+                className="group my-2 inline-flex items-center gap-3 rounded-lg border border-border-subtle bg-bg-secondary p-3 text-left shadow-sm transition hover:border-primary/40 hover:bg-bg-secondary/80"
                 type="button"
                 onClick={(): void => {
                     setIsOpen(true);

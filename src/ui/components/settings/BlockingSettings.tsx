@@ -445,7 +445,7 @@ export const BlockingSettings = () => {
                         />
                         <input
                             aria-label="Search blocked users"
-                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition-all outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
+                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
                             placeholder="Search blocked users..."
                             value={searchQuery}
                             onChange={(e): void => {

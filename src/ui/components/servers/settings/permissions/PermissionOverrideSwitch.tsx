@@ -34,7 +34,7 @@ export const PermissionOverrideSwitch = ({
         </div>
         <div className="flex shrink-0 overflow-hidden rounded-md border border-border-subtle bg-bg-secondary p-1">
             <Button
-                className="h-8 w-10 rounded-l border-none p-0 shadow-none transition-all"
+                className="h-8 w-10 rounded-l border-none p-0 shadow-none transition"
                 title="Deny"
                 variant={value === false ? 'danger' : 'ghost'}
                 onClick={(): void => {
@@ -62,7 +62,7 @@ export const PermissionOverrideSwitch = ({
                 <Minus size={16} />
             </Button>
             <Button
-                className="h-8 w-10 rounded-r border-none p-0 shadow-none transition-all"
+                className="h-8 w-10 rounded-r border-none p-0 shadow-none transition"
                 title="Allow"
                 variant={value === true ? 'success' : 'ghost'}
                 onClick={(): void => {

@@ -64,6 +64,9 @@ export class AudioPipeline {
                 let buffer = this.buffers.get(url);
                 if (!buffer) {
                     const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                     const arrayBuffer = await response.arrayBuffer();
                     buffer = await context.decodeAudioData(arrayBuffer);
                     this.buffers.set(url, buffer);

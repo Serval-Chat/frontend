@@ -26,7 +26,7 @@ export const ServerVisualsSection = ({
                 Server Icon
             </label>
             <button
-                className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+                className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition hover:border-primary"
                 type="button"
                 onClick={onIconClick}
                 onKeyDown={(e): void => {
@@ -69,7 +69,7 @@ export const ServerVisualsSection = ({
                 Server Banner
             </label>
             <button
-                className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition-all hover:border-primary md:w-64"
+                className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition hover:border-primary md:w-64"
                 type="button"
                 onClick={onBannerClick}
                 onKeyDown={(e): void => {

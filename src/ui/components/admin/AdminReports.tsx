@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 
 import { Link, useLocation } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { Heading } from '@/ui/components/common/Heading';
 import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
 import { ReportIdCopy } from '@/ui/components/common/ReportIdCopy';
 import { Text } from '@/ui/components/common/Text';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 import { ReportMessagePreview } from './ReportMessagePreview';
 import { ReportPunishmentActions } from './ReportPunishmentActions';
@@ -20,12 +21,22 @@ import { ReportUserProfileSnapshot } from './ReportUserProfileSnapshot';
 
 const STATUSES: ReportStatus[] = ['open', 'reviewing', 'resolved', 'dismissed'];
 
+interface ReportQuery {
+    filter: ReportStatus | '';
+    offset: number;
+    reportIdInput: string;
+    reportId: string;
+}
+
 export const AdminReports = () => {
     const location = useLocation();
-    const [filter, setFilter] = useState<ReportStatus | ''>('open');
-    const [offset, setOffset] = useState(0);
-    const [reportIdInput, setReportIdInput] = useState('');
-    const [reportId, setReportId] = useState('');
+    const [query, patchQuery] = useReducer(mergeReducer<ReportQuery>, {
+        filter: 'open',
+        offset: 0,
+        reportIdInput: '',
+        reportId: '',
+    });
+    const { filter, offset, reportIdInput, reportId } = query;
     const {
         data: reports,
         isLoading,
@@ -71,8 +82,10 @@ export const AdminReports = () => {
                         className="flex gap-2"
                         onSubmit={(event): void => {
                             event.preventDefault();
-                            setReportId(reportIdInput.trim());
-                            setOffset(0);
+                            patchQuery({
+                                reportId: reportIdInput.trim(),
+                                offset: 0,
+                            });
                         }}
                     >
                         <input
@@ -80,9 +93,11 @@ export const AdminReports = () => {
                             className="min-w-56 rounded-lg border border-border-subtle bg-bg-secondary px-3 py-2"
                             placeholder="Search report ID"
                             value={reportIdInput}
-                            onChange={(event): void =>
-                                setReportIdInput(event.target.value)
-                            }
+                            onChange={(event): void => {
+                                patchQuery({
+                                    reportIdInput: event.target.value,
+                                });
+                            }}
                         />
                         <Button type="submit" variant="normal">
                             Search
@@ -91,9 +106,11 @@ export const AdminReports = () => {
                             <Button
                                 variant="normal"
                                 onClick={(): void => {
-                                    setReportId('');
-                                    setReportIdInput('');
-                                    setOffset(0);
+                                    patchQuery({
+                                        reportId: '',
+                                        reportIdInput: '',
+                                        offset: 0,
+                                    });
                                 }}
                             >
                                 Clear
@@ -106,8 +123,10 @@ export const AdminReports = () => {
                         disabled={Boolean(reportId)}
                         value={filter}
                         onChange={(event): void => {
-                            setFilter(event.target.value as ReportStatus | '');
-                            setOffset(0);
+                            patchQuery({
+                                filter: event.target.value as ReportStatus | '',
+                                offset: 0,
+                            });
                         }}
                     >
                         <option value="">All statuses</option>
@@ -337,16 +356,22 @@ export const AdminReports = () => {
                     <Button
                         disabled={offset === 0}
                         variant="normal"
-                        onClick={(): void =>
-                            setOffset(Math.max(0, offset - 100))
-                        }
+                        onClick={(): void => {
+                            patchQuery((current) => ({
+                                offset: Math.max(0, current.offset - 100),
+                            }));
+                        }}
                     >
                         Previous
                     </Button>
                     <Button
                         disabled={(reports?.length ?? 0) < 100}
                         variant="normal"
-                        onClick={(): void => setOffset(offset + 100)}
+                        onClick={(): void => {
+                            patchQuery((current) => ({
+                                offset: current.offset + 100,
+                            }));
+                        }}
                     >
                         Next
                     </Button>

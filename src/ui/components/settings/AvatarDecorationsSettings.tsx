@@ -1,4 +1,4 @@
-import { useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Share2, Sparkles, Trash2, Upload } from 'lucide-react';
@@ -305,6 +305,13 @@ export const AvatarDecorationsSettings = () => {
     });
     const { name, selectedFile, previewUrl, isHovered, decorationToDelete } =
         deco;
+
+    useEffect(
+        (): (() => void) => (): void => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        },
+        [previewUrl],
+    );
     const setName = (v: string): void => {
         patchDeco({ name: v });
     };

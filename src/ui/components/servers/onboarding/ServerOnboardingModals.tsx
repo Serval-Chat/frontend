@@ -701,7 +701,7 @@ const OnboardingWelcomeStep = ({
             <div className="custom-scrollbar grid max-h-[55vh] gap-3 overflow-y-auto pr-2 sm:grid-cols-2">
                 {welcomeChannels.map((channel) => (
                     <Button
-                        className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition-all duration-200 hover:border-primary hover:bg-bg-secondary/80"
+                        className="justify-start rounded-xl border border-border-subtle bg-bg-secondary/40 px-4 py-3 text-left shadow-none transition duration-200 hover:border-primary hover:bg-bg-secondary/80"
                         justify="start"
                         key={channel.id}
                         type="button"
@@ -917,12 +917,12 @@ export const ServerOnboardingModal = ({
                                         {i < steps.length - 1 ? (
                                             <div className="relative mx-3 mb-5 h-0.5 w-24 overflow-hidden rounded-full bg-border-subtle sm:w-32">
                                                 <div
-                                                    className="absolute inset-y-0 left-0 bg-primary transition-all duration-500 ease-out"
+                                                    className="absolute inset-0 origin-left bg-primary transition-transform duration-500 ease-out"
                                                     style={{
-                                                        width:
+                                                        transform:
                                                             i < stepIndex
-                                                                ? '100%'
-                                                                : '0%',
+                                                                ? 'scaleX(1)'
+                                                                : 'scaleX(0)',
                                                     }}
                                                 />
                                             </div>

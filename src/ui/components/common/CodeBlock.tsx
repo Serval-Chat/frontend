@@ -161,7 +161,7 @@ export const CodeBlock = ({
                         {godboltLanguageId !== null && (
                             <>
                                 <Button
-                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-[hsl(25,95%,53%)]/10 hover:text-[hsl(25,95%,53%)]"
+                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition hover:bg-[hsl(25,95%,53%)]/10 hover:text-[hsl(25,95%,53%)]"
                                     size="sm"
                                     title="Try in Godbolt"
                                     variant="ghost"
@@ -176,7 +176,7 @@ export const CodeBlock = ({
                             </>
                         )}
                         <Button
-                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition hover:bg-primary/10 hover:text-primary"
                             size="sm"
                             title="Full Screen"
                             variant="ghost"
@@ -189,7 +189,7 @@ export const CodeBlock = ({
                         </Button>
                         <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
                         <Button
-                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                            className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition hover:bg-primary/10 hover:text-primary"
                             size="sm"
                             variant="ghost"
                             onClick={handleCopy}
@@ -207,7 +207,7 @@ export const CodeBlock = ({
                             <>
                                 <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
                                 <Button
-                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition-all hover:bg-primary/10 hover:text-primary"
+                                    className="flex items-center gap-3 rounded-md border-none p-1.5 text-muted-foreground shadow-none transition hover:bg-primary/10 hover:text-primary"
                                     size="sm"
                                     title="Download"
                                     variant="ghost"

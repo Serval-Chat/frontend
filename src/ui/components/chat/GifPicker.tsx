@@ -219,6 +219,10 @@ const FavoritesShortcutTile = ({
     );
 };
 
+const focusOnMount = (el: HTMLInputElement | null): void => {
+    el?.focus();
+};
+
 export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
     const [search, setSearch] = useState('');
     const [tab, setTab] = useState<'trending' | 'stickers' | 'favorites'>(
@@ -383,11 +387,6 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
 
     const [isCreatingTag, setIsCreatingTag] = useState(false);
     const [newTagName, setNewTagName] = useState('');
-    const newTagInputRef = useRef<HTMLInputElement>(null);
-
-    useEffect((): void => {
-        if (isCreatingTag) newTagInputRef.current?.focus();
-    }, [isCreatingTag]);
 
     const handleCreateTag = (e: React.FormEvent): void => {
         e.preventDefault();
@@ -630,7 +629,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                         maxLength={32}
                                         maxWidth={112}
                                         placeholder="Tag name..."
-                                        ref={newTagInputRef}
+                                        ref={focusOnMount}
                                         size="sm"
                                         value={newTagName}
                                         onBlur={(): void => {

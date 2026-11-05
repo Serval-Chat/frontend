@@ -100,10 +100,12 @@ interface FieldProps {
 
 const Field = ({ label, hint, children, className }: FieldProps): ReactNode => (
     <div className={cn('flex flex-col gap-1', className)}>
-        <label className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-            {label}
+        <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                {label}
+            </span>
+            {children}
         </label>
-        {children}
         {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
     </div>
 );

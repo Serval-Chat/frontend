@@ -43,7 +43,7 @@ const StickerGridItem = ({
     onDelete: () => void;
 }) => (
     <div
-        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition-all hover:border-primary"
+        className="group relative aspect-square overflow-hidden rounded-lg border border-border-subtle bg-bg-subtle transition hover:border-primary"
         onMouseEnter={onHover}
         onMouseLeave={onLeave}
     >
@@ -257,7 +257,7 @@ export const ServerStickerSettings = ({
                     <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                         {/* Upload Box */}
                         <button
-                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={
                                 isUploading || isBulkUploading || !stickerName
                             }
@@ -283,7 +283,7 @@ export const ServerStickerSettings = ({
 
                         {/* Bulk Upload Box */}
                         <button
-                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition-all hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
                             type="button"
                             onClick={(): void | undefined =>

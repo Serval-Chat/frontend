@@ -331,7 +331,7 @@ export const AdminServerMemberships = ({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {(servers || []).map((server) => (
                 <div
-                    className="hover:border-border-hover flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/30 p-4 transition-all hover:bg-bg-secondary/50"
+                    className="hover:border-border-hover flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/30 p-4 transition hover:bg-bg-secondary/50"
                     key={server.id}
                 >
                     <div className="flex items-center gap-4">

@@ -174,7 +174,7 @@ export const ServerInfoSection = ({
                                 {tag}
                                 <button
                                     aria-label={`Remove tag ${tag}`}
-                                    className="rounded-full p-1 opacity-60 transition-all hover:bg-primary/20 hover:opacity-100"
+                                    className="rounded-full p-1 opacity-60 transition hover:bg-primary/20 hover:opacity-100"
                                     type="button"
                                     onClick={(): void => {
                                         onRemoveTag(tag);

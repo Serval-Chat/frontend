@@ -550,7 +550,7 @@ export const ServerOnboardingSettings = ({
                 )}
 
                 <Button
-                    className="flex w-full items-center justify-center rounded-lg border border-dashed border-border-subtle py-2.5 text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
+                    className="flex w-full items-center justify-center rounded-lg border border-dashed border-border-subtle py-2.5 text-muted-foreground transition hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
                     variant="ghost"
                     onClick={(): void => {
                         dispatchForm({

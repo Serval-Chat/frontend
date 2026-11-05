@@ -220,9 +220,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
                 link.id = linkId;
                 link.rel = 'stylesheet';
                 link.media = 'print';
-                link.addEventListener('load', (): void => {
+                link.onload = (): void => {
                     if (link) link.media = 'all';
-                });
+                };
                 document.head.append(link);
             }
             if (link.getAttribute('href') !== customFontUrl) {

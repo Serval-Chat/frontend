@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 
 import { adminBansApi } from '@/api/admin/bans.api';
 import type { StaffReport } from '@/api/reports/reports.api';
@@ -8,8 +8,17 @@ import { Input } from '@/ui/components/common/Input';
 import { Text } from '@/ui/components/common/Text';
 import { colors } from '@/ui/theme';
 import { extractApiError } from '@/utils/extractApiError';
+import { mergeReducer } from '@/utils/mergeReducer';
 
 type Punishment = 'warn' | 'mute' | 'ban' | '';
+
+interface PunishmentForm {
+    punishment: Punishment;
+    reason: string;
+    duration: string;
+    isSubmitting: boolean;
+    feedback?: { message: string; isError: boolean };
+}
 
 interface ReportPunishmentActionsProps {
     report: StaffReport;
@@ -25,23 +34,24 @@ export const ReportPunishmentActions = ({
     ]
         .filter(Boolean)
         .join(' · ');
-    const [punishment, setPunishment] = useState<Punishment>('');
-    const [reason, setReason] = useState(`Reported for ${reportReason}`);
-    const [duration, setDuration] = useState('60');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [feedback, setFeedback] = useState<{
-        message: string;
-        isError: boolean;
-    }>();
+    const [form, patchForm] = useReducer(mergeReducer<PunishmentForm>, {
+        punishment: '',
+        reason: `Reported for ${reportReason}`,
+        duration: '60',
+        isSubmitting: false,
+    });
+    const { punishment, reason, duration, isSubmitting, feedback } = form;
 
     if (!userId) return null;
 
     const submitPunishment = async (): Promise<void> => {
         if (!punishment) return;
         if (!reason.trim()) {
-            setFeedback({
-                message: 'A punishment reason is required.',
-                isError: true,
+            patchForm({
+                feedback: {
+                    message: 'A punishment reason is required.',
+                    isError: true,
+                },
             });
             return;
         }
@@ -51,9 +61,11 @@ export const ReportPunishmentActions = ({
             punishment !== 'warn' &&
             (!Number.isInteger(durationMinutes) || durationMinutes <= 0)
         ) {
-            setFeedback({
-                message: 'Duration must be a positive number of minutes.',
-                isError: true,
+            patchForm({
+                feedback: {
+                    message: 'Duration must be a positive number of minutes.',
+                    isError: true,
+                },
             });
             return;
         }
@@ -62,16 +74,17 @@ export const ReportPunishmentActions = ({
             duration.trim() !== '' &&
             (!Number.isInteger(durationMinutes) || durationMinutes <= 0)
         ) {
-            setFeedback({
-                message:
-                    'Warning expiry must be a positive number of minutes or left blank.',
-                isError: true,
+            patchForm({
+                feedback: {
+                    message:
+                        'Warning expiry must be a positive number of minutes or left blank.',
+                    isError: true,
+                },
             });
             return;
         }
 
-        setIsSubmitting(true);
-        setFeedback(undefined);
+        patchForm({ isSubmitting: true, feedback: undefined });
         const punishmentNotice = reason.trim();
         try {
             if (punishment === 'warn') {
@@ -93,18 +106,25 @@ export const ReportPunishmentActions = ({
                     durationMinutes,
                 );
             }
-            setFeedback({
-                message: `${punishment === 'warn' ? 'Warning issued' : punishment === 'mute' ? 'User muted' : 'User banned'} successfully.`,
-                isError: false,
+            patchForm({
+                punishment: '',
+                feedback: {
+                    message: `${punishment === 'warn' ? 'Warning issued' : punishment === 'mute' ? 'User muted' : 'User banned'} successfully.`,
+                    isError: false,
+                },
             });
-            setPunishment('');
         } catch (error) {
-            setFeedback({
-                message: extractApiError(error, 'Could not apply punishment.'),
-                isError: true,
+            patchForm({
+                feedback: {
+                    message: extractApiError(
+                        error,
+                        'Could not apply punishment.',
+                    ),
+                    isError: true,
+                },
             });
         } finally {
-            setIsSubmitting(false);
+            patchForm({ isSubmitting: false });
         }
     };
 
@@ -123,15 +143,16 @@ export const ReportPunishmentActions = ({
                             value={punishment}
                             onChange={(event): void => {
                                 const next = event.target.value as Punishment;
-                                setPunishment(next);
-                                setDuration(
-                                    next === 'ban'
-                                        ? '1440'
-                                        : next === 'mute'
-                                          ? '60'
-                                          : '',
-                                );
-                                setFeedback(undefined);
+                                patchForm({
+                                    punishment: next,
+                                    duration:
+                                        next === 'ban'
+                                            ? '1440'
+                                            : next === 'mute'
+                                              ? '60'
+                                              : '',
+                                    feedback: undefined,
+                                });
                             }}
                         >
                             <option value="">No punishment</option>
@@ -154,7 +175,7 @@ export const ReportPunishmentActions = ({
                                 maxLength={500}
                                 value={reason}
                                 onChange={(event): void =>
-                                    setReason(event.target.value)
+                                    patchForm({ reason: event.target.value })
                                 }
                             />
                         </div>
@@ -177,7 +198,7 @@ export const ReportPunishmentActions = ({
                                 type="number"
                                 value={duration}
                                 onChange={(event): void =>
-                                    setDuration(event.target.value)
+                                    patchForm({ duration: event.target.value })
                                 }
                             />
                         </div>

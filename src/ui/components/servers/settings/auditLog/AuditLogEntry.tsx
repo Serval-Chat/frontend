@@ -512,7 +512,7 @@ const RoleReorderVisualizer = ({
 
                         return (
                             <path
-                                className="transition-all duration-300"
+                                className="transition-[d,opacity,stroke] duration-300"
                                 d={d}
                                 fill="none"
                                 key={`path-${roleName}`}

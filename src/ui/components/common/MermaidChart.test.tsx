@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+    act,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MermaidChart } from '@/ui/components/common/MermaidChart';
@@ -132,5 +138,40 @@ describe('MermaidChart', (): void => {
         expect(clean).not.toContain('<script');
         expect(clean).not.toContain('onerror');
         expect(clean).toContain('<text>ok</text>');
+    });
+
+    it('ignores a stale render that resolves after a newer one', async (): Promise<void> => {
+        const mermaid = (await import('mermaid')).default;
+        const pending = new Map<string, (svg: string) => void>();
+        const renderSpy = vi.spyOn(mermaid, 'render').mockImplementation(
+            (_id: string, text: string): ReturnType<typeof mermaid.render> =>
+                new Promise((resolve): void => {
+                    pending.set(text, (svg): void => {
+                        resolve({ svg } as Awaited<
+                            ReturnType<typeof mermaid.render>
+                        >);
+                    });
+                }),
+        );
+
+        const { rerender } = render(<MermaidChart content="old" />);
+        fireEvent.click(screen.getByText('Mermaid diagram'));
+        rerender(<MermaidChart content="new" />);
+
+        await waitFor((): void => {
+            expect(pending.has('new')).toBe(true);
+        });
+        await act(async (): Promise<void> => {
+            pending.get('new')!('<svg><text>new chart</text></svg>');
+        });
+        await act(async (): Promise<void> => {
+            pending.get('old')!('<svg><text>old chart</text></svg>');
+        });
+
+        const container = document.querySelector('.mermaid-chart-container');
+        expect(container?.textContent).toContain('new chart');
+        expect(container?.textContent).not.toContain('old chart');
+
+        renderSpy.mockRestore();
     });
 });

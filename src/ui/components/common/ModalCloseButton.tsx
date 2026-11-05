@@ -17,7 +17,7 @@ export const ModalCloseButton = ({
     <div className={cn('flex flex-col items-center gap-2', className)}>
         <IconButton
             aria-label="Close"
-            className="rounded-full border-2 border-border-subtle p-2 text-muted-foreground transition-all duration-200 hover:bg-bg-subtle hover:text-foreground"
+            className="rounded-full border-2 border-border-subtle p-2 text-muted-foreground transition duration-200 hover:bg-bg-subtle hover:text-foreground"
             icon={X}
             iconSize={iconSize}
             onClick={onClick}

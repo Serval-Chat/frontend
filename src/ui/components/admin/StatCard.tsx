@@ -14,9 +14,9 @@ interface StatCardProps {
 }
 
 export const StatCard = ({ title, value, icon }: StatCardProps): ReactNode => (
-    <Box className="group relative flex flex-col justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
+    <Box className="group relative flex flex-col justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle p-4 transition duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5">
         {/* Background Accent */}
-        <Box className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition-all duration-500 group-hover:bg-primary/10" />
+        <Box className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl transition duration-500 group-hover:bg-primary/10" />
 
         <Box className="flex items-start justify-between gap-4">
             <Stack gap="none">

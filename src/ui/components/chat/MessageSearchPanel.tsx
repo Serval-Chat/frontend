@@ -363,7 +363,7 @@ export function SearchResultItem({
     return (
         <button
             aria-label="Navigate to message"
-            className="group relative flex w-full flex-col text-left transition-all duration-150 hover:bg-white/2"
+            className="group relative flex w-full flex-col text-left transition duration-150 hover:bg-white/2"
             style={{
                 background: 'none',
                 border: 'none',

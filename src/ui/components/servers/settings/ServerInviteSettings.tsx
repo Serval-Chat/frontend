@@ -249,7 +249,7 @@ export const ServerInviteSettings = ({
                             Expire After
                         </label>
                         <select
-                            className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none"
+                            className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition focus:ring-2 focus:ring-primary focus:outline-none"
                             id="expires-in"
                             value={expiresIn}
                             onChange={(e): void => {

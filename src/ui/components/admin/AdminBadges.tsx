@@ -118,7 +118,7 @@ const AssignBadgeModal = ({
                         ) : users && users.length > 0 ? (
                             users.map((user) => (
                                 <Box
-                                    className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/20 p-4 transition-all hover:bg-bg-secondary/40"
+                                    className="flex items-center justify-between rounded-xl border border-border-subtle bg-bg-secondary/20 p-4 transition hover:bg-bg-secondary/40"
                                     key={user.id}
                                 >
                                     <Box className="flex items-center gap-4 overflow-hidden">

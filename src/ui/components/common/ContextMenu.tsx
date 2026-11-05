@@ -182,52 +182,52 @@ export const ContextMenu = ({
                 {children}
             </Box>
 
-            {isOpen
-                ? createPortal(
-                      <AnimatePresence>
-                          <m.div
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              ref={menuRef}
-                              style={{
-                                  position: 'fixed',
-                                  top: position.y,
-                                  left: position.x,
-                                  zIndex: 'var(--z-index-top)',
-                                  boxShadow:
-                                      '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
-                              }}
-                              transition={{ duration: 0.15, ease: 'easeOut' }}
-                              onClick={(e): void => {
-                                  e.stopPropagation();
-                              }}
-                              onMouseDown={(e): void => {
-                                  e.stopPropagation();
-                              }}
-                          >
-                              {filteredItems.map((item, index) => (
-                                  <ContextMenuItemRenderer
-                                      closeMenu={closeMenu}
-                                      item={item}
-                                      key={
-                                          item.id ??
-                                          (item.type === 'divider'
-                                              ? `divider-${index}`
-                                              : item.type === 'custom'
-                                                ? `custom-${index}`
-                                                : typeof item.label === 'string'
-                                                  ? `item-${item.label}`
-                                                  : `index-${index}`)
-                                      }
-                                  />
-                              ))}
-                          </m.div>
-                      </AnimatePresence>,
-                      document.body,
-                  )
-                : null}
+            {createPortal(
+                <AnimatePresence>
+                    {isOpen ? (
+                        <m.div
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className="context-menu-portal min-w-[220px] overflow-hidden rounded-lg border border-border-subtle bg-background py-2 shadow-lg backdrop-blur-md"
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            ref={menuRef}
+                            style={{
+                                position: 'fixed',
+                                top: position.y,
+                                left: position.x,
+                                zIndex: 'var(--z-index-top)',
+                                boxShadow:
+                                    '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 190, 0, 0.1)',
+                            }}
+                            transition={{ duration: 0.15, ease: 'easeOut' }}
+                            onClick={(e): void => {
+                                e.stopPropagation();
+                            }}
+                            onMouseDown={(e): void => {
+                                e.stopPropagation();
+                            }}
+                        >
+                            {filteredItems.map((item, index) => (
+                                <ContextMenuItemRenderer
+                                    closeMenu={closeMenu}
+                                    item={item}
+                                    key={
+                                        item.id ??
+                                        (item.type === 'divider'
+                                            ? `divider-${index}`
+                                            : item.type === 'custom'
+                                              ? `custom-${index}`
+                                              : typeof item.label === 'string'
+                                                ? `item-${item.label}`
+                                                : `index-${index}`)
+                                    }
+                                />
+                            ))}
+                        </m.div>
+                    ) : null}
+                </AnimatePresence>,
+                document.body,
+            )}
         </>
     );
 };

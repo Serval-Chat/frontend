@@ -32,7 +32,9 @@ import { Text } from '@/ui/components/common/Text';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { cn } from '@/utils/cn';
 
-type AdminBotRowData = NonNullable<ReturnType<typeof useAdminBots>['data']>[number];
+type AdminBotRowData = NonNullable<
+    ReturnType<typeof useAdminBots>['data']
+>[number];
 
 const AdminBotRow = ({
     bot,
@@ -188,11 +190,6 @@ export const AdminBots = (): ReactNode => {
         searchTerm,
         ADMIN_CONSTANTS.SEARCH_DEBOUNCE_MS,
     );
-    const [lastSearch, setLastSearch] = useState(debouncedSearch);
-    if (debouncedSearch !== lastSearch) {
-        setLastSearch(debouncedSearch);
-        setPage(0);
-    }
 
     const {
         data: bots,
@@ -229,6 +226,7 @@ export const AdminBots = (): ReactNode => {
                         variant="admin"
                         onChange={(e): void => {
                             setSearchTerm(e.target.value);
+                            setPage(0);
                         }}
                     />
                 </div>
@@ -257,7 +255,10 @@ export const AdminBots = (): ReactNode => {
                         <TableRow>
                             <TableCell align="center" colSpan={5}>
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                                    <Text className="text-destructive" weight="medium">
+                                    <Text
+                                        className="text-destructive"
+                                        weight="medium"
+                                    >
                                         Failed to load bots.
                                     </Text>
                                     <Text

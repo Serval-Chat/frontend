@@ -81,6 +81,9 @@ const AT_BOTTOM_TOLERANCE_PX = 2;
 const LOAD_MORE_TRIGGER_PX = 500;
 const CORRECTION_THRESHOLD_PX = 1;
 
+const maxScrollTop = (el: HTMLElement): number =>
+    Math.max(0, el.scrollHeight - el.clientHeight);
+
 const messageMentionsUser = (
     message: ProcessedChatMessage,
     userId: string | undefined,
@@ -324,9 +327,6 @@ export const MessagesList = React.memo(
             !isLoading &&
             (!activeHighlightId ||
                 messages.some((m): boolean => m.id === activeHighlightId));
-
-        const maxScrollTop = (el: HTMLElement): number =>
-            Math.max(0, el.scrollHeight - el.clientHeight);
 
         const writeScrollTop = useCallback(
             (el: HTMLElement, value: number): void => {

@@ -52,8 +52,8 @@ export const BulkUploadModal = ({
                     </div>
                     <div className="h-3 w-full overflow-hidden rounded-full bg-border-subtle shadow-inner">
                         <div
-                            className="h-full bg-primary transition-all duration-500 ease-out"
-                            style={{ width: `${progress}%` }}
+                            className="h-full w-full origin-left bg-primary transition-transform duration-500 ease-out"
+                            style={{ transform: `scaleX(${progress / 100})` }}
                         />
                     </div>
                 </div>

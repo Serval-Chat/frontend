@@ -135,7 +135,7 @@ export const AdminBadgesManagement = ({
                 {badges && badges.length > 0 ? (
                     (badges as unknown as Badge[]).map((badge: Badge) => (
                         <div
-                            className="group relative inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-bg-secondary/50 px-3 py-2 transition-all hover:border-danger/30 hover:bg-danger/5"
+                            className="group relative inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-bg-secondary/50 px-3 py-2 transition hover:border-danger/30 hover:bg-danger/5"
                             key={badge.id}
                         >
                             <UserBadge badge={badge} />

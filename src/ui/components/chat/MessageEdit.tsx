@@ -3,8 +3,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { ClearEditorPlugin } from '@lexical/react/LexicalClearEditorPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { EditorRefPlugin } from '@lexical/react/LexicalEditorRefPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
@@ -49,18 +49,6 @@ import { LexicalInitPlugin } from './lexical/LexicalInitPlugin';
 import { LexicalMarkdownFormattingPlugin } from './lexical/LexicalMarkdownFormattingPlugin';
 import { LexicalSubmitPlugin } from './lexical/LexicalSubmitPlugin';
 import { $getRawMessageText } from './lexical/lexicalUtils';
-
-const LexicalEditorRefPlugin = ({
-    onEditor,
-}: {
-    onEditor: (editor: LexicalEditor) => void;
-}): null => {
-    const [editor] = useLexicalComposerContext();
-    React.useEffect((): void => {
-        onEditor(editor);
-    }, [editor, onEditor]);
-    return null;
-};
 
 const EmojiPicker = React.lazy(() =>
     import('@/ui/components/emoji/EmojiPicker').then((m) => ({
@@ -225,14 +213,20 @@ export const MessageEdit = ({
     const allServerEmojis = React.useMemo(
         () =>
             customCategories.flatMap((cat) =>
-                cat.emojis.filter(isCustomEmojiEntry).map((e) => ({
-                    id: e.id,
-                    name: e.name,
-                    imageUrl: e.url,
-                    serverId: cat.id,
-                    createdBy: '',
-                    createdAt: '',
-                })),
+                cat.emojis.flatMap((e) =>
+                    isCustomEmojiEntry(e)
+                        ? [
+                              {
+                                  id: e.id,
+                                  name: e.name,
+                                  imageUrl: e.url,
+                                  serverId: cat.id,
+                                  createdBy: '',
+                                  createdAt: '',
+                              },
+                          ]
+                        : [],
+                ),
             ),
         [customCategories],
     );
@@ -413,13 +407,9 @@ export const MessageEdit = ({
 
     return (
         <Box className="relative w-full">
-            <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition-all duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
+            <div className="relative flex min-h-[60px] flex-1 cursor-text items-start rounded-md border border-border-subtle bg-bg-secondary transition duration-200 focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/20 focus-within:outline-none">
                 <LexicalComposer initialConfig={initialConfig}>
-                    <LexicalEditorRefPlugin
-                        onEditor={(editor): void => {
-                            editorInstanceRef.current = editor;
-                        }}
-                    />
+                    <EditorRefPlugin editorRef={editorInstanceRef} />
                     <LexicalInitPlugin initialText={initialText} />
                     <AutoFocusPlugin defaultSelection="rootEnd" />
                     <RichTextPlugin
