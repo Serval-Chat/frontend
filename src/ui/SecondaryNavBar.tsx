@@ -77,8 +77,12 @@ export const SecondaryNavBar = () => {
                 {navMode === 'servers' ? <ServerSection /> : null}
             </Box>
 
-            <ActiveVoicePanel />
-            <MiniProfile />
+            {inSwipePanel ? (
+                <>
+                    <ActiveVoicePanel />
+                    <MiniProfile />
+                </>
+            ) : null}
 
             <Resizer
                 isResizing={isResizing}

@@ -24,8 +24,10 @@ import { PrimaryNavBar } from '@/ui/PrimaryNavBar';
 import { SecondaryNavBar } from '@/ui/SecondaryNavBar';
 import { TertiarySidebar } from '@/ui/TertiarySidebar';
 import { transitions } from '@/ui/animations';
+import { ActiveVoicePanel } from '@/ui/components/chat/ActiveVoicePanel';
 import { Box } from '@/ui/components/layout/Box';
 import { MainContent } from '@/ui/components/layout/MainContent';
+import { MiniProfile } from '@/ui/components/profile/MiniProfile';
 import { UnacknowledgedWarningModal } from '@/ui/components/warnings/UnacknowledgedWarningModal';
 import { isServerSubpage } from '@/utils/serverSubpages';
 
@@ -54,8 +56,16 @@ const DesktopChatLayout = ({
 }) => (
     <Box className="chat-background fixed inset-0 flex w-full overflow-hidden overscroll-none">
         <Outlet />
-        <PrimaryNavBar />
-        <SecondaryNavBar />
+        <Box className="flex h-full shrink-0 flex-col">
+            <Box className="flex min-h-0 flex-1">
+                <PrimaryNavBar />
+                <SecondaryNavBar />
+            </Box>
+            <Box className="border-r border-[var(--channel-sidebar-border,var(--border-subtle))]">
+                <ActiveVoicePanel />
+                <MiniProfile />
+            </Box>
+        </Box>
         <MainContent />
         <AnimatePresence>
             {!isSplitViewActive &&

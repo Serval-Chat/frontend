@@ -1,10 +1,15 @@
 import React, { useRef, useState } from 'react';
 
+import { Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 import { useMe } from '@/api/users/users.queries';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
+import { IconButton } from '@/ui/components/common/IconButton';
 import { ParsedEmoji } from '@/ui/components/common/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/ui/components/common/ParsedUnicodeEmoji';
 import { StyledUserName } from '@/ui/components/common/StyledUserName';
+import { Tooltip } from '@/ui/components/common/Tooltip';
 import { UserProfilePicture } from '@/ui/components/common/UserProfilePicture';
 import { Box } from '@/ui/components/layout/Box';
 import { isCustomEmojiId } from '@/utils/validation';
@@ -38,6 +43,7 @@ export const MiniProfile = () => {
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [isStatusPickerOpen, setIsStatusPickerOpen] = useState(false);
     const avatarRef = useRef<HTMLElement>(null);
+    const navigate = useNavigate();
 
     const { status: displayStatus, setStatus } = useSelfStatus();
 
@@ -98,6 +104,19 @@ export const MiniProfile = () => {
                     </Box>
                 </Box>
             </Box>
+
+            <Tooltip content="User Settings">
+                <IconButton
+                    aria-label="User Settings"
+                    className="shrink-0 text-text-subtle hover:bg-white/10 hover:text-text-normal"
+                    icon={Settings}
+                    iconSize={21}
+                    variant="ghost"
+                    onClick={(): void => {
+                        void navigate('/chat/@setting/my-account');
+                    }}
+                />
+            </Tooltip>
 
             <StatusModal
                 initialEmoji={statusEmoji}

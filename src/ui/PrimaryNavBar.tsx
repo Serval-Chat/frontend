@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 
-import { Compass, Home, Plus, Settings, Telescope } from 'lucide-react';
+import { Compass, Home, Plus, Telescope } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
@@ -54,14 +54,12 @@ interface NavOverlayState {
     showCreateServer: boolean;
     showJoinServer: boolean;
     showDiscovery: boolean;
-    settingsSectionOverride: string | null;
 }
 
 const INITIAL_NAV_OVERLAY: NavOverlayState = {
     showCreateServer: false,
     showJoinServer: false,
     showDiscovery: false,
-    settingsSectionOverride: null,
 };
 
 const navOverlayReducer = (
@@ -91,12 +89,7 @@ export const PrimaryNavBar = () => {
         navOverlayReducer,
         INITIAL_NAV_OVERLAY,
     );
-    const {
-        showCreateServer,
-        showJoinServer,
-        showDiscovery,
-        settingsSectionOverride,
-    } = overlay;
+    const { showCreateServer, showJoinServer, showDiscovery } = overlay;
     const setShowCreateServer = (v: boolean): void => {
         patchOverlay({ showCreateServer: v });
     };
@@ -106,32 +99,17 @@ export const PrimaryNavBar = () => {
     const setShowDiscovery = (v: boolean): void => {
         patchOverlay({ showDiscovery: v });
     };
-    const setSettingsSectionOverride = (v: string | null): void => {
-        patchOverlay({ settingsSectionOverride: v });
-    };
 
     const showSettings = location.pathname.startsWith('/chat/@setting');
     const inSwipePanel = useMobileSwipeContext();
 
     const isChatActive = !!selectedFriendId || !!selectedChannelId;
 
-    if (
-        (!showSettings || location.pathname === '/chat/@setting/my-account') &&
-        settingsSectionOverride !== null
-    ) {
-        setSettingsSectionOverride(null);
-    }
-
     const handleHomeClick = (): void => {
         dispatch(setMobileHomeTab('friends'));
         if (navMode !== 'friends' || location.pathname !== '/chat/@me') {
             void navigate('/chat/@me');
         }
-    };
-
-    const handleSettingsClick = (): void => {
-        setSettingsSectionOverride('account');
-        void navigate('/chat/@setting/my-account');
     };
 
     const handleCloseSettings = (): void => {
@@ -206,23 +184,10 @@ export const PrimaryNavBar = () => {
                 </Tooltip>
             </Box>
 
-            <Divider />
-
-            <Box>
-                <Tooltip content="User Settings">
-                    <IconButton
-                        aria-label="User Settings"
-                        icon={Settings}
-                        onClick={handleSettingsClick}
-                    />
-                </Tooltip>
-            </Box>
-
             {showSettings ? (
                 <React.Suspense fallback={<SettingsModalLoading />}>
                     <SettingsModal
                         isOpen={showSettings}
-                        sectionOverride={settingsSectionOverride}
                         onClose={handleCloseSettings}
                     />
                 </React.Suspense>
