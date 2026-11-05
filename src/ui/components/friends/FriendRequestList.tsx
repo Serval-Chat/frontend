@@ -26,7 +26,7 @@ export const FriendRequestList = () => {
     const { data: sentRequests } = useOutgoingRequests();
     const [view, setView] = React.useState<
         'all' | 'pending' | 'sent' | 'blocked' | 'add'
-    >('pending');
+    >('all');
 
     const requestCount = requests?.length ?? 0;
     const syncedRequestCountRef = useRef(requestCount);
