@@ -9,23 +9,23 @@ import {
     useParams,
 } from 'react-router-dom';
 
-import { AdminAuditLogs } from '@/ui/components/admin/AdminAuditLogs';
-import { AdminAwaitingReview } from '@/ui/components/admin/AdminAwaitingReview';
-import { AdminBadges } from '@/ui/components/admin/AdminBadges';
-import { AdminBansAndMutes } from '@/ui/components/admin/AdminBansAndMutes';
-import { AdminBots } from '@/ui/components/admin/AdminBots';
-import { AdminBotsAwaitingReview } from '@/ui/components/admin/AdminBotsAwaitingReview';
-import { AdminIAM } from '@/ui/components/admin/AdminIAM';
-import { AdminInvites } from '@/ui/components/admin/AdminInvites';
-import { AdminLayout } from '@/ui/components/admin/AdminLayout';
-import { AdminOverview } from '@/ui/components/admin/AdminOverview';
-import { AdminReports } from '@/ui/components/admin/AdminReports';
-import { AdminServerDetail } from '@/ui/components/admin/AdminServerDetail';
-import { AdminServers } from '@/ui/components/admin/AdminServers';
-import { AdminSettings } from '@/ui/components/admin/AdminSettings';
-import { AdminSidebar } from '@/ui/components/admin/AdminSidebar';
-import { AdminUserDetail } from '@/ui/components/admin/AdminUserDetail';
-import { Text } from '@/ui/components/common/Text';
+import { AdminAuditLogs } from '@/features/admin/AdminAuditLogs';
+import { AdminAwaitingReview } from '@/features/admin/AdminAwaitingReview';
+import { AdminBadges } from '@/features/admin/AdminBadges';
+import { AdminBansAndMutes } from '@/features/admin/AdminBansAndMutes';
+import { AdminBots } from '@/features/admin/AdminBots';
+import { AdminBotsAwaitingReview } from '@/features/admin/AdminBotsAwaitingReview';
+import { AdminIAM } from '@/features/admin/AdminIAM';
+import { AdminInvites } from '@/features/admin/AdminInvites';
+import { AdminLayout } from '@/features/admin/AdminLayout';
+import { AdminOverview } from '@/features/admin/AdminOverview';
+import { AdminReports } from '@/features/admin/AdminReports';
+import { AdminServerDetail } from '@/features/admin/AdminServerDetail';
+import { AdminServers } from '@/features/admin/AdminServers';
+import { AdminSettings } from '@/features/admin/AdminSettings';
+import { AdminSidebar } from '@/features/admin/AdminSidebar';
+import { AdminUserDetail } from '@/features/admin/AdminUserDetail';
+import { Text } from '@/ui/primitives/Text';
 
 const AdminUserDetailWrapper = (): ReactNode => {
     const { userId } = useParams<{ userId: string }>();

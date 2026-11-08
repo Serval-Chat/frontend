@@ -11,7 +11,7 @@ import {
     type AdminMute,
     adminBansApi,
 } from '@/api/admin/bans.api';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 
 const adminBansKeys = {

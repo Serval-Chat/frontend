@@ -9,13 +9,13 @@ import {
     useParams,
 } from 'react-router-dom';
 
-import { Text } from '@/ui/components/common/Text';
-import { DevBotCreator } from '@/ui/components/developer/DevBotCreator';
-import { DevBotDetail } from '@/ui/components/developer/DevBotDetail';
-import { DevBots } from '@/ui/components/developer/DevBots';
-import { DevLayout } from '@/ui/components/developer/DevLayout';
-import { DevSidebar } from '@/ui/components/developer/DevSidebar';
-import { DeveloperSettings } from '@/ui/components/settings/DeveloperSettings';
+import { DevBotCreator } from '@/features/developer/DevBotCreator';
+import { DevBotDetail } from '@/features/developer/DevBotDetail';
+import { DevBots } from '@/features/developer/DevBots';
+import { DevLayout } from '@/features/developer/DevLayout';
+import { DevSidebar } from '@/features/developer/DevSidebar';
+import { DeveloperSettings } from '@/features/settings/DeveloperSettings';
+import { Text } from '@/ui/primitives/Text';
 
 const DevBotDetailWrapper = (): ReactNode => {
     const { clientId } = useParams<{ clientId: string }>();

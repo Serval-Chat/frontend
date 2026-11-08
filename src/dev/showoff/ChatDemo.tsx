@@ -1,0 +1,282 @@
+import type { User } from '@/api/users/users.types';
+import type { ProcessedChatMessage } from '@/types/chat.ui';
+import {
+    InviteLink,
+    InviteLinkSkeleton,
+} from '@/features/chat/InviteLink';
+import { MessagesList } from '@/features/chat/MessagesList';
+import { Text } from '@/ui/primitives/Text';
+
+import { DemoSection } from './DemoSection';
+
+const MOCK_USERS: Record<
+    'catflare' | 'hexagon' | 'evalyn' | 'mintsuki',
+    User
+> = {
+    catflare: {
+        id: 'u1',
+        login: 'catflare',
+        createdAt: new Date(),
+        username: 'catflare',
+        displayName: 'Catflare',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-1.jpg',
+        usernameGradient: {
+            enabled: true,
+            angle: 90,
+            colors: ['#ff9a9e', '#fecfef'],
+        },
+        usernameGlow: {
+            enabled: false,
+            color: '#ff9a9e',
+            intensity: 5,
+        },
+    },
+    hexagon: {
+        id: 'u2',
+        login: 'hexagon',
+        createdAt: new Date(),
+        username: 'hexagon',
+        displayName: 'hexagon',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-4.jpg',
+        usernameGradient: {
+            enabled: true,
+            angle: 135,
+            repeating: true,
+            colors: ['#D60270', '#9B4F96', '#0038A8 14.28%'],
+        },
+        usernameGlow: {
+            enabled: false,
+            color: '#4facfe',
+            intensity: 5,
+        },
+    },
+    evalyn: {
+        id: 'u3',
+        login: 'evalyn',
+        createdAt: new Date(),
+        username: 'evalyn',
+        displayName: 'Evalyn',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-5.jpg',
+        usernameGradient: {
+            enabled: true,
+            angle: 45,
+            colors: ['#f093fb', '#f5576c'],
+        },
+        usernameGlow: {
+            enabled: false,
+            color: '#f093fb',
+            intensity: 5,
+        },
+    },
+    mintsuki: {
+        id: 'u4',
+        login: 'mintsuki',
+        createdAt: new Date(),
+        username: 'mintsuki',
+        displayName: 'Mintsuki',
+        profilePicture: 'https://rolling.catfla.re/images/servals/serval-6.jpg',
+        usernameGradient: {
+            enabled: false,
+            colors: [],
+            angle: 0,
+        },
+        usernameGlow: {
+            enabled: false,
+            color: '',
+            intensity: 5,
+        },
+    },
+};
+
+const demoMessage = (
+    message: Omit<
+        ProcessedChatMessage,
+        | 'attachments'
+        | 'embeds'
+        | 'interaction'
+        | 'poll'
+        | 'reactions'
+        | 'isEdited'
+        | 'isPinned'
+        | 'isSticky'
+        | 'isWebhook'
+        | 'senderIsBot'
+        | 'stickerId'
+    > &
+        Partial<
+            Pick<
+                ProcessedChatMessage,
+                | 'attachments'
+                | 'embeds'
+                | 'interaction'
+                | 'poll'
+                | 'reactions'
+                | 'isEdited'
+                | 'isPinned'
+                | 'isSticky'
+                | 'isWebhook'
+                | 'senderIsBot'
+                | 'stickerId'
+            >
+        >,
+): ProcessedChatMessage => ({
+    attachments: [],
+    embeds: [],
+    interaction: null,
+    isEdited: false,
+    isPinned: false,
+    isSticky: false,
+    isWebhook: false,
+    poll: null,
+    reactions: [],
+    senderIsBot: false,
+    stickerId: null,
+    ...message,
+});
+
+const MOCK_MESSAGES: ProcessedChatMessage[] = [
+    demoMessage({
+        id: '0',
+        text: 'Hello everyone! I hope you guys like Serchat uwu',
+        createdAt: new Date(Date.now() - 3_600_000).toISOString(),
+        user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare.id,
+    }),
+    demoMessage({
+        id: '1',
+        text: 'Yas! I love this place',
+        createdAt: new Date(Date.now() - 3_550_000).toISOString(),
+        user: MOCK_USERS.hexagon,
+        senderId: MOCK_USERS.hexagon.id,
+        replyTo: {
+            id: '0',
+            user: MOCK_USERS.catflare,
+            text: 'Hello everyone! I hope you guys like Serchat uwu',
+        },
+    }),
+    demoMessage({
+        id: '2',
+        text: "Please fix this bug. I can't change default role for my members!",
+        createdAt: new Date(Date.now() - 3_500_000).toISOString(),
+        user: MOCK_USERS.evalyn,
+        senderId: MOCK_USERS.evalyn.id,
+        reactions: [
+            {
+                emoji: '😃',
+                emojiType: 'unicode',
+                count: 1,
+                users: [MOCK_USERS.mintsuki.id],
+            },
+        ],
+    }),
+    demoMessage({
+        id: '3',
+        text: 'I forgot my password. Could you plz reset it thx',
+        createdAt: new Date(Date.now() - 3_450_000).toISOString(),
+        user: MOCK_USERS.mintsuki,
+        senderId: MOCK_USERS.mintsuki.id,
+    }),
+    demoMessage({
+        id: '4',
+        text: 'Eh fine but I got no reset password feature :sob:',
+        createdAt: new Date(Date.now() - 3_400_000).toISOString(),
+        user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare.id,
+        replyTo: {
+            id: '3',
+            user: MOCK_USERS.mintsuki,
+            text: 'I forgot my password. Could you plz reset it thx',
+        },
+    }),
+    demoMessage({
+        id: '5',
+        text: 'Anyways @everyone I have to reload the server. New update incoming :333',
+        createdAt: new Date(Date.now() - 3_350_000).toISOString(),
+        user: MOCK_USERS.catflare,
+        senderId: MOCK_USERS.catflare.id,
+    }),
+    demoMessage({
+        id: '7',
+        text:
+            'Some code idk```c\n' +
+            '#include <stdio.h>\n' +
+            'int main() {\n' +
+            '    for(int i = 0; i < 30; i++) {\n' +
+            '        printf("Line %d\\n", i);\n' +
+            '    }\n' +
+            '    return 0;\n' +
+            '}\n' +
+            '```',
+        createdAt: new Date(Date.now() - 3_250_000).toISOString(),
+        user: MOCK_USERS.evalyn,
+        senderId: MOCK_USERS.evalyn.id,
+    }),
+];
+
+export const ChatDemo = () => (
+    <DemoSection id="chat-messages" title="Chat Messages">
+        <div className="space-y-6">
+            <div>
+                <Text as="p" className="mt-1" size="sm" variant="muted">
+                    Showoff for messages
+                </Text>
+            </div>
+
+            <div className="flex h-[500px] flex-col overflow-hidden rounded-xl border border-border-subtle bg-background shadow-2xl">
+                <div className="border-b border-border-subtle bg-bg-subtle p-4">
+                    <Text className="text-foreground" weight="semibold">
+                        # General (English)
+                    </Text>
+                </div>
+                <MessagesList messages={MOCK_MESSAGES} />
+            </div>
+
+            <div>
+                <Text as="p" className="mt-8 mb-4" size="sm" weight="semibold">
+                    Invite Link Previews
+                </Text>
+                <div className="flex flex-col gap-6 rounded-xl border border-border-subtle bg-background p-4">
+                    <div className="flex flex-wrap items-start gap-6">
+                        <div>
+                            <Text
+                                as="p"
+                                className="mb-2 pl-1"
+                                size="xs"
+                                variant="muted"
+                            >
+                                Skeleton State
+                            </Text>
+                            <InviteLinkSkeleton hasBanner tagCount={3} />
+                        </div>
+                        <div>
+                            <Text
+                                as="p"
+                                className="mb-2 pl-1"
+                                size="xs"
+                                variant="muted"
+                            >
+                                Loaded State
+                            </Text>
+                            <InviteLink
+                                code="cats"
+                                url="https://serchat.app/invite/cats"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="border-t border-border-subtle/50 pt-4">
+                        <Text
+                            as="p"
+                            className="mb-2 pl-1"
+                            size="xs"
+                            variant="muted"
+                        >
+                            Skeleton (Maxxed Tags Preview)
+                        </Text>
+                        <InviteLinkSkeleton hasBanner tagCount={15} />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </DemoSection>
+);

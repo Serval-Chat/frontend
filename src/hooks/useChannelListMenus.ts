@@ -18,10 +18,10 @@ import {
 } from 'lucide-react';
 
 import type { Category, Channel } from '@/api/servers/servers.types';
+import type { ListItem } from '@/features/servers/channelListModel';
 import { useAppDispatch } from '@/store/hooks';
 import { setSplitViewPane } from '@/store/slices/navSlice';
-import type { ContextMenuItem } from '@/ui/components/common/ContextMenu';
-import type { ListItem } from '@/ui/components/servers/channelListModel';
+import type { ContextMenuItem } from '@/ui/primitives/ContextMenu';
 
 interface UseChannelListMenusArgs {
     channels: Channel[];

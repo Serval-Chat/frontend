@@ -28,6 +28,7 @@ import type {
     UsernameGlow,
     UsernameGradient,
 } from '@/api/users/users.types';
+import { showInAppNotification } from '@/app/notifications/inAppNotifications';
 import type { RootState } from '@/store';
 import {
     setBackendInstanceId,
@@ -52,7 +53,6 @@ import {
     setVoiceUserState,
 } from '@/store/slices/voiceSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
-import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
 import { getValidMessageInteraction } from '@/ui/utils/chat';
 import { audioPipeline } from '@/utils/audio/AudioPipeline';
 import type { SoundChoice } from '@/utils/audio/NotificationSoundManager';

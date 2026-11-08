@@ -1,0 +1,1202 @@
+import {
+    type CSSProperties,
+    type ReactNode,
+    memo,
+    useCallback,
+    useMemo,
+    useState,
+} from 'react';
+
+import { interactionsApi } from '@/api/interactions/interactions.api';
+import { useMe } from '@/api/users/users.queries';
+import { ParsedText } from '@/features/messages/ParsedText';
+import type {
+    ButtonComponent,
+    Embed,
+    EmbedMedia,
+    MessagePayload,
+} from '@/types/embed';
+import { ImageLightbox } from '@/ui/primitives/ImageLightbox';
+import { Link } from '@/ui/primitives/Link';
+import { useToast } from '@/ui/primitives/Toast';
+import { cn } from '@/utils/cn';
+import { extractApiError } from '@/utils/extractApiError';
+import { APP_LOCALE } from '@/utils/locale';
+import {
+    getSafeUrl,
+    isSafeVideoUrl,
+    isSafeYoutubeEmbedUrl,
+} from '@/utils/proxy';
+import {
+    type ParserOptions,
+    ParserPresets,
+    parseText,
+} from '@/utils/textParser/parser';
+
+const timestampFormatter12Hour = new Intl.DateTimeFormat(APP_LOCALE, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    hour12: true,
+});
+const timestampFormatter24Hour = new Intl.DateTimeFormat(APP_LOCALE, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    hour12: false,
+});
+
+const colorToCss = (color: number | undefined): string | undefined => {
+    if (color === undefined) return undefined;
+    return `#${color.toString(16).padStart(6, '0')}`;
+};
+
+const formatTimestamp = (
+    iso: string | undefined,
+    use24HourTime: boolean,
+): string | undefined => {
+    if (!iso) return undefined;
+    try {
+        const formatter = use24HourTime
+            ? timestampFormatter24Hour
+            : timestampFormatter12Hour;
+        return formatter.format(new Date(iso));
+    } catch {
+        return iso;
+    }
+};
+
+const getEmbedKey = (embed: Embed): string =>
+    [
+        embed.type,
+        embed.url,
+        embed.video?.url,
+        embed.image?.url,
+        embed.thumbnail?.url,
+        embed.title,
+        embed.description,
+        embed.color,
+    ]
+        .filter(Boolean)
+        .join(':');
+
+interface ParsedEmbedTextProps {
+    text: string;
+    preset: ParserOptions;
+    serverId?: string;
+    size?: 'xs' | 'sm' | 'base';
+    variant?: 'danger' | 'muted';
+    wrap?: 'preWrap';
+    onResize?: () => void;
+}
+
+const ParsedEmbedText = memo(
+    ({
+        text,
+        preset,
+        serverId,
+        size,
+        variant,
+        wrap,
+        onResize,
+    }: ParsedEmbedTextProps): ReactNode => {
+        const nodes = useMemo(() => parseText(text, preset), [text, preset]);
+
+        return (
+            <ParsedText
+                nodes={nodes}
+                serverId={serverId}
+                size={size}
+                variant={variant}
+                wrap={wrap}
+                onResize={onResize}
+            />
+        );
+    },
+);
+ParsedEmbedText.displayName = 'ParsedEmbedText';
+
+const FALLBACK_EMBED_IMAGE_WIDTH = 400;
+const FALLBACK_EMBED_IMAGE_HEIGHT = 225;
+
+const getEmbedImageStyle = (
+    media: EmbedMedia | undefined,
+    maxWidth: number,
+): CSSProperties => {
+    const width = media?.width ?? FALLBACK_EMBED_IMAGE_WIDTH;
+    const height = media?.height ?? FALLBACK_EMBED_IMAGE_HEIGHT;
+    return {
+        aspectRatio: `${width} / ${height}`,
+        width: `min(${width}px, 100%)`,
+        maxWidth: `${Math.min(width, maxWidth)}px`,
+    };
+};
+
+interface EmbedImageProps {
+    src: string | undefined;
+    alt: string;
+    className?: string;
+    imageClassName: string;
+    style?: CSSProperties;
+    onResize?: () => void;
+}
+
+const EmbedImage = memo(
+    ({
+        src,
+        alt,
+        className,
+        imageClassName,
+        style,
+        onResize,
+    }: EmbedImageProps): ReactNode => {
+        const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+        if (!src) return null;
+
+        return (
+            <>
+                <button
+                    aria-label={`View ${alt}`}
+                    className={cn(
+                        'cursor-pointer border-0 bg-transparent p-0 text-left',
+                        className,
+                    )}
+                    type="button"
+                    onClick={(): void => {
+                        setIsLightboxOpen(true);
+                    }}
+                >
+                    <img
+                        alt={alt}
+                        className={imageClassName}
+                        decoding="async"
+                        loading="eager"
+                        src={src}
+                        style={style}
+                        onLoad={onResize}
+                    />
+                </button>
+                <ImageLightbox
+                    alt={alt}
+                    isOpen={isLightboxOpen}
+                    src={src}
+                    onClose={(): void => {
+                        setIsLightboxOpen(false);
+                    }}
+                />
+            </>
+        );
+    },
+);
+EmbedImage.displayName = 'EmbedImage';
+
+interface EmbedCardProps {
+    embed: Embed;
+    variant: 'preview' | 'chat';
+    serverId?: string;
+    isDeleted?: boolean;
+    onResize?: () => void;
+}
+
+const EmbedCard = memo(
+    ({
+        embed,
+        variant,
+        serverId,
+        isDeleted,
+        onResize,
+    }: EmbedCardProps): ReactNode => {
+        const { data: me } = useMe();
+        const use24HourTime = me?.settings?.use24HourTime ?? false;
+        const barColor = colorToCss(embed.color);
+        const hasContent = Boolean(
+            embed.title ??
+            embed.description ??
+            embed.author ??
+            embed.footer ??
+            embed.thumbnail ??
+            embed.image ??
+            embed.video ??
+            embed.fields?.length,
+        );
+
+        const imageUrl = embed.image?.url
+            ? getSafeUrl(embed.image.url)
+            : undefined;
+        const thumbnailUrl = embed.thumbnail?.url
+            ? getSafeUrl(embed.thumbnail.url)
+            : undefined;
+        const authorIconUrl = embed.author?.icon_url
+            ? getSafeUrl(embed.author.icon_url)
+            : undefined;
+        const footerIconUrl = embed.footer?.icon_url
+            ? getSafeUrl(embed.footer.icon_url)
+            : undefined;
+
+        const fieldRows = useMemo((): {
+            fields: typeof embed.fields;
+            inline: boolean;
+        }[] => {
+            interface FieldRow {
+                fields: typeof embed.fields;
+                inline: boolean;
+            }
+            const rows: FieldRow[] = [];
+            if (embed.fields) {
+                let currentRow: NonNullable<typeof embed.fields> = [];
+                for (const field of embed.fields) {
+                    if (field.inline) {
+                        currentRow.push(field);
+                        if (currentRow.length === 3) {
+                            rows.push({ fields: currentRow, inline: true });
+                            currentRow = [];
+                        }
+                    } else {
+                        if (currentRow.length > 0) {
+                            rows.push({ fields: currentRow, inline: true });
+                            currentRow = [];
+                        }
+                        rows.push({ fields: [field], inline: false });
+                    }
+                }
+                if (currentRow.length > 0) {
+                    rows.push({ fields: currentRow, inline: true });
+                }
+            }
+            return rows;
+        }, [embed]);
+
+        const footerText = useMemo((): string => {
+            if (!embed.footer?.text && !embed.timestamp) return '';
+            return [
+                embed.footer?.text,
+                formatTimestamp(embed.timestamp, use24HourTime),
+            ]
+                .filter(Boolean)
+                .join(' • ');
+        }, [embed.footer?.text, embed.timestamp, use24HourTime]);
+
+        if (!hasContent) return null;
+
+        if (
+            embed.type === 'youtube' &&
+            embed.video?.url &&
+            isSafeYoutubeEmbedUrl(embed.video.url)
+        ) {
+            const isShorts = embed.url?.includes('/shorts/') ?? false;
+            return (
+                <div
+                    className={cn(
+                        'mt-1 flex w-full flex-col overflow-hidden rounded-r-sm',
+                        isShorts ? 'max-w-[300px]' : 'max-w-[520px]',
+                    )}
+                    style={{
+                        borderLeft: '4px solid #ff0000',
+                    }}
+                >
+                    <div
+                        className={cn(
+                            'flex w-full flex-col rounded-r-sm',
+                            variant === 'preview'
+                                ? 'bg-embed-bg'
+                                : 'bg-embed-bg/70',
+                        )}
+                    >
+                        {/* Provider */}
+                        <div className="px-4 pt-3 pb-1">
+                            <p
+                                className={cn(
+                                    'mb-0.5 text-xs',
+                                    isDeleted
+                                        ? 'text-danger/80'
+                                        : 'text-muted-foreground',
+                                )}
+                            >
+                                {embed.provider?.url ? (
+                                    <Link
+                                        className="hover:underline"
+                                        href={embed.provider.url}
+                                    >
+                                        {embed.provider.name ?? 'YouTube'}
+                                    </Link>
+                                ) : (
+                                    (embed.provider?.name ?? 'YouTube')
+                                )}
+                            </p>
+
+                            {/* Title */}
+                            {embed.title ? (
+                                <p
+                                    className={cn(
+                                        'mb-0.5 text-sm font-semibold',
+                                        isDeleted
+                                            ? 'text-danger'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {embed.url ? (
+                                        <Link
+                                            className="text-primary hover:underline"
+                                            href={embed.url}
+                                        >
+                                            {embed.title}
+                                        </Link>
+                                    ) : (
+                                        embed.title
+                                    )}
+                                </p>
+                            ) : null}
+
+                            {/* Author / channel */}
+                            {embed.author?.name ? (
+                                <p
+                                    className={cn(
+                                        'mb-2 text-xs',
+                                        isDeleted
+                                            ? 'text-danger/80'
+                                            : 'text-muted-foreground',
+                                    )}
+                                >
+                                    {embed.author.url ? (
+                                        <Link
+                                            className="hover:underline"
+                                            href={embed.author.url}
+                                        >
+                                            {embed.author.name}
+                                        </Link>
+                                    ) : (
+                                        embed.author.name
+                                    )}
+                                </p>
+                            ) : null}
+                        </div>
+
+                        <div
+                            className={cn(
+                                'relative w-full overflow-hidden',
+                                isDeleted && 'opacity-50 grayscale',
+                            )}
+                            style={{
+                                aspectRatio: isShorts ? '9 / 16' : '16 / 9',
+                            }}
+                        >
+                            <iframe
+                                allowFullScreen
+                                className="absolute inset-0 h-full w-full"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                sandbox="allow-presentation allow-scripts allow-popups"
+                                src={embed.video.url}
+                                title={embed.title ?? 'YouTube video'}
+                                onLoad={onResize}
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        if (
+            embed.type === 'video' &&
+            embed.video?.url &&
+            isSafeVideoUrl(embed.video.url)
+        ) {
+            return (
+                <div className="mt-1 flex w-fit">
+                    <video
+                        controls
+                        playsInline
+                        aria-label={embed.title ?? 'Embedded video'}
+                        className={cn(
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            isDeleted && 'opacity-50 grayscale',
+                        )}
+                        preload="metadata"
+                        src={embed.video.url}
+                        style={getEmbedImageStyle(embed.video, 520)}
+                        onLoadedData={onResize}
+                        onLoadedMetadata={onResize}
+                    >
+                        <track kind="captions" label="Captions" srcLang="en" />
+                    </video>
+                </div>
+            );
+        }
+
+        if (embed.type === 'image' && embed.image?.url) {
+            return (
+                <div className="mt-1 flex w-fit">
+                    <EmbedImage
+                        alt={embed.title || 'Image'}
+                        className="block"
+                        imageClassName={cn(
+                            'max-h-96 max-w-[520px] rounded-md object-contain',
+                            isDeleted && 'opacity-50 grayscale',
+                        )}
+                        src={imageUrl}
+                        style={getEmbedImageStyle(embed.image, 520)}
+                        onResize={onResize}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div
+                className="mt-1 flex w-fit max-w-[520px] overflow-hidden rounded-r-sm"
+                style={{
+                    borderLeft: `4px solid ${barColor ?? 'var(--color-primary)'}`,
+                }}
+            >
+                <div
+                    className={cn(
+                        'flex w-auto flex-col rounded-r-sm px-4 py-3',
+                        variant === 'preview'
+                            ? 'bg-embed-bg'
+                            : 'bg-embed-bg/70',
+                    )}
+                >
+                    {/* Provider */}
+                    {embed.provider?.name ? (
+                        <p
+                            className={cn(
+                                'mb-0.5 text-xs',
+                                isDeleted
+                                    ? 'text-danger/80'
+                                    : 'text-muted-foreground',
+                            )}
+                        >
+                            {embed.provider.url ? (
+                                <Link
+                                    className="hover:underline"
+                                    href={embed.provider.url}
+                                >
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED_INLINE}
+                                        serverId={serverId}
+                                        size="xs"
+                                        text={embed.provider.name}
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
+                                        onResize={onResize}
+                                    />
+                                </Link>
+                            ) : (
+                                <ParsedEmbedText
+                                    preset={ParserPresets.EMBED_INLINE}
+                                    serverId={serverId}
+                                    size="xs"
+                                    text={embed.provider.name}
+                                    variant={isDeleted ? 'danger' : undefined}
+                                    onResize={onResize}
+                                />
+                            )}
+                        </p>
+                    ) : null}
+
+                    {/* Author */}
+                    {embed.author?.name ? (
+                        <div className="mb-2 flex items-center gap-2">
+                            {embed.author.icon_url ? (
+                                <img
+                                    alt=""
+                                    className="h-6 w-6 rounded-full object-cover"
+                                    decoding="async"
+                                    loading="eager"
+                                    src={authorIconUrl}
+                                />
+                            ) : null}
+                            <span
+                                className={cn(
+                                    'text-sm font-semibold',
+                                    isDeleted
+                                        ? 'text-danger'
+                                        : 'text-foreground',
+                                )}
+                            >
+                                {embed.author.url ? (
+                                    <Link
+                                        className="hover:underline"
+                                        href={embed.author.url}
+                                    >
+                                        <ParsedEmbedText
+                                            preset={ParserPresets.EMBED_INLINE}
+                                            serverId={serverId}
+                                            size="sm"
+                                            text={embed.author.name}
+                                            variant={
+                                                isDeleted ? 'danger' : undefined
+                                            }
+                                            onResize={onResize}
+                                        />
+                                    </Link>
+                                ) : (
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED_INLINE}
+                                        serverId={serverId}
+                                        size="sm"
+                                        text={embed.author.name}
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
+                                        onResize={onResize}
+                                    />
+                                )}
+                            </span>
+                        </div>
+                    ) : null}
+
+                    {/* Title + thumbnail side-by-side */}
+                    <div className="flex items-start gap-4">
+                        <div className="flex-1">
+                            {/* Title */}
+                            {embed.title ? (
+                                <p
+                                    className={cn(
+                                        'mb-1 text-base font-semibold',
+                                        isDeleted
+                                            ? 'text-danger'
+                                            : 'text-foreground',
+                                    )}
+                                >
+                                    {embed.url ? (
+                                        <Link
+                                            className="text-primary hover:underline"
+                                            href={embed.url}
+                                        >
+                                            <ParsedEmbedText
+                                                preset={
+                                                    ParserPresets.EMBED_INLINE
+                                                }
+                                                serverId={serverId}
+                                                size="base"
+                                                text={embed.title}
+                                                variant={
+                                                    isDeleted
+                                                        ? 'danger'
+                                                        : undefined
+                                                }
+                                                onResize={onResize}
+                                            />
+                                        </Link>
+                                    ) : (
+                                        <ParsedEmbedText
+                                            preset={ParserPresets.EMBED_INLINE}
+                                            serverId={serverId}
+                                            size="base"
+                                            text={embed.title}
+                                            variant={
+                                                isDeleted ? 'danger' : undefined
+                                            }
+                                            onResize={onResize}
+                                        />
+                                    )}
+                                </p>
+                            ) : null}
+
+                            {/* Description */}
+                            {embed.description ? (
+                                <div
+                                    className="mb-2 text-sm leading-relaxed"
+                                    style={{ display: 'flow-root' }}
+                                >
+                                    <ParsedEmbedText
+                                        preset={ParserPresets.EMBED}
+                                        serverId={serverId}
+                                        size="sm"
+                                        text={embed.description}
+                                        variant={
+                                            isDeleted ? 'danger' : undefined
+                                        }
+                                        wrap="preWrap"
+                                        onResize={onResize}
+                                    />
+                                </div>
+                            ) : null}
+
+                            {/* Fields */}
+                            {fieldRows.length > 0 ? (
+                                <div className="mt-2 flex flex-col gap-2">
+                                    {fieldRows.map((row) => (
+                                        <div
+                                            className={cn(
+                                                'grid gap-x-4',
+                                                row.inline
+                                                    ? `grid-cols-${Math.min(row.fields?.length ?? 1, 3)}`
+                                                    : 'grid-cols-1',
+                                            )}
+                                            key={`row-${row.fields?.map((f): string => f.name).join(',')}`}
+                                        >
+                                            {row.fields?.map((field) => (
+                                                <div
+                                                    key={`${field.name}-${field.value}`}
+                                                >
+                                                    <div
+                                                        className={cn(
+                                                            'text-xs font-semibold',
+                                                            isDeleted
+                                                                ? 'text-danger'
+                                                                : 'text-foreground',
+                                                        )}
+                                                        style={{
+                                                            display:
+                                                                'flow-root',
+                                                        }}
+                                                    >
+                                                        <ParsedEmbedText
+                                                            preset={
+                                                                ParserPresets.EMBED_INLINE
+                                                            }
+                                                            serverId={serverId}
+                                                            size="xs"
+                                                            text={field.name}
+                                                            variant={
+                                                                isDeleted
+                                                                    ? 'danger'
+                                                                    : undefined
+                                                            }
+                                                            onResize={onResize}
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        className="text-sm text-muted-foreground"
+                                                        style={{
+                                                            display:
+                                                                'flow-root',
+                                                        }}
+                                                    >
+                                                        <ParsedEmbedText
+                                                            preset={
+                                                                ParserPresets.EMBED
+                                                            }
+                                                            serverId={serverId}
+                                                            size="sm"
+                                                            text={field.value}
+                                                            variant={
+                                                                isDeleted
+                                                                    ? 'danger'
+                                                                    : undefined
+                                                            }
+                                                            wrap="preWrap"
+                                                            onResize={onResize}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+
+                        {/* Thumbnail */}
+                        {embed.thumbnail?.url ? (
+                            <EmbedImage
+                                alt={embed.title || 'Thumbnail'}
+                                className="ml-auto block shrink-0"
+                                imageClassName={cn(
+                                    'h-20 w-20 rounded object-cover',
+                                    isDeleted && 'opacity-50 grayscale',
+                                )}
+                                src={thumbnailUrl}
+                                onResize={onResize}
+                            />
+                        ) : null}
+                    </div>
+
+                    {/* Large image */}
+                    {embed.image?.url ? (
+                        <EmbedImage
+                            alt={embed.title || 'Image'}
+                            className="mt-3 block"
+                            imageClassName={cn(
+                                'max-h-72 max-w-[488px] rounded object-contain',
+                                isDeleted && 'opacity-50 grayscale',
+                            )}
+                            src={imageUrl}
+                            style={getEmbedImageStyle(embed.image, 488)}
+                            onResize={onResize}
+                        />
+                    ) : null}
+
+                    {/* Footer */}
+                    {(embed.footer?.text ?? embed.timestamp) ? (
+                        <div className="mt-3 flex items-center gap-2">
+                            {embed.footer?.icon_url ? (
+                                <img
+                                    alt=""
+                                    className={cn(
+                                        'h-5 w-5 rounded-full object-cover',
+                                        isDeleted && 'opacity-50 grayscale',
+                                    )}
+                                    decoding="async"
+                                    loading="eager"
+                                    src={footerIconUrl}
+                                />
+                            ) : null}
+                            <div
+                                className={cn(
+                                    'text-xs',
+                                    isDeleted
+                                        ? 'text-danger/80'
+                                        : 'text-muted-foreground',
+                                )}
+                                style={{ display: 'flow-root' }}
+                            >
+                                <ParsedEmbedText
+                                    preset={ParserPresets.EMBED}
+                                    serverId={serverId}
+                                    size="xs"
+                                    text={footerText}
+                                    variant={isDeleted ? 'danger' : 'muted'}
+                                    wrap="preWrap"
+                                    onResize={onResize}
+                                />
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+        );
+    },
+);
+EmbedCard.displayName = 'EmbedCard';
+
+interface EmbedButtonsProps {
+    buttons: ButtonComponent[] | undefined;
+    serverId?: string;
+    channelId?: string;
+    messageId?: string;
+    isDeleted?: boolean;
+    pendingButtonKey?: string | null;
+    onButtonClick: (componentIndex: number, button: ButtonComponent) => void;
+}
+
+const EmbedButtons = memo(
+    ({
+        buttons,
+        serverId,
+        channelId,
+        messageId,
+        isDeleted,
+        pendingButtonKey,
+        onButtonClick,
+    }: EmbedButtonsProps): ReactNode => {
+        const visibleButtons = buttons
+            ?.filter(
+                (component): component is ButtonComponent =>
+                    component.type === 'button',
+            )
+            .slice(0, 8);
+        if (!visibleButtons || visibleButtons.length === 0) return null;
+
+        return (
+            <div className="mt-2 flex flex-wrap gap-2">
+                {visibleButtons.map((button, buttonIndex) => {
+                    const buttonKey = `${button.custom_id ?? button.url ?? buttonIndex}`;
+                    const disabled =
+                        button.disabled === true ||
+                        isDeleted === true ||
+                        pendingButtonKey === buttonKey ||
+                        (button.style !== 'link' &&
+                            (!serverId ||
+                                !channelId ||
+                                !messageId ||
+                                !button.custom_id));
+                    const label =
+                        button.label ?? button.emoji?.name ?? 'Button';
+                    const className = cn(
+                        'rounded px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+                        button.style === 'primary' &&
+                            'text-primary-foreground bg-primary hover:bg-primary/90',
+                        button.style === 'secondary' &&
+                            'bg-bg-secondary text-foreground hover:bg-bg-secondary/80',
+                        button.style === 'success' &&
+                            'bg-success text-white hover:bg-success/90',
+                        button.style === 'danger' &&
+                            'bg-danger text-white hover:bg-danger/90',
+                        button.style === 'link' &&
+                            'border border-border-subtle bg-transparent text-primary hover:bg-bg-secondary',
+                    );
+
+                    if (button.style === 'link' && button.url) {
+                        return (
+                            <Link
+                                external
+                                className={className}
+                                href={button.url}
+                                key={buttonKey}
+                            >
+                                {label}
+                            </Link>
+                        );
+                    }
+
+                    return (
+                        <button
+                            className={className}
+                            disabled={disabled}
+                            key={buttonKey}
+                            type="button"
+                            onClick={(): void => {
+                                onButtonClick(buttonIndex, button);
+                            }}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    },
+);
+EmbedButtons.displayName = 'EmbedButtons';
+
+export interface EmbedRendererProps {
+    payload: MessagePayload;
+    className?: string;
+    variant?: 'preview' | 'chat';
+    serverId?: string;
+    channelId?: string;
+    messageId?: string;
+    senderId?: string;
+    isEphemeral?: boolean;
+    invocationId?: string;
+    isDeleted?: boolean;
+    isReportPreview?: boolean;
+    onResize?: () => void;
+}
+
+export const EmbedRenderer = ({
+    payload,
+    className,
+    variant = 'preview',
+    serverId,
+    channelId,
+    messageId,
+    senderId,
+    isEphemeral,
+    invocationId,
+    isDeleted,
+    isReportPreview,
+    onResize,
+}: EmbedRendererProps): ReactNode => {
+    const { showToast } = useToast();
+    const [pendingButtonKey, setPendingButtonKey] = useState<string | null>(
+        null,
+    );
+    const hasAnything = Boolean(
+        payload.content?.trim() ||
+        payload.embeds?.length ||
+        payload.components?.length ||
+        payload.poll,
+    );
+    const visiblePollAnswers = useMemo(
+        () =>
+            payload.poll?.answers.filter(
+                (answer): boolean => answer.text.trim() !== '',
+            ) ?? [],
+        [payload.poll?.answers],
+    );
+    const shouldRenderPollPreview = Boolean(
+        payload.poll &&
+        (visiblePollAnswers.length > 0 || payload.poll.question.trim()),
+    );
+
+    const handleButtonClick = useCallback(
+        async (
+            componentIndex: number,
+            button: ButtonComponent,
+        ): Promise<void> => {
+            if (
+                button.style === 'link' ||
+                button.disabled === true ||
+                !serverId ||
+                !channelId ||
+                !messageId ||
+                !button.custom_id
+            ) {
+                return;
+            }
+
+            const buttonKey = button.custom_id;
+            setPendingButtonKey(buttonKey);
+            try {
+                await interactionsApi.createComponentInteraction({
+                    serverId,
+                    channelId,
+                    messageId,
+                    componentIndex,
+                    customId: button.custom_id,
+                    invocationId: isEphemeral ? invocationId : undefined,
+                    botUserId: isEphemeral ? senderId : undefined,
+                });
+            } catch (error) {
+                showToast(extractApiError(error), 'error');
+            } finally {
+                setPendingButtonKey(null);
+            }
+        },
+        [
+            channelId,
+            invocationId,
+            isEphemeral,
+            messageId,
+            senderId,
+            serverId,
+            showToast,
+        ],
+    );
+
+    const handleButtonClickVoid = useCallback(
+        (componentIndex: number, button: ButtonComponent): void => {
+            void handleButtonClick(componentIndex, button);
+        },
+        [handleButtonClick],
+    );
+
+    if (isReportPreview) {
+        if (!hasAnything) return null;
+
+        return (
+            <div className="mt-2 flex flex-col items-start gap-2">
+                {payload.embeds?.map((embed, index) => (
+                    <div
+                        className="w-full max-w-[520px] rounded-r-sm border-l-4 border-primary bg-embed-bg/70 p-3"
+                        // Duplicate saved embeds can share the same content key.
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${getEmbedKey(embed)}-${index}`}
+                    >
+                        {embed.provider?.name ? (
+                            <div className="text-xs text-text-muted">
+                                {embed.provider.name}
+                            </div>
+                        ) : null}
+                        {embed.author?.name ? (
+                            <div className="mt-1 text-xs font-medium">
+                                {embed.author.name}
+                            </div>
+                        ) : null}
+                        {embed.title ? (
+                            <div className="mt-1 font-semibold">
+                                {embed.title}
+                            </div>
+                        ) : null}
+                        {embed.description ? (
+                            <div className="mt-1 whitespace-pre-wrap">
+                                {embed.description}
+                            </div>
+                        ) : null}
+                        {embed.fields?.map((field) => (
+                            <div
+                                className="mt-2"
+                                key={`${field.name}-${field.value}`}
+                            >
+                                <div className="text-xs font-semibold">
+                                    {field.name}
+                                </div>
+                                <div className="whitespace-pre-wrap">
+                                    {field.value}
+                                </div>
+                            </div>
+                        ))}
+                        {embed.footer?.text ? (
+                            <div className="mt-2 text-xs text-text-muted">
+                                {embed.footer.text}
+                            </div>
+                        ) : null}
+                        {embed.timestamp ? (
+                            <div className="mt-1 text-xs text-text-muted">
+                                {embed.timestamp}
+                            </div>
+                        ) : null}
+                        {embed.url ||
+                        embed.author?.url ||
+                        embed.provider?.url ? (
+                            <div className="mt-2 text-xs break-all text-text-muted">
+                                {[
+                                    embed.url,
+                                    embed.author?.url,
+                                    embed.provider?.url,
+                                ]
+                                    .filter((url): url is string =>
+                                        Boolean(url),
+                                    )
+                                    .join('\n')}
+                            </div>
+                        ) : null}
+                        {embed.image?.url ||
+                        embed.thumbnail?.url ||
+                        embed.video?.url ? (
+                            <div className="mt-2 text-xs break-all text-text-muted">
+                                External media preview omitted
+                                {[
+                                    embed.image?.url,
+                                    embed.thumbnail?.url,
+                                    embed.video?.url,
+                                ]
+                                    .filter((url): url is string =>
+                                        Boolean(url),
+                                    )
+                                    .join('\n')}
+                            </div>
+                        ) : null}
+                    </div>
+                ))}
+                {payload.components?.map((component, index) => (
+                    <span
+                        className="rounded-md border border-border-subtle px-2 py-1 text-sm"
+                        // Components can repeat labels and URLs; preserve each row.
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`${component.custom_id ?? component.url ?? component.label ?? 'button'}-${index}`}
+                    >
+                        {component.emoji?.name
+                            ? `${component.emoji.name} `
+                            : ''}
+                        {component.label ?? 'Button'}
+                        {component.url ? ` · ${component.url}` : ''}
+                    </span>
+                ))}
+            </div>
+        );
+    }
+
+    if (!hasAnything && variant === 'preview') {
+        return (
+            <div
+                className={cn(
+                    'flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border-subtle p-12 text-center',
+                    className,
+                )}
+            >
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg-secondary text-2xl">
+                    📋
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    Nothing to preview yet. Fill in the form on the left.
+                </p>
+            </div>
+        );
+    }
+
+    if (!hasAnything) return null;
+
+    return (
+        <div
+            className={cn(
+                variant === 'preview'
+                    ? 'flex flex-col gap-0.5 rounded-md bg-bg-subtle p-4 font-sans shadow-lg'
+                    : 'flex flex-col gap-0.5',
+                className,
+            )}
+        >
+            {/* Message content */}
+            {payload.content ? (
+                <div
+                    className="mb-1 text-sm leading-relaxed"
+                    style={{ display: 'flow-root' }}
+                >
+                    <ParsedEmbedText
+                        preset={ParserPresets.EMBED}
+                        serverId={serverId}
+                        size="sm"
+                        text={payload.content}
+                        wrap="preWrap"
+                        onResize={onResize}
+                    />
+                </div>
+            ) : null}
+
+            {/* Embeds */}
+            {payload.embeds?.map((embed, embedIndex) => (
+                <div
+                    className="flex flex-col items-start"
+                    // a message can carry duplicate embeds (same link posted twice,
+                    // bridged duplicates), so the content key alone can collide;
+                    // pair it with the index (embeds within a message are a fixed,
+                    // non-reordered list, so this is a safe disambiguator).
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${getEmbedKey(embed)}-${embedIndex}`}
+                >
+                    <EmbedCard
+                        embed={embed}
+                        isDeleted={isDeleted}
+                        serverId={serverId}
+                        variant={variant}
+                        onResize={onResize}
+                    />
+                </div>
+            ))}
+
+            <EmbedButtons
+                buttons={payload.components}
+                channelId={channelId}
+                isDeleted={isDeleted}
+                messageId={messageId}
+                pendingButtonKey={pendingButtonKey}
+                serverId={serverId}
+                onButtonClick={handleButtonClickVoid}
+            />
+
+            {/* Poll preview */}
+            {shouldRenderPollPreview && payload.poll ? (
+                <div
+                    className={cn(
+                        'mt-2 max-w-[520px] overflow-hidden rounded-lg border border-border-subtle bg-embed-bg',
+                        isDeleted && 'opacity-60 grayscale',
+                    )}
+                >
+                    {/* Header */}
+                    <div className="px-4 pt-4 pb-3">
+                        <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                            Poll
+                        </span>
+                        {payload.poll.question.trim() ? (
+                            <p className="mt-2 text-base leading-snug font-semibold text-foreground">
+                                {payload.poll.question}
+                            </p>
+                        ) : null}
+                    </div>
+
+                    {/* Answers */}
+                    {visiblePollAnswers.length > 0 ? (
+                        <ul className="flex flex-col gap-1.5 px-4 pb-3">
+                            {visiblePollAnswers.map((answer) => (
+                                <li key={`answer-${answer.text}`}>
+                                    <button
+                                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-bg-subtle px-3 py-2.5 text-left text-sm text-foreground hover:bg-bg-secondary"
+                                        type="button"
+                                    >
+                                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-border-subtle">
+                                            <span className="h-1.5 w-1.5 rounded-full" />
+                                        </span>
+                                        {answer.emoji?.name ? (
+                                            <span>{answer.emoji.name}</span>
+                                        ) : null}
+                                        <span className="flex-1">
+                                            {answer.text}
+                                        </span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : null}
+
+                    {/* Footer meta */}
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2.5">
+                        <span className="text-xs text-muted-foreground">
+                            {payload.poll.duration}h
+                        </span>
+                        {payload.poll.allow_multiselect ? (
+                            <span className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                Can select multiple
+                            </span>
+                        ) : null}
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                            0 votes · poll not started
+                        </span>
+                    </div>
+                </div>
+            ) : null}
+        </div>
+    );
+};

@@ -1,0 +1,60 @@
+import { UserX } from 'lucide-react';
+
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Modal } from '@/ui/primitives/Modal';
+import { Text } from '@/ui/primitives/Text';
+
+interface KickUserModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    username: string;
+    userAvatar?: string | null;
+}
+
+export const KickUserModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    username,
+    userAvatar,
+}: KickUserModalProps) => (
+    <Modal isOpen={isOpen} title="Kick Member" onClose={onClose}>
+        <Box className="space-y-6">
+            <Box className="flex flex-col items-center gap-4 py-4 text-center">
+                <UserProfilePicture
+                    size="xl"
+                    src={userAvatar}
+                    username={username}
+                />
+                <Box>
+                    <Heading level={3}>Kick {username}?</Heading>
+                    <Text className="mt-1 text-muted-foreground">
+                        Are you sure you want to kick{' '}
+                        <strong>{username}</strong> from the server? They will
+                        be able to rejoin with a new invite.
+                    </Text>
+                </Box>
+            </Box>
+
+            <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
+                <Button variant="ghost" onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button
+                    variant="danger"
+                    onClick={(): void => {
+                        onConfirm();
+                        onClose();
+                    }}
+                >
+                    <UserX className="mr-2 h-4 w-4" />
+                    Kick Member
+                </Button>
+            </Box>
+        </Box>
+    </Modal>
+);

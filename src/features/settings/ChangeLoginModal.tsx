@@ -1,0 +1,162 @@
+import React, { useState } from 'react';
+
+import { useChangeLogin } from '@/api/auth/auth.queries';
+import type { ApiError } from '@/api/types';
+import { useMe } from '@/api/users/users.queries';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Input } from '@/ui/primitives/Input';
+import { Modal } from '@/ui/primitives/Modal';
+import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { Text } from '@/ui/primitives/Text';
+import { useToast } from '@/ui/primitives/Toast';
+
+interface ChangeLoginModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export const ChangeLoginModal = ({
+    isOpen,
+    onClose,
+}: ChangeLoginModalProps) => {
+    const { showToast } = useToast();
+    const { data: user } = useMe();
+    const { mutate: changeLogin, isPending } = useChangeLogin();
+
+    const [newLogin, setNewLogin] = useState('');
+    const [password, setPassword] = useState('');
+
+    const [errors, setErrors] = useState<{
+        newLogin?: string;
+        password?: string;
+    }>({});
+
+    const handleClose = (): void => {
+        setNewLogin('');
+        setPassword('');
+        setErrors({});
+        onClose();
+    };
+
+    const handleSubmit = (e: React.FormEvent): void => {
+        e.preventDefault();
+
+        const newErrors: typeof errors = {};
+
+        if (!newLogin) {
+            newErrors.newLogin = 'New login is required';
+        } else if (newLogin === user?.login) {
+            newErrors.newLogin =
+                'New login must be different from current login';
+        }
+
+        if (!password) {
+            newErrors.password = 'Password is required';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        changeLogin(
+            { newLogin, password },
+            {
+                onSuccess: (): void => {
+                    showToast('Login updated successfully', 'success');
+                    handleClose();
+                },
+                onError: (error: unknown): void => {
+                    showToast(
+                        (error as ApiError).response?.data?.message ||
+                            'Failed to update login',
+                        'error',
+                    );
+                },
+            },
+        );
+    };
+
+    return (
+        <Modal isOpen={isOpen} title="Change Login" onClose={handleClose}>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+                <Box className="space-y-4">
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="current-login"
+                        >
+                            Current Login
+                        </label>
+                        <Input
+                            disabled
+                            id="current-login"
+                            type="text"
+                            value={user?.login || ''}
+                        />
+                    </Box>
+
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="new-login"
+                        >
+                            New Login
+                        </label>
+                        <Input
+                            id="new-login"
+                            type="text"
+                            value={newLogin}
+                            onChange={(e): void => {
+                                setNewLogin(e.target.value);
+                            }}
+                        />
+                        {errors.newLogin ? (
+                            <Text className="text-status-error" size="xs">
+                                {errors.newLogin}
+                            </Text>
+                        ) : null}
+                    </Box>
+
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="password"
+                        >
+                            Confirm Password
+                        </label>
+                        <PasswordInput
+                            id="password"
+                            value={password}
+                            onChange={(e): void => {
+                                setPassword(e.target.value);
+                            }}
+                        />
+                        {errors.password ? (
+                            <Text className="text-status-error" size="xs">
+                                {errors.password}
+                            </Text>
+                        ) : null}
+                        <Text size="xs" variant="muted">
+                            Enter your current password to confirm this change.
+                        </Text>
+                    </Box>
+                </Box>
+
+                <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
+                    <Button type="button" variant="ghost" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        className="border-none bg-primary text-white hover:bg-primary-hover"
+                        loading={isPending}
+                        type="submit"
+                    >
+                        Update Login
+                    </Button>
+                </Box>
+            </form>
+        </Modal>
+    );
+};

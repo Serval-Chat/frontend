@@ -10,6 +10,14 @@ import { m } from 'framer-motion';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
+import { MainContent } from '@/app/layout/MainContent';
+import { MobileSwipeContext } from '@/app/shell/MobileSwipeContext';
+import { PrimaryNavBar } from '@/app/shell/PrimaryNavBar';
+import { SecondaryNavBar } from '@/app/shell/SecondaryNavBar';
+import { TertiarySidebar } from '@/app/shell/TertiarySidebar';
+import { ActiveVoicePanel } from '@/features/chat/ActiveVoicePanel';
+import { UnacknowledgedWarningModal } from '@/features/moderation/UnacknowledgedWarningModal';
+import { MiniProfile } from '@/features/users/profile/MiniProfile';
 import { useResizable } from '@/hooks/useResizable';
 import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { useAppDispatch, useAppShallowSelector } from '@/store/hooks';
@@ -19,16 +27,8 @@ import {
     toggleMobileHomeTab,
     toggleMobileMemberList,
 } from '@/store/slices/navSlice';
-import { MobileSwipeContext } from '@/ui/MobileSwipeContext';
-import { PrimaryNavBar } from '@/ui/PrimaryNavBar';
-import { SecondaryNavBar } from '@/ui/SecondaryNavBar';
-import { TertiarySidebar } from '@/ui/TertiarySidebar';
 import { transitions } from '@/ui/animations';
-import { ActiveVoicePanel } from '@/ui/components/chat/ActiveVoicePanel';
-import { Box } from '@/ui/components/layout/Box';
-import { MainContent } from '@/ui/components/layout/MainContent';
-import { MiniProfile } from '@/ui/components/profile/MiniProfile';
-import { UnacknowledgedWarningModal } from '@/ui/components/warnings/UnacknowledgedWarningModal';
+import { Box } from '@/ui/primitives/Box';
 import { isServerSubpage } from '@/utils/serverSubpages';
 
 const isMobileViewport = (): boolean =>

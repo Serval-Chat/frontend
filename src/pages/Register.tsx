@@ -2,17 +2,17 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { AnimatePresence, m } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { FormContent } from '@/features/auth/FormContent';
 import { useRegisterForm } from '@/hooks/useRegisterForm';
-import { FormContent } from '@/ui/components/auth/FormContent';
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { Input } from '@/ui/components/common/Input';
-import { InputWrapper } from '@/ui/components/common/InputWrapper';
-import { PasswordInput } from '@/ui/components/common/PasswordInput';
-import { StatusMessage } from '@/ui/components/common/StatusMessage';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { InputWrapper } from '@/ui/primitives/InputWrapper';
+import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { StatusMessage } from '@/ui/primitives/StatusMessage';
+import { Text } from '@/ui/primitives/Text';
 
 /**
  * @description Register page

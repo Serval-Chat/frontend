@@ -8,7 +8,7 @@ import {
 import type { User, UsernameFont } from '@/api/users/users.types';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useTheme } from '@/providers/ThemeProvider';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { mergeReducer } from '@/utils/mergeReducer';
 
 const validateCustomThemeCss = (css: string): string | null => {

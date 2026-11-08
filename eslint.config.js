@@ -112,6 +112,11 @@ export default tseslint.config(
       'react/display-name': 'warn',
 
       'react/no-multi-comp': ['warn', { ignoreStateless: true }],
+
+      'no-ui/no-raw-controls-outside-primitives': [
+        'warn',
+        { allowedPaths: ['src/ui/primitives/', 'src/dev/nt/'] },
+      ],
     },
   },
   {
@@ -119,6 +124,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-restricted-syntax': 'off',
+      'no-ui/no-raw-controls-outside-primitives': 'off',
     },
   },
   {

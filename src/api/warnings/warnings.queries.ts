@@ -6,7 +6,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 
 import { warningsApi } from './warnings.api';

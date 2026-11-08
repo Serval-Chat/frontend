@@ -1,33 +1,30 @@
 import type { ReactNode } from 'react';
 
-import { Heading } from '@/ui/components/common/Heading';
-import { Animations } from '@/ui/components/showoff/Animations';
-import { CalloutBoxDemo } from '@/ui/components/showoff/CalloutBoxDemo';
-import { ChatDemo } from '@/ui/components/showoff/ChatDemo';
-import { ColorPalette } from '@/ui/components/showoff/ColorPalette';
-import { ContextMenuDemo } from '@/ui/components/showoff/ContextMenuDemo';
-import { CopyDialogDemo } from '@/ui/components/showoff/CopyDialogDemo';
-import { DividerPresentation } from '@/ui/components/showoff/DividerPresentation';
-import { FlashButtons } from '@/ui/components/showoff/FlashButtons';
-import { InputsDemo } from '@/ui/components/showoff/InputsDemo';
-import { LoadingSpinnerDemo } from '@/ui/components/showoff/LoadingSpinnerDemo';
-import { NavigationDemo } from '@/ui/components/showoff/NavigationDemo';
-import { ProcessingButtons } from '@/ui/components/showoff/ProcessingButtons';
-import { PushPromptDemo } from '@/ui/components/showoff/PushPromptDemo';
-import { RetainSizeButtons } from '@/ui/components/showoff/RetainSizeButtons';
-import { SearchDemo } from '@/ui/components/showoff/SearchDemo';
-import { SpecializedButtons } from '@/ui/components/showoff/SpecializedButtons';
-import { StatusMessages } from '@/ui/components/showoff/StatusMessages';
-import {
-    type TOCProps,
-    TableOfContents,
-} from '@/ui/components/showoff/TableOfContents';
-import { ToastDemo } from '@/ui/components/showoff/ToastDemo';
-import { TogglesDemo } from '@/ui/components/showoff/TogglesDemo';
-import { TypographyDemo } from '@/ui/components/showoff/TypographyDemo';
-import { UserIdentitiesDemo } from '@/ui/components/showoff/UserIdentitiesDemo';
-import { UserProfilePopupDemo } from '@/ui/components/showoff/UserProfilePopupDemo';
-import { SHOWOFF_SECTIONS } from '@/ui/components/showoff/config';
+import { Animations } from '@/dev/showoff/Animations';
+import { CalloutBoxDemo } from '@/dev/showoff/CalloutBoxDemo';
+import { ChatDemo } from '@/dev/showoff/ChatDemo';
+import { ColorPalette } from '@/dev/showoff/ColorPalette';
+import { ContextMenuDemo } from '@/dev/showoff/ContextMenuDemo';
+import { CopyDialogDemo } from '@/dev/showoff/CopyDialogDemo';
+import { DividerPresentation } from '@/dev/showoff/DividerPresentation';
+import { FlashButtons } from '@/dev/showoff/FlashButtons';
+import { InputsDemo } from '@/dev/showoff/InputsDemo';
+import { LoadingSpinnerDemo } from '@/dev/showoff/LoadingSpinnerDemo';
+import { NavigationDemo } from '@/dev/showoff/NavigationDemo';
+import { ProcessingButtons } from '@/dev/showoff/ProcessingButtons';
+import { PushPromptDemo } from '@/dev/showoff/PushPromptDemo';
+import { RetainSizeButtons } from '@/dev/showoff/RetainSizeButtons';
+import { SearchDemo } from '@/dev/showoff/SearchDemo';
+import { SpecializedButtons } from '@/dev/showoff/SpecializedButtons';
+import { StatusMessages } from '@/dev/showoff/StatusMessages';
+import { type TOCProps, TableOfContents } from '@/dev/showoff/TableOfContents';
+import { ToastDemo } from '@/dev/showoff/ToastDemo';
+import { TogglesDemo } from '@/dev/showoff/TogglesDemo';
+import { TypographyDemo } from '@/dev/showoff/TypographyDemo';
+import { UserIdentitiesDemo } from '@/dev/showoff/UserIdentitiesDemo';
+import { UserProfilePopupDemo } from '@/dev/showoff/UserProfilePopupDemo';
+import { SHOWOFF_SECTIONS } from '@/dev/showoff/config';
+import { Heading } from '@/ui/primitives/Heading';
 
 const sections: TOCProps['sections'] = [
     {

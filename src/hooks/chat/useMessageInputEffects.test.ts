@@ -24,7 +24,7 @@ vi.mock('lexical', () => ({
     HISTORY_MERGE_TAG: 'history-merge',
 }));
 
-vi.mock('@/ui/components/chat/lexical/markdownFormatting', () => ({
+vi.mock('@/features/chat/lexical/markdownFormatting', () => ({
     $reformatAll: vi.fn(),
 }));
 

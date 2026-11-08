@@ -13,21 +13,21 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useServers } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { UserProfilePictureIcon } from '@/features/users/UserProfilePictureIcon';
+import { ProfileBanner } from '@/features/users/profile/ProfileBanner';
 import { useAuthorizeBot, usePublicBotInfo } from '@/hooks/developer/useBots';
 import { BOT_PERMISSION_KEYS } from '@/types/bot';
 import type { BotPermissionKey } from '@/types/bot';
-import { Button } from '@/ui/components/common/Button';
-import { CalloutBox } from '@/ui/components/common/CalloutBox';
-import { Divider } from '@/ui/components/common/Divider';
-import { Heading } from '@/ui/components/common/Heading';
-import { MutedText } from '@/ui/components/common/MutedText';
-import { Skeleton } from '@/ui/components/common/Skeleton';
-import { Text } from '@/ui/components/common/Text';
-import { useToast } from '@/ui/components/common/Toast';
-import { UserProfilePictureIcon } from '@/ui/components/common/UserProfilePictureIcon';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
-import { ProfileBanner } from '@/ui/components/profile/ProfileBanner';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { CalloutBox } from '@/ui/primitives/CalloutBox';
+import { Divider } from '@/ui/primitives/Divider';
+import { Heading } from '@/ui/primitives/Heading';
+import { MutedText } from '@/ui/primitives/MutedText';
+import { Skeleton } from '@/ui/primitives/Skeleton';
+import { Text } from '@/ui/primitives/Text';
+import { useToast } from '@/ui/primitives/Toast';
 import {
     BOT_PERMISSION_LABELS,
     bitmaskToPermissions,

@@ -10,9 +10,9 @@ import {
 } from 'lexical';
 
 import { SERVERS_QUERY_KEYS } from '@/api/servers/servers.queries';
+import { $reformatAll } from '@/features/chat/lexical/markdownFormatting';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import type { KeybindManager } from '@/keybinds/KeybindManager';
-import { $reformatAll } from '@/ui/components/chat/lexical/markdownFormatting';
 import { getDraft } from '@/utils/drafts';
 import { WsEvents } from '@/ws';
 

@@ -1,0 +1,78 @@
+import React from 'react';
+
+import { UsersRound } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+import { useIncomingRequests } from '@/api/friends/friends.queries';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setMobileHomeTab } from '@/store/slices/navSlice';
+import { Box } from '@/ui/primitives/Box';
+import { Divider } from '@/ui/primitives/Divider';
+import { Text } from '@/ui/primitives/Text';
+import { cn } from '@/utils/cn';
+
+import { FriendList } from './FriendList';
+
+const FriendsHeader = (): React.ReactNode => (
+    <Box className="text-foreground-muted mb-3 px-1 text-xs font-semibold tracking-wider uppercase">
+        Friends
+    </Box>
+);
+
+const FriendRequestNavItem = (): React.ReactNode => {
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { data: requests } = useIncomingRequests();
+    const selectedFriendId = useAppSelector(
+        (state): string | null => state.nav.selectedFriendId,
+    );
+    const selectedChannelId = useAppSelector(
+        (state): string | null => state.nav.selectedChannelId,
+    );
+
+    const isActive = !selectedFriendId && !selectedChannelId;
+
+    return (
+        <button
+            className={cn(
+                'group mb-4 flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-200',
+                isActive
+                    ? 'bg-bg-tertiary text-foreground'
+                    : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
+            )}
+            type="button"
+            onClick={(): void => {
+                dispatch(setMobileHomeTab('requests'));
+                void navigate('/chat/@me');
+            }}
+        >
+            <UsersRound aria-hidden="true" className="h-4 w-4 shrink-0" />
+            <Text className="flex-1 text-left font-medium" size="sm">
+                Friends
+            </Text>
+            {requests && requests.length > 0 ? (
+                <Box className="rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">
+                    {requests.length}
+                </Box>
+            ) : null}
+        </button>
+    );
+};
+
+export const FriendsSection = () => (
+    <Box className="flex h-full flex-col overflow-hidden">
+        <Box className="shrink-0 px-3 pt-4 pb-2">
+            <FriendsHeader />
+            <FriendRequestNavItem />
+            <Divider fullWidth className="my-2" />
+        </Box>
+        <Box
+            aria-label="Friends list"
+            className="custom-scrollbar flex-1 overflow-y-auto"
+            role="region"
+            tabIndex={0}
+        >
+            <FriendList />
+        </Box>
+    </Box>
+);

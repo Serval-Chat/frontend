@@ -16,7 +16,7 @@ import type { Emoji } from '@/api/emojis/emojis.types';
 import type { ServerSettings, User } from '@/api/users/users.types';
 import { setUnreadServers } from '@/store/slices/unreadSlice';
 import { setVoiceParticipants } from '@/store/slices/voiceSlice';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { hasAuthToken } from '@/utils/authToken';
 import { extractApiError } from '@/utils/extractApiError';
 

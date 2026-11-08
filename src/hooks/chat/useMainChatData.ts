@@ -16,6 +16,7 @@ import {
 } from '@/api/servers/servers.queries';
 import { useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import type { MessagePermissionFlags } from '@/features/chat/Message/Message.types';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { usePaginatedMessages } from '@/hooks/chat/usePaginatedMessages';
 import { useProcessedMessages } from '@/hooks/chat/useProcessedMessages';
@@ -23,7 +24,6 @@ import { useSlowMode } from '@/hooks/chat/useSlowMode';
 import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useChatWS } from '@/hooks/ws/useChatWS';
-import type { MessagePermissionFlags } from '@/ui/components/chat/Message/Message.types';
 
 interface UseMainChatDataArgs {
     requireUrlMatch: boolean;

@@ -1,0 +1,63 @@
+import React from 'react';
+
+import { Text } from '@/ui/primitives/Text';
+import { cn } from '@/utils/cn';
+
+export const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+    <Text
+        className="mb-2"
+        size="xs"
+        tracking="wider"
+        transform="uppercase"
+        variant="muted"
+        weight="bold"
+    >
+        {children}
+    </Text>
+);
+
+export const EmptyState = ({ message }: { message: string }) => (
+    <div className="flex h-full items-center justify-center text-muted-foreground">
+        {message}
+    </div>
+);
+
+export const EditorLayout = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex h-full flex-1 flex-col overflow-hidden bg-background md:flex-row">
+        {children}
+    </div>
+);
+
+export const EditorPanel = ({
+    children,
+    isMobileListOpen = false,
+}: {
+    children: React.ReactNode;
+    isMobileListOpen?: boolean;
+}) => (
+    <div
+        className={cn(
+            'relative flex-1 overflow-y-auto p-8',
+            isMobileListOpen ? 'hidden md:block' : 'block',
+        )}
+    >
+        <div className="mx-auto max-w-2xl space-y-8 pb-24">{children}</div>
+    </div>
+);
+
+export const RolesSidebar = ({
+    children,
+    isMobileListOpen = true,
+}: {
+    children: React.ReactNode;
+    isMobileListOpen?: boolean;
+}) => (
+    <aside
+        className={cn(
+            'order-first flex-shrink-0 overflow-y-auto border-l border-border-subtle bg-bg-secondary md:order-last',
+            isMobileListOpen ? 'w-full md:w-64' : 'hidden md:block md:w-64',
+        )}
+    >
+        <div className="space-y-4 p-4">{children}</div>
+    </aside>
+);

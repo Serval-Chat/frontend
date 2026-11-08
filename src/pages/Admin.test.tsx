@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Admin } from './Admin';
 
-vi.mock('@/ui/components/admin/AdminLayout', () => ({
+vi.mock('@/features/admin/AdminLayout', () => ({
     AdminLayout: ({
         children,
         sidebar,
@@ -28,7 +28,7 @@ vi.mock('@/ui/components/admin/AdminLayout', () => ({
     ),
 }));
 
-vi.mock('@/ui/components/admin/AdminSidebar', () => ({
+vi.mock('@/features/admin/AdminSidebar', () => ({
     AdminSidebar: () => {
         const location = useLocation();
         const activeSection = location.pathname.split('/')[2] || 'overview';
@@ -52,11 +52,11 @@ vi.mock('@/ui/components/admin/AdminSidebar', () => ({
     },
 }));
 
-vi.mock('@/ui/components/admin/AdminOverview', () => ({
+vi.mock('@/features/admin/AdminOverview', () => ({
     AdminOverview: () => <div data-testid="admin-overview" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminIAM', () => ({
+vi.mock('@/features/admin/AdminIAM', () => ({
     AdminIAM: ({ onViewUser }: { onViewUser: (id: string) => void }) => (
         <div data-testid="admin-iam">
             <button
@@ -72,7 +72,7 @@ vi.mock('@/ui/components/admin/AdminIAM', () => ({
     ),
 }));
 
-vi.mock('@/ui/components/admin/AdminUserDetail', () => ({
+vi.mock('@/features/admin/AdminUserDetail', () => ({
     AdminUserDetail: ({
         userId,
         onBack,
@@ -88,19 +88,19 @@ vi.mock('@/ui/components/admin/AdminUserDetail', () => ({
     ),
 }));
 
-vi.mock('@/ui/components/admin/AdminAuditLogs', () => ({
+vi.mock('@/features/admin/AdminAuditLogs', () => ({
     AdminAuditLogs: () => <div data-testid="admin-audit-logs" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminBadges', () => ({
+vi.mock('@/features/admin/AdminBadges', () => ({
     AdminBadges: () => <div data-testid="admin-badges" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminSettings', () => ({
+vi.mock('@/features/admin/AdminSettings', () => ({
     AdminSettings: () => <div data-testid="admin-settings" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminServers', () => ({
+vi.mock('@/features/admin/AdminServers', () => ({
     AdminServers: ({
         onViewServer,
     }: {
@@ -119,23 +119,23 @@ vi.mock('@/ui/components/admin/AdminServers', () => ({
     ),
 }));
 
-vi.mock('@/ui/components/admin/AdminAwaitingReview', () => ({
+vi.mock('@/features/admin/AdminAwaitingReview', () => ({
     AdminAwaitingReview: () => <div data-testid="admin-awaiting-review" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminServerDetail', () => ({
+vi.mock('@/features/admin/AdminServerDetail', () => ({
     AdminServerDetail: () => <div data-testid="admin-server-detail" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminInvites', () => ({
+vi.mock('@/features/admin/AdminInvites', () => ({
     AdminInvites: () => <div data-testid="admin-invites" />,
 }));
 
-vi.mock('@/ui/components/admin/AdminBansAndMutes', () => ({
+vi.mock('@/features/admin/AdminBansAndMutes', () => ({
     AdminBansAndMutes: () => <div data-testid="admin-bans-and-mutes" />,
 }));
 
-vi.mock('@/ui/components/common/Text', () => ({
+vi.mock('@/ui/primitives/Text', () => ({
     Text: ({ children }: { children: React.ReactNode }) => (
         <span>{children}</span>
     ),

@@ -5,6 +5,9 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import { AppRoutes } from '@/AppRoutes';
+import { InAppNotificationProvider } from '@/app/notifications/InAppNotificationProvider';
+import { RootErrorBoundary } from '@/app/screens/RootErrorBoundary';
+import { Seo } from '@/app/seo/Seo';
 import { teardownWebPush } from '@/lib/pushClient';
 import { LimitedAnimationsProvider } from '@/providers/LimitedAnimationsProvider';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -12,10 +15,7 @@ import { StoreProvider } from '@/providers/StoreProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import '@/sentry';
 import '@/styles/index.css';
-import { RootErrorBoundary } from '@/ui/components/common/RootErrorBoundary';
-import { ToastProvider } from '@/ui/components/common/Toast';
-import { Seo } from '@/ui/components/seo/Seo';
-import { InAppNotificationProvider } from '@/ui/notifications/InAppNotificationProvider';
+import { ToastProvider } from '@/ui/primitives/Toast';
 import { hasAuthToken } from '@/utils/authToken';
 
 globalThis.addEventListener('auth-change', (): void => {

@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+
+import { useChangePassword } from '@/api/auth/auth.queries';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Modal } from '@/ui/primitives/Modal';
+import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { Text } from '@/ui/primitives/Text';
+import { useToast } from '@/ui/primitives/Toast';
+import { validatePassword } from '@/utils/validation';
+
+interface ChangePasswordModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export const ChangePasswordModal = ({
+    isOpen,
+    onClose,
+}: ChangePasswordModalProps) => {
+    const { showToast } = useToast();
+    const { mutate: changePassword, isPending } = useChangePassword();
+
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const [errors, setErrors] = useState<{
+        current?: string;
+        new?: string;
+        confirm?: string;
+    }>({});
+
+    const handleClose = (): void => {
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setErrors({});
+        onClose();
+    };
+
+    const handleSubmit = (e: React.FormEvent): void => {
+        e.preventDefault();
+
+        const newPasswordError = validatePassword(newPassword);
+        const newErrors: typeof errors = {};
+
+        if (!currentPassword) {
+            newErrors.current = 'Current password is required';
+        }
+
+        if (newPasswordError) {
+            newErrors.new = newPasswordError;
+        }
+
+        if (newPassword !== confirmPassword) {
+            newErrors.confirm = 'Passwords do not match';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        changePassword(
+            { currentPassword, newPassword },
+            {
+                onSuccess: (): void => {
+                    showToast('Password updated successfully', 'success');
+                    handleClose();
+                },
+                onError: (error): void => {
+                    showToast(
+                        error.message || 'Failed to update password',
+                        'error',
+                    );
+                },
+            },
+        );
+    };
+
+    return (
+        <Modal isOpen={isOpen} title="Update Password" onClose={handleClose}>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+                <Box className="space-y-4">
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="current-password"
+                        >
+                            Current Password
+                        </label>
+                        <PasswordInput
+                            autoComplete="current-password"
+                            id="current-password"
+                            name="current-password"
+                            value={currentPassword}
+                            onChange={(e): void => {
+                                setCurrentPassword(e.target.value);
+                            }}
+                        />
+                        {errors.current ? (
+                            <Text className="text-status-error" size="xs">
+                                {errors.current}
+                            </Text>
+                        ) : null}
+                    </Box>
+
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="new-password"
+                        >
+                            New Password
+                        </label>
+                        <PasswordInput
+                            autoComplete="new-password"
+                            id="new-password"
+                            name="new-password"
+                            value={newPassword}
+                            onChange={(e): void => {
+                                setNewPassword(e.target.value);
+                            }}
+                        />
+                        {errors.new ? (
+                            <Text className="text-status-error" size="xs">
+                                {errors.new}
+                            </Text>
+                        ) : null}
+                    </Box>
+
+                    <Box className="space-y-2">
+                        <label
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            htmlFor="confirm-password"
+                        >
+                            Confirm New Password
+                        </label>
+                        <PasswordInput
+                            autoComplete="new-password"
+                            id="confirm-password"
+                            name="confirm-password"
+                            value={confirmPassword}
+                            onChange={(e): void => {
+                                setConfirmPassword(e.target.value);
+                            }}
+                        />
+                        {errors.confirm ? (
+                            <Text className="text-status-error" size="xs">
+                                {errors.confirm}
+                            </Text>
+                        ) : null}
+                    </Box>
+                </Box>
+
+                <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">
+                    <Button type="button" variant="ghost" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        className="border-none bg-primary text-white hover:bg-primary-hover"
+                        loading={isPending}
+                        type="submit"
+                    >
+                        Update Password
+                    </Button>
+                </Box>
+            </form>
+        </Modal>
+    );
+};

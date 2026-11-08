@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 
 import { authApi } from '@/api/auth/auth.api';
 import type { ApiError } from '@/api/types';
-import { FormContent } from '@/ui/components/auth/FormContent';
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { Input } from '@/ui/components/common/Input';
-import { InputWrapper } from '@/ui/components/common/InputWrapper';
-import { Link } from '@/ui/components/common/Link';
-import { StatusMessage } from '@/ui/components/common/StatusMessage';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { FormContent } from '@/features/auth/FormContent';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { InputWrapper } from '@/ui/primitives/InputWrapper';
+import { Link } from '@/ui/primitives/Link';
+import { StatusMessage } from '@/ui/primitives/StatusMessage';
+import { Text } from '@/ui/primitives/Text';
 
 export const ForgotPassword = () => {
     const [email, setEmail] = useState('');

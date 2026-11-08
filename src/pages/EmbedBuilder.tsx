@@ -1,8 +1,8 @@
 import { type ReactNode, useState } from 'react';
 
+import { EmbedCreator } from '@/features/embed/EmbedCreator';
+import { EmbedRenderer } from '@/features/embed/EmbedRenderer';
 import type { MessagePayload } from '@/types/embed';
-import { EmbedCreator } from '@/ui/components/embed/EmbedCreator';
-import { EmbedRenderer } from '@/ui/components/embed/EmbedRenderer';
 
 const DEFAULT_PAYLOAD: MessagePayload = {
     embeds: [

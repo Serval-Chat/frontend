@@ -6,7 +6,7 @@ import type { User } from '@/api/users/users.types';
 import type { KeybindManager } from '@/keybinds/KeybindManager';
 import type { Theme } from '@/providers/ThemeProvider';
 import { armInterceptor } from '@/hooks/ws/debugSendInterceptor';
-import { showInAppNotification } from '@/ui/notifications/inAppNotifications';
+import { showInAppNotification } from '@/app/notifications/inAppNotifications';
 import { WsEvents, wsClient } from '@/ws';
 
 const THEMES: Theme[] = [

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiClient } from '@/api/client';
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import {
     Table,
     TableBody,
@@ -11,9 +12,8 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from '@/ui/components/common/Table';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
+} from '@/ui/primitives/Table';
+import { Text } from '@/ui/primitives/Text';
 
 interface WcagIssue {
     ruleId: string;

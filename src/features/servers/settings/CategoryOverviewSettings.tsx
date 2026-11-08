@@ -1,0 +1,182 @@
+import { useState } from 'react';
+
+import { Trash2 } from 'lucide-react';
+
+import {
+    useDeleteCategory,
+    useUpdateCategory,
+} from '@/api/servers/servers.queries';
+import type { Category } from '@/api/servers/servers.types';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { Modal } from '@/ui/primitives/Modal';
+import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
+import { Text } from '@/ui/primitives/Text';
+
+interface CategoryOverviewSettingsProps {
+    category: Category;
+    onDeleted?: () => void;
+}
+
+export const CategoryOverviewSettings = ({
+    category,
+    onDeleted,
+}: CategoryOverviewSettingsProps) => {
+    // Reset on every category.id change by the render-time guard further down.
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
+    const [name, setName] = useState(category.name);
+    // react-doctor-disable-next-line react-doctor/no-derived-useState
+    const [originalName, setOriginalName] = useState(category.name);
+
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+    const { mutate: updateCategory, isPending: isUpdating } = useUpdateCategory(
+        category.serverId,
+        category.id,
+    );
+    const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory(
+        category.serverId,
+    );
+
+    const [syncedCategoryId, setSyncedCategoryId] = useState(category.id);
+    if (category.id !== syncedCategoryId) {
+        setSyncedCategoryId(category.id);
+        setName(category.name);
+        setOriginalName(category.name);
+    }
+
+    const hasChanges = name !== originalName;
+
+    const handleSave = (): void => {
+        updateCategory(
+            {
+                name,
+            },
+            {
+                onSuccess: (): void => {
+                    setOriginalName(name);
+                },
+            },
+        );
+    };
+
+    const handleReset = (): void => {
+        setName(originalName);
+    };
+
+    const handleDelete = (): void => {
+        deleteCategory(category.id, {
+            onSuccess: (): void => {
+                onDeleted?.();
+            },
+        });
+    };
+
+    return (
+        <div className="max-w-3xl space-y-10 pb-20">
+            <div>
+                <Heading className="mb-1" level={2} variant="section">
+                    Category Overview
+                </Heading>
+                <Text variant="muted">Update your category's name.</Text>
+            </div>
+
+            <div className="space-y-8">
+                <div className="space-y-2">
+                    <label
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                        htmlFor="category-name"
+                    >
+                        Category Name
+                    </label>
+                    <Input
+                        id="category-name"
+                        placeholder="new-category"
+                        value={name}
+                        onChange={(e): void => {
+                            setName(e.target.value);
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="space-y-6 pt-10">
+                <div className="border-b border-border-subtle pb-4">
+                    <Heading className="text-error" level={2} variant="section">
+                        Danger Zone
+                    </Heading>
+                </div>
+
+                <div className="divide-y divide-border-subtle rounded-lg border border-bg-secondary">
+                    <div className="flex items-center justify-between gap-4 p-4">
+                        <div className="space-y-1">
+                            <Text as="p" variant="danger" weight="bold">
+                                Delete Category
+                            </Text>
+                            <Text as="p" size="xs" variant="muted">
+                                Permanently delete this category. Channels
+                                inside will become uncategorized. This action is
+                                IRREVERSIBLE.
+                            </Text>
+                        </div>
+                        <Button
+                            className="min-w-[120px]"
+                            variant="danger"
+                            onClick={(): void => {
+                                setIsDeleteConfirmOpen(true);
+                            }}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Category
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            <SettingsFloatingBar
+                isPending={isUpdating}
+                isVisible={hasChanges}
+                onReset={handleReset}
+                onSave={handleSave}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                className="max-w-md"
+                isOpen={isDeleteConfirmOpen}
+                title="Delete Category"
+                onClose={(): void => {
+                    setIsDeleteConfirmOpen(false);
+                }}
+            >
+                <div className="space-y-6">
+                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
+                        Are you sure you want to delete{' '}
+                        <span className="font-bold">{category.name}</span>?
+                        Channels within this category will not be deleted, but
+                        will become uncategorized. This action cannot be undone.
+                    </div>
+                    <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
+                        <Button
+                            variant="ghost"
+                            onClick={(): void => {
+                                setIsDeleteConfirmOpen(false);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            loading={isDeleting}
+                            variant="danger"
+                            onClick={handleDelete}
+                        >
+                            Delete Category
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
+        </div>
+    );
+};

@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 
 import { authApi } from '@/api/auth/auth.api';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { mergeReducer } from '@/utils/mergeReducer';
 
 interface TwoFactorState {

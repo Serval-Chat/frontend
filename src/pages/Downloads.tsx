@@ -2,11 +2,11 @@ import type { ReactNode } from 'react';
 
 import { Download, Monitor, Smartphone } from 'lucide-react';
 
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { TopNavBar } from '@/ui/components/layout/TopNavBar';
+import { TopNavBar } from '@/app/layout/TopNavBar';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Text } from '@/ui/primitives/Text';
 
 const CURRENT_YEAR = new Date().getFullYear();
 

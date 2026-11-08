@@ -3,9 +3,9 @@ import type React from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { useMe } from '@/api/users/users.queries';
+import { SessionVerificationError } from '@/app/screens/SessionVerificationError';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/ui/components/common/LoadingSpinner';
-import { SessionVerificationError } from '@/ui/components/common/SessionVerificationError';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 
 export const TauriGateway = (): React.ReactElement => {
     const { isAuthenticated } = useAuth();

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { AdminPasswordlessResetResult } from '@/api/admin/passwordless.api';
 import { adminPasswordlessApi } from '@/api/admin/passwordless.api';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 
 export const useAdminResetPasswordless = (): UseMutationResult<

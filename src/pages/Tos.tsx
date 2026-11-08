@@ -2,9 +2,9 @@ import type { ReactNode } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { ParsedText } from '@/ui/components/common/ParsedText';
-import { Box } from '@/ui/components/layout/Box';
-import { TopNavBar } from '@/ui/components/layout/TopNavBar';
+import { TopNavBar } from '@/app/layout/TopNavBar';
+import { ParsedText } from '@/features/messages/ParsedText';
+import { Box } from '@/ui/primitives/Box';
 import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 

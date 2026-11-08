@@ -1,0 +1,110 @@
+import React from 'react';
+
+import type { Role } from '@/api/servers/servers.types';
+import type { User } from '@/api/users/users.types';
+import { BotTag } from '@/features/users/BotTag';
+import { StyledUserName } from '@/features/users/StyledUserName';
+import { Box } from '@/ui/primitives/Box';
+import { Text } from '@/ui/primitives/Text';
+import { cn } from '@/utils/cn';
+import { resolveDisplayName } from '@/utils/displayName';
+import { formatTimestamp } from '@/utils/timestamp';
+
+interface MessageHeaderProps {
+    user: User;
+    localNickname?: string | null;
+    isWebhook?: boolean;
+    role?: Role;
+    iconRole?: Role;
+    timestamp: string;
+    isGroupStart?: boolean;
+    disableCustomFonts?: boolean;
+    disableGlowAndColors?: boolean;
+    disableColors?: boolean;
+    disableGlow?: boolean;
+    use24HourTime?: boolean;
+    showUsersPronouns?: boolean;
+    onClickName?: () => void;
+    isEdited?: boolean;
+    editedAt?: string;
+}
+
+export const MessageHeader = React.memo(
+    ({
+        user,
+        localNickname,
+        isWebhook,
+        role,
+        iconRole,
+        timestamp,
+        isGroupStart = true,
+        disableCustomFonts,
+        disableGlowAndColors,
+        disableColors,
+        disableGlow,
+        use24HourTime,
+        showUsersPronouns,
+        onClickName,
+        isEdited,
+        editedAt,
+    }: MessageHeaderProps) => {
+        if (!isGroupStart) return null;
+
+        return (
+            <Box className="mb-0.5 flex items-baseline gap-2">
+                <Box
+                    className={cn(
+                        onClickName &&
+                            'cursor-pointer underline-offset-2 hover:underline',
+                    )}
+                    onClick={onClickName}
+                >
+                    <StyledUserName
+                        showIcon
+                        disableColors={disableColors}
+                        disableCustomFonts={disableCustomFonts}
+                        disableGlow={disableGlow}
+                        disableGlowAndColors={disableGlowAndColors}
+                        iconRole={iconRole}
+                        role={role}
+                        user={user}
+                    >
+                        {resolveDisplayName(
+                            localNickname,
+                            user.nickname,
+                            user.displayName,
+                            user.username,
+                        )}
+                    </StyledUserName>
+                </Box>
+                {user.isBot ? (
+                    <BotTag className="h-4" verified={user.botVerified} />
+                ) : null}
+                {isWebhook && !user.isBot ? (
+                    <BotTag className="h-4" label="WEBHOOK" />
+                ) : null}
+                {showUsersPronouns && user.pronouns ? (
+                    <Text className="self-center text-xs text-text-muted">
+                        ({user.pronouns})
+                    </Text>
+                ) : null}
+
+                <Text className="self-center text-[10px] font-medium tracking-wider text-text-muted uppercase">
+                    {formatTimestamp(timestamp, use24HourTime)}
+                </Text>
+
+                {isEdited ? (
+                    <Text className="self-center text-[10px] font-medium text-text-muted italic">
+                        (edited
+                        {editedAt
+                            ? ` ${formatTimestamp(editedAt, use24HourTime)}`
+                            : ''}
+                        )
+                    </Text>
+                ) : null}
+            </Box>
+        );
+    },
+);
+
+MessageHeader.displayName = 'MessageHeader';

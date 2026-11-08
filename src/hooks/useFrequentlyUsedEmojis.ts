@@ -10,7 +10,7 @@ import {
 import type { FrequentlyUsedEmojiEntry } from '@/api/frequentlyUsedEmojis/frequentlyUsedEmojis.types';
 import { useAllServerEmojis } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
-import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
+import type { CustomEmojiCategory } from '@/features/emoji/EmojiPicker';
 import { emojiMap } from '@/utils/emoji';
 import {
     type EmojiUsageInput,

@@ -13,7 +13,7 @@ import {
     buildListItems,
     channelListReducer,
     initialChannelListState,
-} from '@/ui/components/servers/channelListModel';
+} from '@/features/servers/channelListModel';
 
 interface UseChannelListReorderArgs {
     channels: Channel[];

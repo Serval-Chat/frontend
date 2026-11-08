@@ -2,9 +2,9 @@ import { lazy } from 'react';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { AdminRoute } from '@/ui/components/layout/AdminRoute';
-import { AuthenticatedLayout } from '@/ui/components/layout/AuthenticatedLayout';
-import { NavigationSync } from '@/ui/components/layout/NavigationSync';
+import { AdminRoute } from '@/app/layout/AdminRoute';
+import { AuthenticatedLayout } from '@/app/layout/AuthenticatedLayout';
+import { NavigationSync } from '@/app/layout/NavigationSync';
 import { isTauri } from '@/utils/tauri';
 
 const Admin = lazy(() =>

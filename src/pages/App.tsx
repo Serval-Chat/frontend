@@ -3,12 +3,12 @@ import type { CSSProperties, ReactNode } from 'react';
 import { ArrowRight, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { FeatureTile } from '@/ui/components/layout/FeatureTile';
-import { TopNavBar } from '@/ui/components/layout/TopNavBar';
+import { FeatureTile } from '@/app/layout/FeatureTile';
+import { TopNavBar } from '@/app/layout/TopNavBar';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Text } from '@/ui/primitives/Text';
 
 const CURRENT_YEAR = new Date().getFullYear();
 

@@ -16,13 +16,13 @@ import * as botsHooks from '@/hooks/developer/useBots';
 import { BotAuthorize } from './BotAuthorize';
 
 vi.mock(
-    '@/ui/components/layout/DefaultBackground',
+    '@/app/layout/DefaultBackground',
     (): { DefaultBackground: () => null } => ({
         DefaultBackground: (): null => null,
     }),
 );
 
-vi.mock('@/ui/components/common/Toast', () => ({
+vi.mock('@/ui/primitives/Toast', () => ({
     useToast: () => ({ showToast: mockShowToast }),
 }));
 

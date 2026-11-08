@@ -25,7 +25,7 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 const mockShowToast = vi.fn();
-vi.mock('@/ui/components/common/Toast', () => ({
+vi.mock('@/ui/primitives/Toast', () => ({
     useToast: () => ({ showToast: mockShowToast }),
 }));
 

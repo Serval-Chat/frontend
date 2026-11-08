@@ -1,0 +1,46 @@
+import type { ReactNode } from 'react';
+
+import { CopyInput } from '@/ui/primitives/CopyInput';
+import { Input } from '@/ui/primitives/Input';
+import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { Stack } from '@/ui/primitives/Stack';
+
+import { DemoItem } from './DemoItem';
+import { DemoSection } from './DemoSection';
+import { SHOWOFF_SECTIONS } from './config';
+
+export const InputsDemo = (): ReactNode => (
+    <DemoSection id={SHOWOFF_SECTIONS.inputs} title="Input elements">
+        <Stack className="max-w-sm">
+            <DemoItem id="input-normal" title="Normal Input">
+                <Input placeholder="Type something..." />
+            </DemoItem>
+            <DemoItem id="input-disabled" title="Disabled Input">
+                <Input disabled placeholder="Can't type here..." />
+            </DemoItem>
+            <DemoItem id="input-password" title="Password Input">
+                <PasswordInput placeholder="Enter your secret..." />
+            </DemoItem>
+            <DemoItem id="input-copy" title="Copy Input">
+                <CopyInput
+                    readOnly
+                    copyLabel="Copy Link"
+                    value="https://ser.chat/invite/serchat"
+                />
+            </DemoItem>
+            <DemoItem id="input-number" title="Number Input">
+                <Input placeholder="Enter a number..." type="number" />
+            </DemoItem>
+            <DemoItem
+                id="input-width"
+                title="Width Constrained (min: 200px, max: 300px)"
+            >
+                <Input
+                    maxWidth={300}
+                    minWidth={200}
+                    placeholder="I have width limits..."
+                />
+            </DemoItem>
+        </Stack>
+    </DemoSection>
+);

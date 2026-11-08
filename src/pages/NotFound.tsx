@@ -1,10 +1,10 @@
-import { Heading } from '@/ui/components/common/Heading';
-import { Link } from '@/ui/components/common/Link';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
-import { PageWrapper } from '@/ui/components/layout/PageWrapper';
-import { VerticalSpacer } from '@/ui/components/layout/VerticalSpacer';
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { PageWrapper } from '@/app/layout/PageWrapper';
+import { Box } from '@/ui/primitives/Box';
+import { Heading } from '@/ui/primitives/Heading';
+import { Link } from '@/ui/primitives/Link';
+import { Text } from '@/ui/primitives/Text';
+import { VerticalSpacer } from '@/ui/primitives/VerticalSpacer';
 
 /**
  * @description 404 Not Found page

@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { useAllServerEmojis, useServers } from '@/api/servers/servers.queries';
+import type { CustomEmojiCategory } from '@/features/emoji/EmojiPicker';
 import { usePermissions } from '@/hooks/usePermissions';
-import type { CustomEmojiCategory } from '@/ui/components/emoji/EmojiPicker';
 
 export const useCustomEmojis = (options?: {
     enabled?: boolean;

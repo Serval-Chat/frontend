@@ -21,8 +21,8 @@ import {
 } from '@/api/servers/servers.queries';
 import type { User } from '@/api/users/users.types';
 import { useCustomEmojis } from '@/hooks/useCustomEmojis';
-import { isCustomEmojiEntry } from '@/ui/components/emoji/EmojiPicker';
-import type { StickerCategory } from '@/ui/components/emoji/StickerPicker';
+import { isCustomEmojiEntry } from '@/features/emoji/EmojiPicker';
+import type { StickerCategory } from '@/features/emoji/StickerPicker';
 
 interface UseMessageInputDataArgs {
     selectedFriendId: string | null;

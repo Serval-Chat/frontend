@@ -8,7 +8,7 @@ import {
 import type { AxiosError } from 'axios';
 
 import type { KlipyFavorite } from '@/api/klipy/klipy.types';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { hasAuthToken } from '@/utils/authToken';
 
 import { type GifTag, gifTagsApi } from './gifTags.api';

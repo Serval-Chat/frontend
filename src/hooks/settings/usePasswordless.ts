@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { startAuthentication } from '@simplewebauthn/browser';
 
 import { passwordlessApi } from '@/api/passwordless/passwordless.api';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { setAuthToken } from '@/utils/authToken';
 import { extractApiError } from '@/utils/extractApiError';
 import { mergeReducer } from '@/utils/mergeReducer';

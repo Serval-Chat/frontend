@@ -1,0 +1,16 @@
+import React from 'react';
+
+import { Box } from '@/ui/primitives/Box';
+import { cn } from '@/utils/cn';
+
+interface InputWrapperProps {
+    children: React.ReactNode;
+    className?: string;
+}
+
+/**
+ * @description Input wrapper for inputs for consistent vertical spacing
+ */
+export const InputWrapper = ({ children, className }: InputWrapperProps) => (
+    <Box className={cn('space-y-xs', className)}>{children}</Box>
+);

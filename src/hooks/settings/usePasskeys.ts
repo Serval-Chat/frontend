@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { passkeyApi } from '@/api/passkey/passkey.api';
 import { usePasskeysQuery } from '@/api/passkey/passkey.queries';
 import type { PasskeyCredentialSummary } from '@/api/passkey/passkey.types';
-import { useToast } from '@/ui/components/common/Toast';
+import { useToast } from '@/ui/primitives/Toast';
 import { extractApiError } from '@/utils/extractApiError';
 import { mergeReducer } from '@/utils/mergeReducer';
 import { isWebAuthnCancellation } from '@/utils/webauthn';

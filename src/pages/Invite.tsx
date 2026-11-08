@@ -8,17 +8,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { useInviteDetails, useJoinServer } from '@/api/invites/invites.queries';
 import type { InviteServerBanner } from '@/api/invites/invites.types';
-import { Button } from '@/ui/components/common/Button';
-import { Divider } from '@/ui/components/common/Divider';
-import { Heading } from '@/ui/components/common/Heading';
-import { Link } from '@/ui/components/common/Link';
-import { MutedText } from '@/ui/components/common/MutedText';
-import { Skeleton } from '@/ui/components/common/Skeleton';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
-import { ServerBannerMedia } from '@/ui/components/servers/ServerBannerMedia';
-import { ServerIcon } from '@/ui/components/servers/ServerIcon';
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { ServerBannerMedia } from '@/features/servers/ServerBannerMedia';
+import { ServerIcon } from '@/features/servers/ServerIcon';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Divider } from '@/ui/primitives/Divider';
+import { Heading } from '@/ui/primitives/Heading';
+import { Link } from '@/ui/primitives/Link';
+import { MutedText } from '@/ui/primitives/MutedText';
+import { Skeleton } from '@/ui/primitives/Skeleton';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
 

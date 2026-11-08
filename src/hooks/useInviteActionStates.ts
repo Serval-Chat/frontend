@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { useToast } from '@/ui/components/common/Toast';
-import type { InviteActionState } from '@/ui/components/servers/InviteActionButton';
+import type { InviteActionState } from '@/features/servers/InviteActionButton';
+import { useToast } from '@/ui/primitives/Toast';
 
 interface UseInviteActionStatesResult {
     states: Record<string, InviteActionState>;

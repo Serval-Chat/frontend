@@ -4,23 +4,23 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { Loader2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
+import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import { BannedScreen } from '@/app/screens/BannedScreen';
+import { FormContent } from '@/features/auth/FormContent';
 import { useAuth } from '@/hooks/useAuth';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { useLoginWithPasskey } from '@/hooks/useLoginWithPasskey';
 import { useLoginWithRecoveryKey } from '@/hooks/useLoginWithRecoveryKey';
-import { FormContent } from '@/ui/components/auth/FormContent';
-import { Admonition } from '@/ui/components/common/Admonition';
-import { BannedScreen } from '@/ui/components/common/BannedScreen';
-import { Button } from '@/ui/components/common/Button';
-import { Heading } from '@/ui/components/common/Heading';
-import { Input } from '@/ui/components/common/Input';
-import { InputWrapper } from '@/ui/components/common/InputWrapper';
-import { MutedText } from '@/ui/components/common/MutedText';
-import { PasswordInput } from '@/ui/components/common/PasswordInput';
-import { StatusMessage } from '@/ui/components/common/StatusMessage';
-import { Text } from '@/ui/components/common/Text';
-import { Box } from '@/ui/components/layout/Box';
-import { DefaultBackground } from '@/ui/components/layout/DefaultBackground';
+import { Admonition } from '@/ui/primitives/Admonition';
+import { Box } from '@/ui/primitives/Box';
+import { Button } from '@/ui/primitives/Button';
+import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { InputWrapper } from '@/ui/primitives/InputWrapper';
+import { MutedText } from '@/ui/primitives/MutedText';
+import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { StatusMessage } from '@/ui/primitives/StatusMessage';
+import { Text } from '@/ui/primitives/Text';
 import { canUsePasskeys } from '@/utils/webauthn';
 
 /**

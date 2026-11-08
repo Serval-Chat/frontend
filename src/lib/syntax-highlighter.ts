@@ -1,6 +1,6 @@
 import { refractor } from 'refractor/all';
 
-import type { AstNode } from '@/ui/components/common/CodeModal';
+import type { AstNode } from '@/features/messages/CodeModal';
 
 refractor.alias({
     cpp: ['c++', 'hpp', 'h++', 'hh', 'hxx', 'ino', 'cc'],

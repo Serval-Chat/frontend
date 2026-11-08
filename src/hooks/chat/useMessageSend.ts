@@ -14,9 +14,9 @@ import type { Channel } from '@/api/servers/servers.types';
 import type { QueuedFile } from '@/hooks/chat/useFileQueue';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { detectTokensInText } from '@/lib/tokenDetector';
-import { $getSlashChipState } from '@/ui/components/chat/lexical/slashChipHelpers';
-import { tryExecuteSlashCommand } from '@/ui/components/chat/lexical/slashCommandExecution';
-import { useToast } from '@/ui/components/common/Toast';
+import { $getSlashChipState } from '@/features/chat/lexical/slashChipHelpers';
+import { tryExecuteSlashCommand } from '@/features/chat/lexical/slashCommandExecution';
+import { useToast } from '@/ui/primitives/Toast';
 import { clearDraft } from '@/utils/drafts';
 import {
     applyMediaDimensions,

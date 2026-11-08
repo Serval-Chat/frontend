@@ -22,7 +22,7 @@ vi.mock('@/api/servers/servers.api', () => ({
     },
 }));
 
-vi.mock('@/ui/components/common/Toast', () => ({
+vi.mock('@/ui/primitives/Toast', () => ({
     useToast: () => ({
         showToast: vi.fn(),
     }),

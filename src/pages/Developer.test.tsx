@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { Developer } from './Developer';
 
 vi.mock(
-    '@/ui/components/settings/DeveloperSettings',
+    '@/features/settings/DeveloperSettings',
     (): {
         DeveloperSettings: () => React.ReactElement;
     } => ({
