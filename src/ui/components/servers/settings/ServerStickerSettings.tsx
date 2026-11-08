@@ -175,16 +175,7 @@ export const ServerStickerSettings = ({
         uploadSticker(
             { name: stickerName, file: processedFile },
             {
-                onSuccess: (newSticker): void => {
-                    if (import.meta.env.DEV) {
-                        // eslint-disable-next-line no-console
-                        console.log('[Sticker Upload Success]', {
-                            id: newSticker.id,
-                            name: newSticker.name,
-                            imageUrl: newSticker.imageUrl,
-                            resolvedUrl: resolveApiUrl(newSticker.imageUrl),
-                        });
-                    }
+                onSuccess: (): void => {
                     setStickerName('');
                     setSelectedFile(null);
                 },
