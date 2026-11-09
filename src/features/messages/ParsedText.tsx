@@ -62,6 +62,35 @@ interface ParsedTextProps {
     highlightQuery?: string;
 }
 
+const INLINE_TEXT_STYLES: Record<
+    | 'bold'
+    | 'italic'
+    | 'bold_italic'
+    | 'underline'
+    | 'curly_underline'
+    | 'jagged_underline'
+    | 'double_underline'
+    | 'double_curly_underline'
+    | 'dashed_underline'
+    | 'dotted_underline'
+    | 'rhythm_underline'
+    | 'strikethrough',
+    Pick<TextProps, 'className' | 'decoration' | 'fontStyle' | 'weight'>
+> = {
+    bold: { weight: 'bold' },
+    italic: { fontStyle: 'italic' },
+    bold_italic: { fontStyle: 'italic', weight: 'bold' },
+    underline: { decoration: 'underline' },
+    curly_underline: { className: 'curly-underline' },
+    jagged_underline: { className: 'jagged-underline' },
+    double_underline: { className: 'double-underline' },
+    double_curly_underline: { className: 'double-curly-underline' },
+    dashed_underline: { className: 'dashed-underline' },
+    dotted_underline: { className: 'dotted-underline' },
+    rhythm_underline: { className: 'rhythm-underline' },
+    strikethrough: { decoration: 'strike' },
+};
+
 const escapeRegExp = (s: string): string =>
     s.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
@@ -262,224 +291,28 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             );
                         }
 
-                        case 'bold': {
+                        case 'bold':
+                        case 'italic':
+                        case 'bold_italic':
+                        case 'underline':
+                        case 'curly_underline':
+                        case 'jagged_underline':
+                        case 'double_underline':
+                        case 'double_curly_underline':
+                        case 'dashed_underline':
+                        case 'dotted_underline':
+                        case 'rhythm_underline':
+                        case 'strikethrough': {
+                            const style = INLINE_TEXT_STYLES[node.type];
                             return (
                                 <Text
+                                    className={style.className}
+                                    decoration={style.decoration}
+                                    fontStyle={style.fontStyle}
                                     key={idx}
                                     size={size}
                                     variant={variant}
-                                    weight="bold"
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'italic': {
-                            return (
-                                <Text
-                                    fontStyle="italic"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'bold_italic': {
-                            return (
-                                <Text
-                                    fontStyle="italic"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    weight="bold"
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'underline': {
-                            return (
-                                <Text
-                                    decoration="underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'curly_underline': {
-                            return (
-                                <Text
-                                    className="curly-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'jagged_underline': {
-                            return (
-                                <Text
-                                    className="jagged-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'double_underline': {
-                            return (
-                                <Text
-                                    className="double-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'double_curly_underline': {
-                            return (
-                                <Text
-                                    className="double-curly-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'dashed_underline': {
-                            return (
-                                <Text
-                                    className="dashed-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'dotted_underline': {
-                            return (
-                                <Text
-                                    className="dotted-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
-                            );
-                        }
-
-                        case 'rhythm_underline': {
-                            return (
-                                <Text
-                                    className="rhythm-underline"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
+                                    weight={style.weight}
                                     wrap={wrap}
                                 >
                                     {typeof node.content === 'string' ? (
@@ -548,27 +381,6 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                         )}
                                     </sub>
                                 </span>
-                            );
-                        }
-
-                        case 'strikethrough': {
-                            return (
-                                <Text
-                                    decoration="strike"
-                                    key={idx}
-                                    size={size}
-                                    variant={variant}
-                                    wrap={wrap}
-                                >
-                                    {typeof node.content === 'string' ? (
-                                        node.content
-                                    ) : (
-                                        <ParsedText
-                                            {...nestedProps}
-                                            nodes={node.content}
-                                        />
-                                    )}
-                                </Text>
                             );
                         }
 

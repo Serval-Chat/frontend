@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { Role } from '@/api/servers/servers.types';
 import type { User } from '@/api/users/users.types';
 import type { ManualUserStatus } from '@/hooks/useSelfStatus';
 import type * as SelfStatusModule from '@/hooks/useSelfStatus';
@@ -272,6 +273,68 @@ describe('UserItem', (): void => {
             userId: 'user-2',
             reason: 'test reason',
             deleteMessageDuration: '24h',
+        });
+    });
+
+    describe('context menu order', (): void => {
+        const menuLabels = (): string[] =>
+            within(screen.getByTestId('context-items'))
+                .getAllByRole('button')
+                .map((b): string => b.textContent ?? '');
+
+        it("lists a friend's actions in order", (): void => {
+            friendsMock.mockReturnValue({ data: [{ id: 'user-2' }] });
+            render(
+                <UserItem
+                    noFetch
+                    user={{ id: 'user-2', username: 'alice' } as User}
+                    userId="user-2"
+                />,
+            );
+            expect(menuLabels()).toEqual([
+                'Show Profile',
+                'Report User',
+                'Open DMs',
+                'Add to Split View',
+                'Pin DM',
+                'Add Friend Nickname',
+                'Remove Friend',
+                'Block User',
+                'Copy User ID',
+            ]);
+        });
+
+        it("lists an owner's actions on a member in order", (): void => {
+            friendsMock.mockReturnValue({ data: [] });
+            useServerDetailsMock.mockReturnValue({ data: { ownerId: 'me' } });
+            render(
+                <UserItem
+                    noFetch
+                    serverId="server-1"
+                    serverRoles={[
+                        {
+                            id: 'r1',
+                            serverId: 'server-1',
+                            name: 'Mod',
+                            color: null,
+                            position: 1,
+                        } as Role,
+                    ]}
+                    user={{ id: 'user-2', username: 'alice' } as User}
+                    userId="user-2"
+                />,
+            );
+            expect(menuLabels()).toEqual([
+                'Show Profile',
+                'Report User',
+                'Add Friend',
+                'Block User',
+                'Roles',
+                'Timeout Member',
+                'Kick Member',
+                'Ban Member',
+                'Copy User ID',
+            ]);
         });
     });
 });

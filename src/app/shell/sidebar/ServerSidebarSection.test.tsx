@@ -22,14 +22,14 @@ vi.mock('@/ui/primitives/LoadingSpinner', () => ({
     LoadingSpinner: () => <div data-testid="loading-spinner" />,
 }));
 
+vi.mock('@/features/users/UserItemServerDataProvider', () => ({
+    UserItemServerDataProvider: ({ children }: { children: React.ReactNode }) =>
+        children,
+}));
+
 vi.mock('@/features/users/UserItem', async () => {
     const { useState } = (await vi.importActual('react')) as any;
     return {
-        UserItemServerDataProvider: ({
-            children,
-        }: {
-            children: React.ReactNode;
-        }) => children,
         UserItem: ({
             userId,
             user,

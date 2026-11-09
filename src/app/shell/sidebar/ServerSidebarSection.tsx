@@ -4,10 +4,8 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 
 import type { Role, Server, ServerMember } from '@/api/servers/servers.types';
 import { useMe } from '@/api/users/users.queries';
-import {
-    UserItem,
-    UserItemServerDataProvider,
-} from '@/features/users/UserItem';
+import { UserItem } from '@/features/users/UserItem';
+import { UserItemServerDataProvider } from '@/features/users/UserItemServerDataProvider';
 import { useAppSelector } from '@/store/hooks';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 

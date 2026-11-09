@@ -2,28 +2,13 @@ import React, { type ReactNode, useCallback, useMemo } from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
 import {
-    Ban,
-    Check,
     Copy,
     Flag,
     HeadphoneOff,
     ListTree,
-    MessageSquare,
     MicOff,
-    PanelBottomOpen,
-    PanelLeftOpen,
-    PanelRightOpen,
-    PanelTopOpen,
-    PanelsLeftRight,
     Pin,
-    PinOff,
-    Shield,
-    Tag,
     User as UserIcon,
-    UserMinus,
-    UserPlus,
-    UserX,
-    Volume2,
 } from 'lucide-react';
 import { shallowEqual } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -43,13 +28,9 @@ import {
 } from '@/api/friends/friends.queries';
 import {
     useAddRoleToMember,
-    useBanMember,
-    useKickMember,
     useMemberByUserId,
     useRemoveRoleFromMember,
-    useServerDetails,
     useServers,
-    useTimeoutMember,
 } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
@@ -59,7 +40,6 @@ import { ParsedEmoji } from '@/features/messages/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
 import { ReportModal } from '@/features/moderation/ReportModal';
 import { InviteToServerModal } from '@/features/servers/InviteToServerModal';
-import { RoleDot } from '@/features/servers/RoleDot';
 import { BanUserModal } from '@/features/servers/modals/BanUserModal';
 import { KickUserModal } from '@/features/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/features/servers/modals/TimeoutUserModal';
@@ -69,26 +49,36 @@ import { NicknameModal } from '@/features/users/profile/modals/NicknameModal';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setSplitViewPane } from '@/store/slices/navSlice';
 import type {
     UserPresenceMode,
     UserPresenceStatus,
 } from '@/store/slices/presenceSlice';
-import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/primitives/Box';
 import { ContextMenu, type ContextMenuItem } from '@/ui/primitives/ContextMenu';
-import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { resolveDisplayName } from '@/utils/displayName';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
 import { isCustomEmojiId } from '@/utils/validation';
-import { wsMessages } from '@/ws/messages';
 
 import { BotTag } from './BotTag';
 import { StyledUserName } from './StyledUserName';
+import {
+    ServerDataInjector,
+    UserItemViewportProvider,
+} from './UserItemServerDataProvider';
 import { UserProfilePicture } from './UserProfilePicture';
 import type { UserStatus } from './UserProfileStatusIndicator';
+import { useMemberModeration } from './useMemberModeration';
+import type { ServerData } from './userItemContext';
+import { ServerDataContext, UserItemViewportContext } from './userItemContext';
+import {
+    buildDmItems,
+    buildModerationItems,
+    buildRelationshipItems,
+    buildRolesSubmenu,
+    buildVolumeItems,
+} from './userItemMenu';
 
 interface UserItemProps {
     userId: string;
@@ -119,137 +109,6 @@ interface UserItemProps {
     hideUnread?: boolean;
     showPinIcon?: boolean;
 }
-
-interface ServerData {
-    kickMember: ReturnType<typeof useKickMember>['mutate'];
-    banMember: ReturnType<typeof useBanMember>['mutate'];
-    timeoutMember: ReturnType<typeof useTimeoutMember>['mutate'];
-    serverDetails: ReturnType<typeof useServerDetails>['data'];
-    currentUserMember: ReturnType<typeof useMemberByUserId>['data'];
-}
-
-const UserItemViewportContext = React.createContext<boolean | null>(null);
-
-const UserItemViewportProvider = React.memo(
-    ({ children }: { children: React.ReactNode }): ReactNode => {
-        const [isMobile, setIsMobile] = React.useState(
-            (): boolean => window.innerWidth < 768,
-        );
-
-        React.useEffect((): (() => void) => {
-            const handleResize = (): void => {
-                setIsMobile(window.innerWidth < 768);
-            };
-            window.addEventListener('resize', handleResize);
-            return (): void => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }, []);
-
-        return (
-            <UserItemViewportContext.Provider value={isMobile}>
-                {children}
-            </UserItemViewportContext.Provider>
-        );
-    },
-);
-
-UserItemViewportProvider.displayName = 'UserItemViewportProvider';
-
-const ServerDataInjector = React.memo(
-    ({
-        serverId,
-        children,
-    }: {
-        serverId: string;
-        children: (data: ServerData) => React.ReactNode;
-    }): ReactNode => {
-        const { mutate: kickMember } = useKickMember(serverId);
-        const { mutate: banMember } = useBanMember(serverId);
-        const { mutate: timeoutMember } = useTimeoutMember(serverId);
-        const { data: serverDetails } = useServerDetails(serverId, {
-            enabled: true,
-        });
-        const { data: currentUser } = useMe();
-        const { data: currentUserMember } = useMemberByUserId(
-            serverId,
-            currentUser?.id,
-            { enabled: true },
-        );
-
-        const data = useMemo(
-            () => ({
-                kickMember,
-                banMember,
-                timeoutMember,
-                serverDetails,
-                currentUserMember,
-            }),
-            [
-                kickMember,
-                banMember,
-                timeoutMember,
-                serverDetails,
-                currentUserMember,
-            ],
-        );
-
-        return <>{children(data)}</>;
-    },
-);
-
-ServerDataInjector.displayName = 'ServerDataInjector';
-
-const ServerDataContext = React.createContext<{
-    serverId: string;
-    data: ServerData;
-} | null>(null);
-
-const ServerDataContextProvider = ({
-    serverId,
-    data,
-    children,
-}: {
-    serverId: string;
-    data: ServerData;
-    children: React.ReactNode;
-}): ReactNode => {
-    const value = useMemo(() => ({ serverId, data }), [serverId, data]);
-    return (
-        <ServerDataContext.Provider value={value}>
-            {children}
-        </ServerDataContext.Provider>
-    );
-};
-
-export const UserItemServerDataProvider = React.memo(
-    ({
-        serverId,
-        children,
-    }: {
-        serverId: string;
-        children: React.ReactNode;
-    }): ReactNode => (
-        <UserItemViewportProvider>
-            {serverId ? (
-                <ServerDataInjector serverId={serverId}>
-                    {(data): ReactNode => (
-                        <ServerDataContextProvider
-                            data={data}
-                            serverId={serverId}
-                        >
-                            {children}
-                        </ServerDataContextProvider>
-                    )}
-                </ServerDataInjector>
-            ) : (
-                children
-            )}
-        </UserItemViewportProvider>
-    ),
-);
-
-UserItemServerDataProvider.displayName = 'UserItemServerDataProvider';
 
 /**
  * @description Renders a user item with avatar, styled username, and custom status.
@@ -464,76 +323,21 @@ const UserItemInner = React.memo(
         const hasUnread =
             unreadCount > 0 && !hideUnread && !providedServerId && !isActive;
 
-        const myMember = currentUserMember;
-        const myRoles = useMemo(
-            (): Role[] | undefined =>
-                serverRoles?.filter(
-                    (r) =>
-                        myMember?.roles.includes(r.id) ||
-                        r.name === '@everyone',
-                ),
-            [serverRoles, myMember?.roles],
-        );
-        const isOwner = serverDetails?.ownerId === currentUser?.id;
-
-        const myHighestRole = useMemo((): Role | undefined => {
-            if (!myRoles?.length) return undefined;
-            const maxPos = Math.max(...myRoles.map((r): number => r.position));
-            return myRoles.find((r): boolean => r.position === maxPos);
-        }, [myRoles]);
-
-        const canManageRoles =
-            isOwner ||
-            (myRoles?.some(
-                (r): boolean | undefined =>
-                    r.permissions?.administrator || r.permissions?.manageRoles,
-            ) ??
-                false);
-
-        const canKick =
-            isOwner ||
-            (myRoles?.some(
-                (r): boolean | undefined =>
-                    r.permissions?.administrator || r.permissions?.kickMembers,
-            ) ??
-                false);
-
-        const canBan =
-            isOwner ||
-            (myRoles?.some(
-                (r): boolean | undefined =>
-                    r.permissions?.administrator || r.permissions?.banMembers,
-            ) ??
-                false);
-
-        const canTimeout =
-            isOwner ||
-            (myRoles?.some(
-                (r): boolean | undefined =>
-                    r.permissions?.administrator ||
-                    r.permissions?.moderateMembers,
-            ) ??
-                false);
-
-        const targetRoles = useMemo(
-            (): Role[] | undefined =>
-                serverRoles?.filter((r) => targetMember?.roles.includes(r.id)),
-            [serverRoles, targetMember?.roles],
-        );
-        const targetHighestRole = useMemo((): Role | undefined => {
-            if (!targetRoles?.length) return undefined;
-            const maxPos = Math.max(
-                ...targetRoles.map((r): number => r.position),
-            );
-            return targetRoles.find((r): boolean => r.position === maxPos);
-        }, [targetRoles]);
-        const targetHighestPosition = targetHighestRole
-            ? targetHighestRole.position
-            : -1;
-        const myHighestPosition = myHighestRole ? myHighestRole.position : -1;
-
-        const isHigherHierarchy =
-            isOwner || myHighestPosition > targetHighestPosition;
+        const {
+            isOwner,
+            myHighestRole,
+            canManageRoles,
+            canKick,
+            canBan,
+            canTimeout,
+            isHigherHierarchy,
+        } = useMemberModeration({
+            serverRoles,
+            myMember: currentUserMember,
+            targetMember,
+            ownerId: serverDetails?.ownerId,
+            currentUserId: currentUser?.id,
+        });
 
         const contextMenuItems = useMemo((): ContextMenuItem[] => {
             const items: ContextMenuItem[] = [];
@@ -564,177 +368,52 @@ const UserItemInner = React.memo(
                 });
             }
 
-            // Group 1: DM Actions
             if (isFriend) {
                 items.push(
-                    { type: 'divider' },
-                    {
-                        label: 'Open DMs',
-                        icon: MessageSquare,
-                        onClick: (): void => {
-                            void navigate(`/chat/@user/${userId}`);
-                        },
-                    },
-                );
-                if (canInviteToAnyServer) {
-                    items.push({
-                        label: 'Invite to Server',
-                        icon: UserPlus,
-                        onClick: (): void => {
+                    ...buildDmItems({
+                        userId,
+                        isMobile,
+                        isPinnedFriend,
+                        hasNickname: Boolean(localNickname),
+                        hasUnread,
+                        canInviteToAnyServer,
+                        dispatch,
+                        navigate,
+                        togglePinFriend,
+                        openInviteToServer: (): void => {
                             setIsInviteToServerModalOpen(true);
                         },
-                    });
-                }
-                items.push(
-                    {
-                        label: 'Add to Split View',
-                        type: 'submenu',
-                        icon: PanelsLeftRight,
-                        items: [
-                            {
-                                label: isMobile ? 'Top Pane' : 'Left Side',
-                                icon: isMobile ? PanelTopOpen : PanelLeftOpen,
-                                onClick: (): void => {
-                                    dispatch(
-                                        setSplitViewPane({
-                                            side: 'left',
-                                            conversation: {
-                                                type: 'dm',
-                                                friendId: userId,
-                                            },
-                                        }),
-                                    );
-                                },
-                            },
-                            {
-                                label: isMobile ? 'Bottom Pane' : 'Right Side',
-                                icon: isMobile
-                                    ? PanelBottomOpen
-                                    : PanelRightOpen,
-                                onClick: (): void => {
-                                    dispatch(
-                                        setSplitViewPane({
-                                            side: 'right',
-                                            conversation: {
-                                                type: 'dm',
-                                                friendId: userId,
-                                            },
-                                        }),
-                                    );
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        label: isPinnedFriend ? 'Unpin DM' : 'Pin DM',
-                        icon: isPinnedFriend ? PinOff : Pin,
-                        onClick: (): void => {
-                            togglePinFriend(userId);
-                        },
-                    },
-                    {
-                        label: localNickname
-                            ? 'Edit Nickname'
-                            : 'Add Friend Nickname',
-                        icon: Tag,
-                        onClick: (): void => {
+                        openNickname: (): void => {
                             setIsNicknameModalOpen(true);
                         },
-                    },
+                    }),
                 );
-
-                if (hasUnread) {
-                    items.push({
-                        label: 'Mark as Read',
-                        icon: Check,
-                        onClick: (): void => {
-                            wsMessages.markDmRead(userId);
-                        },
-                    });
-                }
             }
 
-            // Group 1.5: Voice Volume
             if (isInSameVoiceChannel) {
-                const volume = userVolume ?? 1;
-                items.push({ type: 'divider' });
-                items.push({
-                    type: 'custom',
-                    content: (
-                        <div className="flex flex-col gap-2 p-1">
-                            <div className="flex items-center justify-between text-xs font-bold tracking-wider text-muted-foreground uppercase">
-                                <div className="flex items-center gap-1.5">
-                                    <Volume2 size={12} />
-                                    User Volume
-                                </div>
-                                <Text>
-                                    {Math.round(
-                                        (isNaN(volume) ? 1 : volume) * 100,
-                                    )}
-                                    %
-                                </Text>
-                            </div>
-                            <Slider
-                                aria-label="User volume"
-                                className="w-full cursor-pointer accent-primary"
-                                max="2"
-                                min="0"
-                                step="0.01"
-                                value={volume}
-                                onChange={(e): void => {
-                                    dispatch(
-                                        setUserVolume({
-                                            userId,
-                                            volume: Number.parseFloat(
-                                                e.target.value,
-                                            ),
-                                        }),
-                                    );
-                                }}
-                            />
-                        </div>
-                    ),
-                });
+                items.push(
+                    ...buildVolumeItems({ userId, userVolume, dispatch }),
+                );
             }
 
-            // Group 2: Friend Management (only if not me)
             if (!isMe) {
-                items.push({ type: 'divider' });
-                if (isFriend) {
-                    items.push({
-                        label: 'Remove Friend',
-                        icon: UserMinus,
-                        onClick: (): void => {
+                items.push(
+                    ...buildRelationshipItems({
+                        isFriend,
+                        isBot: userProfile?.isBot,
+                        isBlocked: blocks?.some(
+                            (b): boolean => b.targetUserId === userId,
+                        ),
+                        removeFriend: (): void => {
                             removeFriend(userId);
                         },
-                        variant: 'danger',
-                    });
-                } else if (!userProfile?.isBot) {
-                    items.push({
-                        label: 'Add Friend',
-                        icon: UserPlus,
-                        onClick: (): void => {
+                        addFriend: (): void => {
                             sendFriendRequest(username);
                         },
-                    });
-                }
-
-                const isUserBlocked = blocks?.some(
-                    (b): boolean => b.targetUserId === userId,
-                );
-                if (isUserBlocked) {
-                    items.push({
-                        label: 'Unblock User',
-                        icon: Shield,
-                        onClick: (): void => {
+                        unblock: (): void => {
                             removeBlock(userId);
                         },
-                    });
-                } else {
-                    items.push({
-                        label: 'Block User',
-                        icon: Ban,
-                        onClick: (): void => {
+                        block: (): void => {
                             void (async (): Promise<void> => {
                                 const profiles = blockProfiles || [];
                                 if (profiles.length === 0) {
@@ -766,86 +445,24 @@ const UserItemInner = React.memo(
                                 }
                             })();
                         },
-                        variant: 'danger',
-                    });
-                }
+                    }),
+                );
             }
 
-            // Group 3: Server Management (Roles)
             if (serverRoles && sid && canManageRoles) {
-                items.push({ type: 'divider' });
-
-                // Sort roles by position (descending)
-                const sortedRoles = serverRoles.toSorted(
-                    (a, b): number => b.position - a.position,
+                items.push(
+                    { type: 'divider' },
+                    buildRolesSubmenu({
+                        userId,
+                        serverRoles,
+                        memberRoles: allRoles,
+                        isOwner,
+                        myHighestRole,
+                        isBusy: isAdding || isRemoving,
+                        addRole,
+                        removeRole,
+                    }),
                 );
-                const rolesToDisplay = sortedRoles.filter(
-                    (r): boolean => r.name !== '@everyone',
-                );
-
-                items.push({
-                    icon: Shield,
-                    items:
-                        rolesToDisplay.length > 0
-                            ? rolesToDisplay.map((r) => {
-                                  const hasRole = allRoles?.some(
-                                      (ur): boolean =>
-                                          String(ur.id) === String(r.id),
-                                  );
-
-                                  // Hierarchy check: can only manage roles strictly below your highest role
-                                  // unless you are the owner
-                                  const canManageThisRole =
-                                      isOwner ||
-                                      (myHighestRole &&
-                                          myHighestRole.position > r.position);
-
-                                  return {
-                                      indent: false,
-                                      label: (
-                                          <Box className="flex items-center gap-2">
-                                              <RoleDot role={r} size={8} />
-                                              <Text className="truncate">
-                                                  {r.name}
-                                              </Text>
-                                          </Box>
-                                      ),
-                                      onClick: (): void => {
-                                          if (isAdding || isRemoving) return;
-
-                                          if (hasRole) {
-                                              removeRole({
-                                                  roleId: r.id,
-                                                  userId,
-                                              });
-                                          } else {
-                                              addRole({
-                                                  roleId: r.id,
-                                                  userId,
-                                              });
-                                          }
-                                      },
-                                      preventClose: true,
-                                      rightIcon: hasRole ? Check : undefined,
-                                      type: 'action',
-                                      variant: canManageThisRole
-                                          ? isAdding || isRemoving
-                                              ? 'ghost'
-                                              : 'normal'
-                                          : 'ghost',
-                                  };
-                              })
-                            : [
-                                  {
-                                      label: 'No roles',
-                                      onClick: (): void => {},
-                                      type: 'action',
-                                      variant: 'ghost',
-                                  },
-                              ],
-                    label: 'Roles',
-                    type: 'submenu',
-                });
             }
 
             items.push({ type: 'divider' });
@@ -888,37 +505,22 @@ const UserItemInner = React.memo(
                 (canKick || canBan || canTimeout) &&
                 isHigherHierarchy
             ) {
-                if (canTimeout) {
-                    items.push({
-                        label: 'Timeout Member',
-                        icon: Shield,
-                        onClick: (): void => {
+                items.push(
+                    ...buildModerationItems({
+                        canTimeout,
+                        canKick,
+                        canBan,
+                        openTimeout: (): void => {
                             setIsTimeoutModalOpen(true);
                         },
-                        variant: 'danger',
-                    });
-                }
-                if (canKick) {
-                    items.push({
-                        label: 'Kick Member',
-                        icon: UserX,
-                        onClick: (): void => {
+                        openKick: (): void => {
                             setIsKickModalOpen(true);
                         },
-                        variant: 'danger',
-                    });
-                }
-                if (canBan) {
-                    items.push({
-                        label: 'Ban Member',
-                        icon: Ban,
-                        onClick: (): void => {
+                        openBan: (): void => {
                             setIsBanModalOpen(true);
                         },
-                        variant: 'danger',
-                    });
-                }
-                items.push({ type: 'divider' });
+                    }),
+                );
             }
 
             items.push({
