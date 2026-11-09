@@ -103,14 +103,7 @@
         var(--background)
     );
     --avatar-fallback-text: var(--muted-foreground);
-    --settings-search-bg: rgb(0 0 0 / 0.4);
-    --settings-search-bg-focus: rgb(0 0 0 / 0.6);
-    --settings-search-border: rgb(255 255 255 / 0.1);
-    --settings-search-icon: rgb(255 255 255 / 0.3);
-    --settings-search-placeholder: rgb(255 255 255 / 0.2);
     --settings-edit-bg: rgb(0 0 0 / 0.2);
-    --settings-edit-control-bg: rgb(0 0 0 / 0.4);
-    --settings-edit-control-border: rgb(255 255 255 / 0.1);
     --settings-edit-card-bg: rgb(255 255 255 / 0.02);
     --settings-edit-card-border: rgb(255 255 255 / 0.05);
     --settings-edit-card-border-hover: rgb(255 255 255 / 0.1);
@@ -535,14 +528,7 @@
     --pride-glass-input-shadow: 0 14px 38px rgba(115, 78, 125, 0.12);
     --avatar-fallback-bg: #ffffff;
     --avatar-fallback-text: #111111;
-    --settings-search-bg: rgba(255, 248, 252, 0.54);
-    --settings-search-bg-focus: rgba(255, 248, 252, 0.68);
-    --settings-search-border: rgba(255, 255, 255, 0.32);
-    --settings-search-icon: rgba(68, 43, 69, 0.48);
-    --settings-search-placeholder: rgba(68, 43, 69, 0.48);
     --settings-edit-bg: rgba(255, 248, 252, 0.36);
-    --settings-edit-control-bg: rgba(255, 248, 252, 0.58);
-    --settings-edit-control-border: rgba(255, 255, 255, 0.34);
     --settings-edit-card-bg: rgba(255, 248, 252, 0.34);
     --settings-edit-card-border: rgba(255, 255, 255, 0.24);
     --settings-edit-card-border-hover: rgba(255, 255, 255, 0.38);

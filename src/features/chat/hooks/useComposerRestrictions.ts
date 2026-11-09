@@ -20,7 +20,8 @@ export const useComposerRestrictions = ({
     serverDetails,
     myMember,
 }: UseComposerRestrictionsArgs) => {
-    const isOwner = serverDetails?.ownerId === me?.id;
+    const isOwner =
+        Boolean(serverDetails?.ownerId) && serverDetails?.ownerId === me?.id;
     const timeoutUntil =
         myMember?.communicationDisabledUntil && !isOwner
             ? new Date(myMember.communicationDisabledUntil).getTime()

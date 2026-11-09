@@ -91,4 +91,24 @@ describe('useMemberModeration', (): void => {
             isHigherHierarchy: true,
         });
     });
+
+    it('grants nothing while the server and current user are still loading', (): void => {
+        const { result } = renderHook(() =>
+            useMemberModeration({
+                serverRoles: undefined,
+                myMember: undefined,
+                targetMember: undefined,
+                ownerId: undefined,
+                currentUserId: undefined,
+            }),
+        );
+        expect(result.current).toMatchObject({
+            isOwner: false,
+            canManageRoles: false,
+            canKick: false,
+            canBan: false,
+            canTimeout: false,
+            isHigherHierarchy: false,
+        });
+    });
 });

@@ -163,7 +163,9 @@ const ProfilePopupContent = ({
         (user && 'customStatus' in user ? user.customStatus?.emoji : undefined);
 
     const { data: currentUser } = useMe();
-    const isOwner = serverDetails?.ownerId === currentUser?.id;
+    const isOwner =
+        Boolean(serverDetails?.ownerId) &&
+        serverDetails?.ownerId === currentUser?.id;
     const myMember = members?.find(
         (m): boolean => m.userId === currentUser?.id,
     );

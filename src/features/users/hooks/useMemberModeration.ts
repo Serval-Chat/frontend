@@ -24,7 +24,7 @@ export const useMemberModeration = ({
             ),
         [serverRoles, myMember?.roles],
     );
-    const isOwner = ownerId === currentUserId;
+    const isOwner = Boolean(ownerId) && ownerId === currentUserId;
 
     const myHighestRole = useMemo((): Role | undefined => {
         if (!myRoles?.length) return undefined;
