@@ -59,10 +59,10 @@ export const PushPrompt = () => {
     if (!isVisible) return null;
 
     return (
-        <div className="border-sidebar-border animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 left-4 z-[9999] flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-2xl md:right-auto md:w-80">
+        <div className="animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 left-4 z-[9999] flex flex-col gap-3 rounded-lg border border-border-subtle bg-background p-4 shadow-2xl md:right-auto md:w-80">
             <Button
                 aria-label="Dismiss banner"
-                className="text-primary-500 hover:text-primary-300"
+                className="text-muted-foreground hover:text-foreground"
                 size="sm"
                 style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}
                 variant="ghost"
@@ -72,19 +72,19 @@ export const PushPrompt = () => {
             </Button>
 
             <Heading
-                className="text-primary-100 pr-5"
+                className="pr-5 text-foreground"
                 level={3}
                 variant="chat-h3"
             >
                 Never Miss a Message
             </Heading>
-            <Text className="text-primary-400" size="sm">
+            <Text className="text-muted-foreground" size="sm">
                 Enable push notifications to know when your friends message you.
             </Text>
 
             <div className="mt-2 flex justify-end gap-2">
                 <Button
-                    className="text-primary-400 hover:text-primary-100"
+                    className="text-muted-foreground hover:text-foreground"
                     size="sm"
                     variant="ghost"
                     onClick={handleDismiss}

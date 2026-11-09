@@ -80,7 +80,7 @@ const StatTooltip = ({
                   : `${daysAgo} days ago`;
     }
     return (
-        <div className="bg-bg-base rounded-lg border border-border-subtle px-3 py-1.5 text-xs shadow-lg">
+        <div className="rounded-lg border border-border-subtle bg-background px-3 py-1.5 text-xs shadow-lg">
             <p className="font-semibold text-foreground">
                 {payload[0]?.value ?? 0}
             </p>

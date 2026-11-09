@@ -7,9 +7,14 @@ import { decorationsApi, getDecorationUrl } from '@/api/decorations';
 import { useMe } from '@/api/users/users.queries';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/primitives/Button';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
 import { mergeReducer } from '@/utils/mergeReducer';
@@ -60,9 +65,8 @@ const DecorationCollection = ({
                                 )}
                                 key={deco.id}
                             >
-                                <button
+                                <Pressable
                                     className="flex w-full cursor-pointer flex-col items-center gap-3 border-0 bg-transparent p-0 text-left"
-                                    type="button"
                                     onClick={() => {
                                         if (!isActive) onApply(deco.id);
                                     }}
@@ -76,9 +80,14 @@ const DecorationCollection = ({
                                                     src={user.profilePicture}
                                                 />
                                             ) : (
-                                                <span className="text-xl font-bold text-muted-foreground opacity-50">
+                                                <Text
+                                                    className="opacity-50"
+                                                    size="xl"
+                                                    variant="muted"
+                                                    weight="bold"
+                                                >
                                                     {user.username?.[0]?.toUpperCase()}
-                                                </span>
+                                                </Text>
                                             )}
                                         </div>
                                         <div
@@ -97,16 +106,15 @@ const DecorationCollection = ({
                                         {deco.name}
                                     </div>
                                     {isActive ? (
-                                        <div className="text-primary-foreground absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase">
+                                        <div className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-foreground uppercase">
                                             Active
                                         </div>
                                     ) : null}
-                                </button>
-                                <button
-                                    className="bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground absolute top-2 right-2 rounded-md p-1.5 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 disabled:opacity-50"
+                                </Pressable>
+                                <Pressable
+                                    className="absolute top-2 right-2 rounded-md bg-danger/10 p-1.5 text-danger opacity-0 transition-opacity group-hover:opacity-100 hover:bg-danger hover:text-white focus:opacity-100 disabled:opacity-50"
                                     disabled={isDeleting}
                                     title="Delete Decoration"
-                                    type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onRequestDelete({
@@ -116,7 +124,7 @@ const DecorationCollection = ({
                                     }}
                                 >
                                     <Trash2 size={14} />
-                                </button>
+                                </Pressable>
                             </div>
                         );
                     })}
@@ -149,19 +157,14 @@ const DecorationUploadSection = ({
         <Heading level={4}>Upload New Decoration</Heading>
         <div className="space-y-5 rounded-xl border border-border-subtle bg-bg-subtle p-6">
             <div className="space-y-1.5">
-                <label
-                    className="text-xs font-bold text-muted-foreground uppercase"
-                    htmlFor="decoration-name"
-                >
-                    Decoration Name
-                </label>
-                <input
-                    className="w-full rounded-lg border border-border-subtle bg-bg-secondary px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
+                <Label htmlFor="decoration-name">Decoration Name</Label>
+                <Input
                     id="decoration-name"
                     maxLength={64}
                     placeholder="e.g. Golden Crown"
                     type="text"
                     value={name}
+                    variant="secondary"
                     onChange={(e) => {
                         onNameChange(e.target.value);
                     }}
@@ -169,20 +172,15 @@ const DecorationUploadSection = ({
             </div>
 
             <div className="space-y-1.5">
-                <label
-                    className="text-xs font-bold text-muted-foreground uppercase"
-                    htmlFor="decoration-file"
-                >
+                <Label htmlFor="decoration-file">
                     Image (WebP or GIF; PNG/JPEG auto-converted)
-                </label>
+                </Label>
                 <div className="flex items-center gap-3">
-                    <input
+                    <FileInput
                         accept="image/webp,image/gif,image/png,image/jpeg"
                         aria-label="Upload decoration image"
-                        className="hidden"
                         id="decoration-file"
                         ref={fileInputRef}
-                        type="file"
                         onChange={onFileChange}
                     />
                     <Button
@@ -194,18 +192,22 @@ const DecorationUploadSection = ({
                         Choose File
                     </Button>
                     {selectedFile ? (
-                        <span className="max-w-xs truncate text-sm text-muted-foreground">
+                        <Text
+                            className="max-w-xs truncate"
+                            size="sm"
+                            variant="muted"
+                        >
                             {selectedFile.name}{' '}
-                            <span className="text-xs opacity-60">
+                            <Text className="opacity-60" size="xs">
                                 ({(selectedFile.size / 1024).toFixed(1)} kB)
-                            </span>
-                        </span>
+                            </Text>
+                        </Text>
                     ) : null}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <Text as="p" size="xs" variant="muted">
                     Max 800 kB. Between 64x64 and 512x512 px. Transparent PNG
                     will be preserved.
-                </p>
+                </Text>
             </div>
 
             {previewUrl ? (
@@ -488,12 +490,12 @@ export const AvatarDecorationsSettings = () => {
                     <div className="flex flex-col gap-2">
                         {user.decorationId ? (
                             <>
-                                <span className="font-semibold text-foreground">
+                                <Text variant="default" weight="semibold">
                                     A decoration is currently active.
-                                </span>
-                                <span className="text-sm text-muted-foreground">
+                                </Text>
+                                <Text size="sm" variant="muted">
                                     Remove it or share the link below.
-                                </span>
+                                </Text>
                                 <div className="mt-1 flex gap-2">
                                     <Button
                                         disabled={removeMutation.isPending}
@@ -517,10 +519,10 @@ export const AvatarDecorationsSettings = () => {
                                 </div>
                             </>
                         ) : (
-                            <span className="text-sm text-muted-foreground">
+                            <Text size="sm" variant="muted">
                                 No active decoration. Upload one below to add
                                 flair to your avatar.
-                            </span>
+                            </Text>
                         )}
                     </div>
                 </div>
@@ -555,14 +557,14 @@ export const AvatarDecorationsSettings = () => {
             >
                 {decorationToDelete ? (
                     <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
+                        <Text as="p" size="sm" variant="muted">
                             Are you sure you want to permanently delete the
                             decoration{' '}
-                            <span className="font-bold text-foreground">
+                            <Text variant="default" weight="bold">
                                 {decorationToDelete.name}
-                            </span>
+                            </Text>
                             ? This action cannot be undone.
-                        </p>
+                        </Text>
                         <div className="flex justify-end gap-2 pt-4">
                             <Button
                                 variant="ghost"

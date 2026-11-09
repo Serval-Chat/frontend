@@ -83,7 +83,7 @@ const ServerModerationControls = ({
             <Button
                 className={
                     server.verified
-                        ? 'hover:bg-info/10 hover:text-info w-full gap-2 rounded-lg text-xs'
+                        ? 'w-full gap-2 rounded-lg text-xs hover:bg-primary/10 hover:text-primary'
                         : 'w-full gap-2 rounded-lg text-xs hover:bg-primary/10 hover:text-primary'
                 }
                 loading={isVerifying || isUnverifying}
@@ -92,7 +92,7 @@ const ServerModerationControls = ({
             >
                 {server.verified ? (
                     <>
-                        <ShieldCheck className="text-info" size={14} />
+                        <ShieldCheck className="text-primary" size={14} />
                         Remove Verified Badge
                     </>
                 ) : (
@@ -100,7 +100,7 @@ const ServerModerationControls = ({
                         <BadgeCheck
                             className={
                                 server.verificationRequested
-                                    ? 'text-warning'
+                                    ? 'text-caution'
                                     : 'text-primary'
                             }
                             size={14}

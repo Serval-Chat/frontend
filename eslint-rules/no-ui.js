@@ -8,6 +8,15 @@ const DEFAULT_ELEMENTS = new Set([...INTERACTIVE_ELEMENTS, ...TEXT_ELEMENTS]);
 
 const DEFAULT_ALLOWED_PATHS = ["src/ui/primitives/"];
 
+function holdsText(element) {
+  return (element.children || []).some(
+    (child) =>
+      (child.type === "JSXText" && child.value.trim() !== "") ||
+      (child.type === "JSXExpressionContainer" &&
+        child.expression.type !== "JSXEmptyExpression"),
+  );
+}
+
 function normalizePath(filePath) {
   return filePath.replace(/\\/g, "/");
 }
@@ -64,9 +73,9 @@ export default {
           JSXOpeningElement(node) {
             if (node.name.type !== "JSXIdentifier") return;
             const element = node.name.name;
-            if (elements.has(element)) {
-              context.report({ node, messageId: "rawElement", data: { element } });
-            }
+            if (!elements.has(element)) return;
+            if (element === "span" && !holdsText(node.parent)) return;
+            context.report({ node, messageId: "rawElement", data: { element } });
           },
         };
       },

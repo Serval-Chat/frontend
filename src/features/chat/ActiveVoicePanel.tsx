@@ -51,10 +51,10 @@ export const ActiveVoicePanel = () => {
                 return { icon: SignalHigh, color: 'text-success' };
             }
             case 'good': {
-                return { icon: SignalMedium, color: 'text-warning' };
+                return { icon: SignalMedium, color: 'text-caution' };
             }
             case 'poor': {
-                return { icon: SignalLow, color: 'text-destructive' };
+                return { icon: SignalLow, color: 'text-danger' };
             }
             case 'unknown':
             default: {
@@ -85,7 +85,7 @@ export const ActiveVoicePanel = () => {
                     <IconButton
                         className={cn(
                             'hover:bg-white/10',
-                            isMuted ? 'text-destructive' : 'text-white',
+                            isMuted ? 'text-danger' : 'text-white',
                         )}
                         icon={isMuted ? MicOff : Mic}
                         iconSize={18}
@@ -99,7 +99,7 @@ export const ActiveVoicePanel = () => {
                     <IconButton
                         className={cn(
                             'hover:bg-white/10',
-                            isDeafened ? 'text-destructive' : 'text-white',
+                            isDeafened ? 'text-danger' : 'text-white',
                         )}
                         icon={isDeafened ? HeadphoneOff : Headphones}
                         iconSize={18}

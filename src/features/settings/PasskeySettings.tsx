@@ -176,7 +176,7 @@ export const PasskeySettings = (): React.ReactNode => {
                                             {passkey.name}
                                         </Text>
                                         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                                            <span>
+                                            <Text>
                                                 Added{' '}
                                                 <Timestamp
                                                     flag="R"
@@ -184,8 +184,8 @@ export const PasskeySettings = (): React.ReactNode => {
                                                         passkey.createdAt,
                                                     )}
                                                 />
-                                            </span>
-                                            <span>
+                                            </Text>
+                                            <Text>
                                                 · last used{' '}
                                                 {passkey.lastUsedAt ? (
                                                     <Timestamp
@@ -197,7 +197,7 @@ export const PasskeySettings = (): React.ReactNode => {
                                                 ) : (
                                                     'never'
                                                 )}
-                                            </span>
+                                            </Text>
                                         </div>
                                     </>
                                 )}

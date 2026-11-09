@@ -6,6 +6,7 @@ import { useMe } from '@/api/users/users.queries';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';
 import { Text } from '@/ui/primitives/Text';
@@ -83,12 +84,7 @@ export const ChangeLoginModal = ({
             <form className="space-y-6" onSubmit={handleSubmit}>
                 <Box className="space-y-4">
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="current-login"
-                        >
-                            Current Login
-                        </label>
+                        <Label htmlFor="current-login">Current Login</Label>
                         <Input
                             disabled
                             id="current-login"
@@ -98,12 +94,7 @@ export const ChangeLoginModal = ({
                     </Box>
 
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="new-login"
-                        >
-                            New Login
-                        </label>
+                        <Label htmlFor="new-login">New Login</Label>
                         <Input
                             id="new-login"
                             type="text"
@@ -113,19 +104,14 @@ export const ChangeLoginModal = ({
                             }}
                         />
                         {errors.newLogin ? (
-                            <Text className="text-status-error" size="xs">
+                            <Text className="text-danger" size="xs">
                                 {errors.newLogin}
                             </Text>
                         ) : null}
                     </Box>
 
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="password"
-                        >
-                            Confirm Password
-                        </label>
+                        <Label htmlFor="password">Confirm Password</Label>
                         <PasswordInput
                             id="password"
                             value={password}
@@ -134,7 +120,7 @@ export const ChangeLoginModal = ({
                             }}
                         />
                         {errors.password ? (
-                            <Text className="text-status-error" size="xs">
+                            <Text className="text-danger" size="xs">
                                 {errors.password}
                             </Text>
                         ) : null}

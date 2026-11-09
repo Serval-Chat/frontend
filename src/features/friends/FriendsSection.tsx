@@ -14,7 +14,7 @@ import { cn } from '@/utils/cn';
 import { FriendList } from './FriendList';
 
 const FriendsHeader = (): React.ReactNode => (
-    <Box className="text-foreground-muted mb-3 px-1 text-xs font-semibold tracking-wider uppercase">
+    <Box className="mb-3 px-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
         Friends
     </Box>
 );
@@ -37,8 +37,8 @@ const FriendRequestNavItem = (): React.ReactNode => {
             className={cn(
                 'group mb-4 flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-200',
                 isActive
-                    ? 'bg-bg-tertiary text-foreground'
-                    : 'text-foreground-muted hover:bg-bg-subtle hover:text-foreground',
+                    ? 'bg-bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
             )}
             type="button"
             onClick={(): void => {

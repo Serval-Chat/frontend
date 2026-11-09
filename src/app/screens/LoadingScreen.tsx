@@ -93,7 +93,7 @@ export const LoadingScreen = ({
                                         type === 'offline'
                                             ? 'text-danger'
                                             : type === 'reconnecting'
-                                              ? 'text-warning'
+                                              ? 'text-caution'
                                               : 'text-primary',
                                     )}
                                 >

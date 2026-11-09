@@ -2,6 +2,8 @@ import { Plus, X } from 'lucide-react';
 
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Slider } from '@/ui/primitives/Slider';
+import { Text } from '@/ui/primitives/Text';
 import { Toggle } from '@/ui/primitives/Toggle';
 
 import { ColorPickerPopover } from './ColorPickerPopover';
@@ -55,9 +57,9 @@ export const UsernameGradientSection = ({
 
         <div className="space-y-4 rounded-lg border border-border-subtle bg-bg-subtle p-4">
             <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">
+                <Text size="sm" variant="default" weight="medium">
                     Enable gradient
-                </span>
+                </Text>
                 <Toggle
                     checked={gradientEnabled}
                     onCheckedChange={setGradientEnabled}
@@ -67,9 +69,14 @@ export const UsernameGradientSection = ({
             {gradientEnabled ? (
                 <>
                     <div>
-                        <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                        <Text
+                            className="mb-2 block"
+                            size="sm"
+                            variant="muted"
+                            weight="medium"
+                        >
                             Colors (Max 20)
-                        </span>
+                        </Text>
                         <div className="mb-2 flex flex-wrap gap-2">
                             {gradientColors.map((colorItem, index) => {
                                 const isOpen =
@@ -81,7 +88,7 @@ export const UsernameGradientSection = ({
                                         key={colorItem.id}
                                     >
                                         <Button
-                                            className="border-border h-10 w-10 min-w-0 rounded-full border-2 p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                            className="h-10 w-10 min-w-0 rounded-full border-2 border-border-subtle p-0 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                             style={{
                                                 backgroundColor:
                                                     colorItem.value,
@@ -104,9 +111,9 @@ export const UsernameGradientSection = ({
                                                     );
                                             }}
                                         >
-                                            <span className="sr-only">
+                                            <Text className="sr-only">
                                                 Select color {colorItem.value}
-                                            </span>
+                                            </Text>
                                         </Button>
                                         <Button
                                             aria-label={`Remove gradient color ${index + 1}`}
@@ -144,7 +151,7 @@ export const UsernameGradientSection = ({
                             {gradientColors.length < 20 ? (
                                 <Button
                                     aria-label="Add gradient color"
-                                    className="border-border flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
+                                    className="flex h-10 w-10 min-w-0 items-center justify-center rounded-full border-2 border-dashed border-border-subtle p-0 text-muted-foreground shadow-none transition-colors hover:border-primary hover:text-primary"
                                     variant="ghost"
                                     onClick={addGradientColor}
                                 >
@@ -156,26 +163,31 @@ export const UsernameGradientSection = ({
 
                     <div className="grid grid-cols-1 gap-4">
                         <div>
-                            <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                            <Text
+                                className="mb-2 block"
+                                size="sm"
+                                variant="muted"
+                                weight="medium"
+                            >
                                 Angle (Deg)
-                            </span>
+                            </Text>
                             <div className="flex items-center gap-4">
-                                <input
+                                <Slider
                                     aria-label="Gradient angle"
-                                    className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
+                                    className="min-w-0 flex-1"
                                     max={360}
                                     min={0}
-                                    type="range"
                                     value={gradientAngle}
-                                    onChange={(e): void => {
-                                        setGradientAngle(
-                                            Number(e.target.value),
-                                        );
-                                    }}
+                                    onValueChange={setGradientAngle}
                                 />
-                                <span className="min-w-[3ch] shrink-0 text-sm font-medium text-foreground">
+                                <Text
+                                    className="min-w-[3ch] shrink-0"
+                                    size="sm"
+                                    variant="default"
+                                    weight="medium"
+                                >
                                     {gradientAngle}°
-                                </span>
+                                </Text>
                             </div>
                         </div>
                     </div>

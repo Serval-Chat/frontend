@@ -23,7 +23,7 @@ const BotCard = ({
     const avatar = user?.profilePicture;
 
     return (
-        <div className="hover:border-border flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-secondary p-4 transition-colors">
+        <div className="flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-secondary p-4 transition-colors hover:border-border-subtle">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-subtle">
                 {avatar ? (
                     <img

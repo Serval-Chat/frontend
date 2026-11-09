@@ -13,6 +13,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
@@ -226,16 +227,15 @@ export const ServerRoleSettings = ({ serverId }: ServerRoleSettingsProps) => {
                 {/* Mobile Back Header */}
                 {isMobileListOpen ? null : (
                     <div className="sticky top-0 z-20 mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
-                        <button
+                        <Pressable
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            type="button"
                             onClick={(): void => {
                                 setIsMobileListOpen(true);
                             }}
                         >
                             <ChevronLeft size={20} />
                             Back
-                        </button>
+                        </Pressable>
                     </div>
                 )}
                 {selectedRole ? (

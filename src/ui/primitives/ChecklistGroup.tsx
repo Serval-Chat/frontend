@@ -178,7 +178,7 @@ const ChecklistRow = ({
                         'transition-colors duration-200',
                         checked
                             ? 'bg-primary shadow-sm shadow-primary/40'
-                            : 'border-border border bg-bg-subtle',
+                            : 'border border-border-subtle bg-bg-subtle',
                     )}
                     initial={false}
                     transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
@@ -219,7 +219,7 @@ const ChecklistRow = ({
                 className={cn(
                     'flex-1 text-sm leading-snug transition-all duration-300',
                     checked
-                        ? 'text-foreground-muted decoration-foreground-muted/50 line-through'
+                        ? 'text-muted-foreground line-through decoration-muted-foreground/50'
                         : 'text-foreground',
                 )}
             >

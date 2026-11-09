@@ -97,7 +97,7 @@ export const EmojiInfoBox = ({
                 <Box className="flex items-center gap-2 border-t border-divider/50 pt-3">
                     {isUnknownServer ? (
                         <>
-                            <Box className="bg-muted flex h-6 w-6 items-center justify-center rounded-full">
+                            <Box className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-subtle">
                                 <Text className="text-xs font-bold text-muted-foreground">
                                     ?
                                 </Text>

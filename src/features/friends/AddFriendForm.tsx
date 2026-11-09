@@ -48,7 +48,7 @@ export const AddFriendForm = ({
             <Box className="flex gap-2">
                 <Input
                     className={cn(
-                        'bg-bg-tertiary border border-bg-subtle transition-all duration-200 focus:border-primary/50 focus:bg-bg-subtle',
+                        'border border-bg-subtle bg-bg-secondary transition-all duration-200 focus:border-primary/50 focus:bg-bg-subtle',
                         isSmall ? 'h-8 text-xs' : 'h-10 text-sm',
                     )}
                     placeholder="Username"

@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { censorToken } from '@/utils/censorToken';
@@ -43,7 +44,11 @@ describe('DeveloperSettings - user token row', (): void => {
     it('shows the token censored but copies the full token', async (): Promise<void> => {
         localStorage.setItem('auth_token', TOKEN);
 
-        render(<DeveloperSettings />);
+        render(
+            <MemoryRouter>
+                <DeveloperSettings />
+            </MemoryRouter>,
+        );
 
         const input = screen.getByLabelText('User token (censored)');
         expect(input).toHaveValue(censorToken(TOKEN));
@@ -56,7 +61,11 @@ describe('DeveloperSettings - user token row', (): void => {
     });
 
     it('renders no copy button and shows a placeholder when there is no token', (): void => {
-        render(<DeveloperSettings />);
+        render(
+            <MemoryRouter>
+                <DeveloperSettings />
+            </MemoryRouter>,
+        );
 
         expect(screen.getByDisplayValue('-')).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: 'Copy token' })).toBeNull();

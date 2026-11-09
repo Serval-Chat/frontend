@@ -23,6 +23,7 @@ import type { ServerFolder as IServerFolder } from '@/api/users/users.types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleFolder } from '@/store/slices/navSlice';
 import { ContextMenu, type ContextMenuItem } from '@/ui/primitives/ContextMenu';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { cn } from '@/utils/cn';
 
@@ -555,14 +556,13 @@ FolderServerItem.displayName = 'FolderServerItem';
 
 const MobileFolderDropTarget = React.memo(
     ({ onConfirm }: { onConfirm: () => void }) => (
-        <button
+        <Pressable
             aria-label="Place server here"
             className="relative z-[2] flex h-7 w-12 items-center justify-center rounded-full border border-primary/40 bg-primary/15 text-primary shadow-lg backdrop-blur-sm"
-            type="button"
             onClick={onConfirm}
         >
             <Check className="h-4 w-4" />
-        </button>
+        </Pressable>
     ),
 );
 

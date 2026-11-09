@@ -12,6 +12,7 @@ import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Popover } from '@/ui/primitives/Popover';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { RoleDot } from '@/features/servers/RoleDot';
 import {
     Table,
@@ -50,7 +51,7 @@ const JoinedViaCell = ({
     return (
         <Text className="block truncate" size="sm">
             {joinedVia.method === 'vanity' ? 'Vanity' : 'Invite'}:{' '}
-            <span className="font-mono">{joinedVia.code}</span>
+            <Text className="font-mono">{joinedVia.code}</Text>
         </Text>
     );
 };
@@ -74,16 +75,15 @@ const MemberRolesCell = ({ roles }: { roles: Role[] }) => {
             ))}
             {hiddenCount > 0 ? (
                 <>
-                    <button
+                    <Pressable
                         className="shrink-0 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                         ref={triggerRef}
-                        type="button"
                         onClick={(): void => {
                             setIsOpen((prev) => !prev);
                         }}
                     >
                         +{hiddenCount}
-                    </button>
+                    </Pressable>
                     <Popover
                         className="max-h-64 w-56 overflow-y-auto p-1"
                         isOpen={isOpen}

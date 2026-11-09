@@ -13,6 +13,7 @@ import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';
 import { Popover } from '@/ui/primitives/Popover';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -195,7 +196,7 @@ export const CreateChannelModal = ({
                     <div className="space-y-2">
                         {CHANNEL_TYPES.map(
                             ({ type, label, description, Icon }) => (
-                                <button
+                                <Pressable
                                     className={cn(
                                         'flex w-full items-center gap-3 rounded-md border px-3 py-3 text-left transition-all',
                                         channelType === type
@@ -203,7 +204,6 @@ export const CreateChannelModal = ({
                                             : 'border-white/10 bg-white/5 hover:bg-white/10',
                                     )}
                                     key={type}
-                                    type="button"
                                     onClick={(): void => {
                                         dispatchForm({
                                             type: 'setChannelType',
@@ -235,7 +235,7 @@ export const CreateChannelModal = ({
                                                 : 'border-muted-foreground',
                                         )}
                                     />
-                                </button>
+                                </Pressable>
                             ),
                         )}
                     </div>

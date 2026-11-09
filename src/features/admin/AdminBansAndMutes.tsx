@@ -71,7 +71,7 @@ const BansList = (): ReactNode => {
 
     if (isLoading) return <LoadingSpinner />;
     if (isError)
-        return <Text className="text-destructive">Failed to load bans.</Text>;
+        return <Text className="text-danger">Failed to load bans.</Text>;
 
     if (!bans || bans.length === 0) {
         return (
@@ -88,7 +88,7 @@ const BansList = (): ReactNode => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {bans.map((ban) => (
                     <div
-                        className="bg-background-subtle flex flex-col gap-3 rounded-xl border border-border-subtle p-4"
+                        className="flex flex-col gap-3 rounded-xl border border-border-subtle bg-bg-subtle p-4"
                         key={ban.id}
                     >
                         <div className="flex items-start justify-between">
@@ -162,7 +162,7 @@ const MutesList = (): ReactNode => {
 
     if (isLoading) return <LoadingSpinner />;
     if (isError)
-        return <Text className="text-destructive">Failed to load mutes.</Text>;
+        return <Text className="text-danger">Failed to load mutes.</Text>;
 
     if (!mutes || mutes.length === 0) {
         return (
@@ -179,7 +179,7 @@ const MutesList = (): ReactNode => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {mutes.map((mute) => (
                     <div
-                        className="bg-background-subtle flex flex-col gap-3 rounded-xl border border-border-subtle p-4"
+                        className="flex flex-col gap-3 rounded-xl border border-border-subtle bg-bg-subtle p-4"
                         key={mute.id}
                     >
                         <div className="flex items-start justify-between">

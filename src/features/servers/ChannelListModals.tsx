@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { Category, Channel } from '@/api/servers/servers.types';
-import { ConfirmLinkModal } from '@/features/messages/ConfirmLinkModal';
+import { ConfirmLinkModal } from '@/ui/primitives/ConfirmLinkModal';
 
 const CategorySettingsModal = React.lazy(() =>
     import('./modals/CategorySettingsModal').then((m) => ({

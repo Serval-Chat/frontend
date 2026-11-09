@@ -278,7 +278,7 @@ const ContextMenuItemRenderer = ({ item, closeMenu }: ContextMenuItemProps) => {
 
     if (item.type === 'label') {
         return (
-            <div className="text-foreground-muted px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase select-none">
+            <div className="px-3 py-1.5 text-[10px] font-bold tracking-wider text-muted-foreground uppercase select-none">
                 {item.label}
             </div>
         );

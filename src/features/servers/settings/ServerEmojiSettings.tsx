@@ -15,10 +15,13 @@ import { BulkUploadModal } from '@/features/servers/BulkUploadModal';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { ImageCropModal } from '@/features/settings/ImageCropModal';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { WsEvents } from '@/ws';
+import { Label } from '@/ui/primitives/Label';
+import { FileInput } from '@/ui/primitives/FileInput';
 
 interface ServerEmojiSettingsProps {
     serverId: string;
@@ -179,12 +182,11 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    <Label
                         htmlFor="emoji-name"
                     >
                         Emoji Name
-                    </label>
+                    </Label>
                     <Input
                         id="emoji-name"
                         maxLength={32}
@@ -199,20 +201,16 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                     </Text>
                 </div>
 
-                <input
+                <FileInput
                     accept="image/png,image/jpeg,image/gif,image/webp"
                     aria-label="Upload emoji image"
-                    className="hidden"
                     ref={fileInputRef}
-                    type="file"
                     onChange={handleFileSelect}
                 />
-                <input
+                <FileInput
                     accept=".zip,application/zip"
                     aria-label="Upload emoji archive"
-                    className="hidden"
                     ref={bulkFileInputRef}
-                    type="file"
                     onChange={(e): undefined => void handleBulkFileSelect(e)}
                 />
 
@@ -223,12 +221,11 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                 ) : (
                     <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
                         {/* Upload Box */}
-                        <button
+                        <Pressable
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={
                                 isUploading || isBulkUploading || !emojiName
                             }
-                            type="button"
                             onClick={handleUploadClick}
                         >
                             {isUploading ? (
@@ -246,13 +243,12 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                                     </Text>
                                 </>
                             )}
-                        </button>
+                        </Pressable>
 
                         {/* Bulk Upload Box */}
-                        <button
+                        <Pressable
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
-                            type="button"
                             onClick={(): void | undefined =>
                                 bulkFileInputRef.current?.click()
                             }
@@ -272,7 +268,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                                     </Text>
                                 </>
                             )}
-                        </button>
+                        </Pressable>
 
                         {/* Emoji Grid */}
                         {emojis.map((emoji) => (

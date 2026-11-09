@@ -6,6 +6,7 @@ import type { Server } from '@/api/servers/servers.types';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Badge } from '@/ui/primitives/Badge';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Text } from '@/ui/primitives/Text';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -145,7 +146,7 @@ export const ServerIcon = React.memo(
                             src={iconUrl}
                         />
                     ) : (
-                        <span className="font-bold">{initials}</span>
+                        <Text weight="bold">{initials}</Text>
                     )}
                 </div>
                 {badgeCount !== undefined && badgeCount > 0 ? (

@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { ContextMenu, type ContextMenuItem } from '@/ui/primitives/ContextMenu';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Text } from '@/ui/primitives/Text';
 import { buttonVariants } from '@/ui/primitives/buttonVariants';
 import { cn } from '@/utils/cn';
 
@@ -109,14 +110,14 @@ export const ChannelItem = React.memo(
                                 iconComponent={IconComponent}
                                 type={type}
                             />
-                            <span
+                            <Text
                                 className={cn(
                                     'truncate text-left text-[15px] font-medium',
                                     (isActive || isUnread) && 'text-foreground',
                                 )}
                             >
                                 {name}
-                            </span>
+                            </Text>
                             {disabled && type === 'voice' ? (
                                 <Settings className="ml-1 h-3 w-3 text-muted-foreground" />
                             ) : null}
@@ -183,9 +184,14 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
         return (
             <div className="group/voice mt-0.5 flex flex-row items-center gap-2 rounded-md py-1 pr-2 pl-2 transition-colors hover:bg-white/5">
                 <div className="h-4 w-4 shrink-0 animate-pulse rounded-full bg-bg-secondary" />
-                <span className="flex-1 animate-pulse truncate text-xs font-medium text-muted-foreground">
+                <Text
+                    className="flex-1 animate-pulse truncate"
+                    size="xs"
+                    variant="muted"
+                    weight="medium"
+                >
                     Connecting...
-                </span>
+                </Text>
             </div>
         );
     }
@@ -204,11 +210,12 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
                                 <Volume2 size={12} />
                                 User Volume
                             </div>
-                            <span>
+                            <Text>
                                 {Math.round((isNaN(volume) ? 1 : volume) * 100)}
                                 %
-                            </span>
+                            </Text>
                         </div>
+                        {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- Slider's custom-range track and margins would change this compact volume control's layout */}
                         <input
                             aria-label="Volume"
                             className="w-full cursor-pointer accent-primary"
@@ -274,19 +281,21 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
                     src={user.profilePicture}
                     username={user.username}
                 />
-                <span className="flex-1 truncate text-xs font-medium text-muted-foreground">
+                <Text
+                    className="flex-1 truncate"
+                    size="xs"
+                    variant="muted"
+                    weight="medium"
+                >
                     {user.displayName || user.username}
-                </span>
+                </Text>
                 {userState && (userState.isMuted || userState.isDeafened) ? (
                     <div className="mr-1 ml-auto flex shrink-0 items-center gap-1">
                         {userState.isMuted ? (
-                            <MicOff className="text-destructive" size={10} />
+                            <MicOff className="text-danger" size={10} />
                         ) : null}
                         {userState.isDeafened ? (
-                            <HeadphoneOff
-                                className="text-destructive"
-                                size={10}
-                            />
+                            <HeadphoneOff className="text-danger" size={10} />
                         ) : null}
                     </div>
                 ) : null}

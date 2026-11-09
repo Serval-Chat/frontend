@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import type { IAuditLogChange } from '@/api/auditLog/auditLog.types';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
 interface AuditLogDiffProps {
@@ -91,9 +93,9 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
                                 className="h-3 w-3 rounded-full border border-white/20 shadow-sm"
                                 style={{ backgroundColor: String(v) }}
                             />
-                            <span className="text-xs opacity-80">
+                            <Text className="opacity-80" size="xs">
                                 {String(v)}
-                            </span>
+                            </Text>
                         </div>
                     ))}
                 </div>
@@ -105,7 +107,7 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
                     className="h-3.5 w-3.5 rounded-full border border-white/20 shadow-sm"
                     style={{ backgroundColor: String(value) }}
                 />
-                <span>{String(value)}</span>
+                <Text>{String(value)}</Text>
             </div>
         );
     }
@@ -117,7 +119,7 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
             value.startsWith('/api/v1/roles/icon/'))
     ) {
         return (
-            <div className="bg-bg-base/50 mt-1 flex justify-center rounded p-1">
+            <div className="mt-1 flex justify-center rounded bg-background/50 p-1">
                 <img
                     alt="Preview"
                     className="max-h-16 max-w-full rounded object-contain"
@@ -135,7 +137,7 @@ function formatValue(value: unknown, field?: string): string | React.ReactNode {
             obj.value.startsWith('/api/v1/')
         ) {
             return (
-                <div className="bg-bg-base/50 mt-1 flex justify-center rounded p-1">
+                <div className="mt-1 flex justify-center rounded bg-background/50 p-1">
                     <img
                         alt="Preview"
                         className="max-h-16 max-w-full rounded object-contain"
@@ -165,9 +167,8 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
 
     return (
         <div className="mt-2 text-sm">
-            <button
-                className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
-                type="button"
+            <Pressable
+                className="flex items-center gap-1 text-xs text-text-muted hover:text-foreground"
                 onClick={(): void => {
                     setExpanded(!expanded);
                 }}
@@ -180,15 +181,15 @@ export const AuditLogDiff = ({ changes }: AuditLogDiffProps) => {
                 {expanded
                     ? 'Hide Changes'
                     : `Show ${rows.length} Change${rows.length === 1 ? '' : 's'}`}
-            </button>
+            </Pressable>
 
             {expanded ? (
-                <div className="bg-bg-surface mt-2 rounded-md p-3">
+                <div className="mt-2 rounded-md bg-bg-subtle p-3">
                     {/* Header */}
                     <div className="mb-2 grid grid-cols-3 gap-2 border-b border-border-subtle pb-1 text-xs font-semibold text-text-muted">
-                        <span>Field</span>
-                        <span>Before</span>
-                        <span>After</span>
+                        <Text>Field</Text>
+                        <Text>Before</Text>
+                        <Text>After</Text>
                     </div>
                     <div className="space-y-4">
                         {rows.map((row, index) => (

@@ -101,7 +101,7 @@ export const SlashArgChipComponent = ({
         <span
             className={cn(
                 'slash-arg-chip mx-0.5 inline-grid rounded-md px-1.5 py-0.5 align-middle text-sm ring-1 select-none',
-                'bg-muted/40 ring-border-subtle',
+                'bg-bg-subtle/40 ring-border-subtle',
             )}
             contentEditable={false}
             style={{ userSelect: 'none', verticalAlign: 'middle' }}

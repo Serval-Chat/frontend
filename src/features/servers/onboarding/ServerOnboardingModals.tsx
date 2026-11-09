@@ -28,6 +28,7 @@ import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -145,22 +146,21 @@ export const RolePicker = ({
             {availableRoles.map((role) => {
                 const isSelected = selected.has(role.id);
                 return (
-                    <button
+                    <Pressable
                         className={cn(
                             'flex w-full flex-col gap-1.5 rounded-xl border px-4 py-3 text-left transition-all duration-200',
                             isSelected
                                 ? 'border-primary bg-primary/10'
-                                : 'hover:border-border border-border-subtle bg-bg-subtle hover:bg-bg-secondary/60',
+                                : 'border-border-subtle bg-bg-subtle hover:border-border-subtle hover:bg-bg-secondary/60',
                         )}
                         key={role.id}
-                        type="button"
                         onClick={(): void => {
                             toggleRole(role.id);
                         }}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
-                            <span
+                            <Text
                                 className={cn(
                                     'truncate text-sm font-medium',
                                     isSelected
@@ -169,10 +169,11 @@ export const RolePicker = ({
                                 )}
                             >
                                 {role.name}
-                            </span>
+                            </Text>
                         </div>
                         {role.description ? (
-                            <p
+                            <Text
+                                as="p"
                                 className={cn(
                                     'line-clamp-2 text-xs leading-relaxed',
                                     isSelected
@@ -181,9 +182,9 @@ export const RolePicker = ({
                                 )}
                             >
                                 {role.description}
-                            </p>
+                            </Text>
                         ) : null}
-                    </button>
+                    </Pressable>
                 );
             })}
         </div>
@@ -352,7 +353,7 @@ export const ChannelPreferenceGroup = ({
                     className={cn(
                         'relative z-content w-full justify-start rounded-md border-none px-2 py-1.5 text-left shadow-none',
                         isCategoryHidden
-                            ? 'bg-warning/10 text-warning hover:bg-warning/15'
+                            ? 'bg-caution/10 text-caution hover:bg-caution/15'
                             : 'bg-transparent text-foreground hover:bg-white/5',
                     )}
                     justify="start"
@@ -382,9 +383,9 @@ export const ChannelPreferenceGroup = ({
                         className="shrink-0 text-muted-foreground"
                         size={16}
                     />
-                    <span className="min-w-0 truncate">
+                    <Text className="min-w-0 truncate">
                         {category?.name ?? 'Uncategorized'}
-                    </span>
+                    </Text>
                     {isCategoryHidden ? (
                         <EyeOff className="shrink-0" size={15} />
                     ) : null}
@@ -400,7 +401,7 @@ export const ChannelPreferenceGroup = ({
                                     className={cn(
                                         'relative z-content w-full justify-start rounded-md border-none px-2 py-1.5 text-left shadow-none',
                                         isHidden
-                                            ? 'bg-warning/10 text-warning hover:bg-warning/15'
+                                            ? 'bg-caution/10 text-caution hover:bg-caution/15'
                                             : 'bg-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground',
                                     )}
                                     justify="start"
@@ -415,9 +416,9 @@ export const ChannelPreferenceGroup = ({
                                     }}
                                 >
                                     {channelIcon(channel)}
-                                    <span className="min-w-0 truncate">
+                                    <Text className="min-w-0 truncate">
                                         {channel.name}
-                                    </span>
+                                    </Text>
                                     {isHidden ? (
                                         <EyeOff
                                             className="shrink-0"
@@ -604,7 +605,7 @@ const OnboardingRulesStep = ({
             <div className="custom-scrollbar max-h-[55vh] space-y-4 overflow-y-auto pr-2">
                 {rulesList.map((rule, idx) => (
                     <div
-                        className="hover:border-border flex gap-4 rounded-xl border border-border-subtle bg-bg-secondary/40 p-4 transition-colors duration-200"
+                        className="flex gap-4 rounded-xl border border-border-subtle bg-bg-secondary/40 p-4 transition-colors duration-200 hover:border-border-subtle"
                         key={`rule-${rule}`}
                     >
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
@@ -621,14 +622,16 @@ const OnboardingRulesStep = ({
         )}
 
         <div className="flex flex-col gap-4 border-t border-border-subtle pt-6">
-            <label
+            <Text
+                as="label"
                 className={cn(
                     'flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all duration-200',
                     accepted
                         ? 'border-primary bg-primary/5'
-                        : 'hover:border-border border-border-subtle hover:bg-white/5',
+                        : 'border-border-subtle hover:border-border-subtle hover:bg-white/5',
                 )}
             >
+                {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- sr-only native checkbox behind a custom-styled card; the Checkbox primitive's input is always visible */}
                 <input
                     checked={accepted}
                     className="sr-only"
@@ -637,7 +640,7 @@ const OnboardingRulesStep = ({
                         onAcceptedChange(e.target.checked);
                     }}
                 />
-                <span
+                <Text
                     className={cn(
                         'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200',
                         accepted
@@ -656,11 +659,11 @@ const OnboardingRulesStep = ({
                             <polyline points="1.5,6 4.5,9 10.5,3" />
                         </svg>
                     ) : null}
-                </span>
+                </Text>
                 <Text className="text-sm font-medium text-foreground">
                     I have read and agree to all server rules
                 </Text>
-            </label>
+            </Text>
             <div className="flex justify-end">
                 <Button
                     className="w-full px-6 py-2.5 sm:w-auto"
@@ -711,9 +714,9 @@ const OnboardingWelcomeStep = ({
                         }}
                     >
                         {channelIcon(channel)}
-                        <span className="truncate text-sm font-semibold">
+                        <Text className="truncate" size="sm" weight="semibold">
                             {channel.name}
-                        </span>
+                        </Text>
                     </Button>
                 ))}
             </div>
@@ -894,12 +897,15 @@ export const ServerOnboardingModal = ({
                                                         <polyline points="1.5,6 4.5,9 10.5,3" />
                                                     </svg>
                                                 ) : (
-                                                    <span className="text-sm font-bold">
+                                                    <Text
+                                                        size="sm"
+                                                        weight="bold"
+                                                    >
                                                         {i + 1}
-                                                    </span>
+                                                    </Text>
                                                 )}
                                             </div>
-                                            <span
+                                            <Text
                                                 className={cn(
                                                     'text-xs font-medium whitespace-nowrap transition-colors duration-300',
                                                     isActive
@@ -910,7 +916,7 @@ export const ServerOnboardingModal = ({
                                                 )}
                                             >
                                                 {s.label}
-                                            </span>
+                                            </Text>
                                         </div>
 
                                         {/* Connector line between steps */}

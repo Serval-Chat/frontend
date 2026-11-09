@@ -3,6 +3,7 @@ import type React from 'react';
 import { useTheme } from '@/providers/ThemeProvider';
 import type { CustomThemeFile } from '@/styles/customThemes';
 import { Button } from '@/ui/primitives/Button';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 interface ThemeSwitcherProps {
@@ -76,7 +77,7 @@ const ThemeCard = ({
             'group flex items-center justify-start gap-4 rounded-2xl border-2 p-6 shadow-none transition-all',
             isActive
                 ? 'border-primary bg-bg-secondary'
-                : 'hover:border-border border-border-subtle bg-bg-subtle',
+                : 'border-border-subtle bg-bg-subtle hover:border-border-subtle',
             variant === 'admin' &&
                 'min-w-[140px] flex-col items-center justify-center p-6',
             className,
@@ -101,18 +102,18 @@ const ThemeCard = ({
                 variant === 'admin' && 'items-center pr-0 text-center',
             )}
         >
-            <span
+            <Text
                 className={cn(
                     'max-w-full truncate text-sm font-bold',
                     isActive ? 'text-primary' : 'text-foreground',
                 )}
             >
                 {label}
-            </span>
+            </Text>
             {meta ? (
-                <span className="max-w-full truncate text-xs text-muted-foreground">
+                <Text className="max-w-full truncate" size="xs" variant="muted">
                     {meta}
-                </span>
+                </Text>
             ) : (
                 <div className="mt-1 flex gap-1">
                     <div

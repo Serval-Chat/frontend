@@ -6,6 +6,8 @@ import type { Role, RolePermissions } from '@/api/servers/servers.types';
 import { RoleDot } from '@/features/servers/RoleDot';
 import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import {
     type ExportedRole,
@@ -82,22 +84,31 @@ function RoleEntryPreview({
     return (
         <div className="group flex items-center gap-2 rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 text-sm">
             {index !== undefined && (
-                <span className="w-5 shrink-0 text-right text-xs text-muted-foreground">
+                <Text
+                    align="right"
+                    className="w-5 shrink-0"
+                    size="xs"
+                    variant="muted"
+                >
                     #{index + 1}
-                </span>
+                </Text>
             )}
             <RoleDot role={entry as unknown as Role} size={12} />
-            <span className="flex-1 truncate font-medium text-foreground">
+            <Text className="flex-1 truncate" variant="default" weight="medium">
                 {entry.name}
-            </span>
+            </Text>
             {entry.separateFromOtherRoles && (
                 <Tooltip
                     content="Display role members separately from online members"
                     position="top"
                 >
-                    <span className="shrink-0 rounded-md bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-blue-400">
+                    <Text
+                        className="shrink-0 rounded-md bg-blue-500/15 px-2 py-0.5 text-[10px] text-blue-400"
+                        tracking="wider"
+                        weight="semibold"
+                    >
                         HOISTED
-                    </span>
+                    </Text>
                 </Tooltip>
             )}
             {entry.permissions?.administrator && (
@@ -105,9 +116,13 @@ function RoleEntryPreview({
                     content="Grants all permissions and bypasses channel restrictions"
                     position="top"
                 >
-                    <span className="shrink-0 rounded-md bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-red-400">
+                    <Text
+                        className="shrink-0 rounded-md bg-red-500/15 px-2 py-0.5 text-[10px] text-red-400"
+                        tracking="wider"
+                        weight="semibold"
+                    >
                         ADMIN
-                    </span>
+                    </Text>
                 </Tooltip>
             )}
             {!entry.permissions?.administrator && modPermissions.length > 0 && (
@@ -118,21 +133,24 @@ function RoleEntryPreview({
                         .join('\n')}`}
                     position="top"
                 >
-                    <span className="shrink-0 rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-amber-400">
+                    <Text
+                        className="shrink-0 rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] text-amber-400"
+                        tracking="wider"
+                        weight="semibold"
+                    >
                         MOD
-                    </span>
+                    </Text>
                 </Tooltip>
             )}
             {onRemove && (
                 <Tooltip content="Remove from import" position="top">
-                    <button
+                    <Pressable
                         aria-label="Remove from import"
                         className="rounded p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400"
-                        type="button"
                         onClick={onRemove}
                     >
                         <Trash2 size={14} />
-                    </button>
+                    </Pressable>
                 </Tooltip>
             )}
         </div>
@@ -208,17 +226,19 @@ export const RoleImportModal = ({
             <div className="flex max-h-full flex-col overflow-hidden px-1">
                 {!parsed && (
                     <div className="flex flex-col gap-4">
-                        <p className="text-sm text-muted-foreground">
+                        <Text as="p" size="sm" variant="muted">
                             Paste a role export code below.
-                        </p>
+                        </Text>
 
                         <div className="flex flex-col gap-1.5">
-                            <label
+                            <Text
+                                as="label"
                                 className="text-xs font-semibold text-muted-foreground"
                                 htmlFor="role-import-code"
                             >
                                 Export code
-                            </label>
+                            </Text>
+                            {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- monospace paste box with manual vertical resize; TextArea auto-grows in the body font */}
                             <textarea
                                 className="custom-scrollbar min-h-[100px] w-full resize-y rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none"
                                 id="role-import-code"
@@ -239,7 +259,7 @@ export const RoleImportModal = ({
                 {error && (
                     <div className="mt-2 flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
                         <AlertCircle className="mt-0.5 shrink-0" size={14} />
-                        <span>{error}</span>
+                        <Text>{error}</Text>
                     </div>
                 )}
 
@@ -271,9 +291,15 @@ export const RoleImportModal = ({
                                         />
                                     ))
                                 ) : (
-                                    <p className="py-4 text-center text-xs text-muted-foreground">
+                                    <Text
+                                        align="center"
+                                        as="p"
+                                        className="py-4"
+                                        size="xs"
+                                        variant="muted"
+                                    >
                                         No roles selected for import.
-                                    </p>
+                                    </Text>
                                 )
                             ) : (
                                 <RoleEntryPreview
@@ -283,12 +309,17 @@ export const RoleImportModal = ({
                         </div>
 
                         {isList && !!roleList?.length && (
-                            <p className="shrink-0 pt-1 text-xs text-muted-foreground">
+                            <Text
+                                as="p"
+                                className="shrink-0 pt-1"
+                                size="xs"
+                                variant="muted"
+                            >
                                 Importing a role list will create{' '}
                                 <strong>{roleList?.length}</strong> new roles in
                                 the order shown above. Existing roles will not
                                 be affected.
-                            </p>
+                            </Text>
                         )}
                     </div>
                 )}

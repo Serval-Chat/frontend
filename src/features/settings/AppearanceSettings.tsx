@@ -8,6 +8,7 @@ import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';
 import { Modal } from '@/ui/primitives/Modal';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
+import { Text } from '@/ui/primitives/Text';
 import { Toggle } from '@/ui/primitives/Toggle';
 
 import { CustomThemesSection } from './CustomThemesSection';
@@ -170,10 +171,10 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                                                 }
                                             />
                                         </div>
-                                        <span className="text-sm text-muted-foreground">
+                                        <Text size="sm" variant="muted">
                                             Show message timestamps in 24-hour
                                             format.
-                                        </span>
+                                        </Text>
                                     </div>
                                 </div>
 
@@ -195,10 +196,10 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                                         <Heading level={4}>
                                             Username Font
                                         </Heading>
-                                        <span className="text-sm text-muted-foreground">
+                                        <Text size="sm" variant="muted">
                                             Select a custom font for your
                                             username alias globally.
-                                        </span>
+                                        </Text>
                                         <div className="relative z-[var(--z-index-dropdown)] max-w-xs">
                                             <DropdownWithSearch
                                                 allowClear={false}
@@ -207,11 +208,11 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                                                         ...fo,
                                                         label: fo.label,
                                                         displayLabel: (
-                                                            <span
+                                                            <Text
                                                                 style={fo.style}
                                                             >
                                                                 {fo.label}
-                                                            </span>
+                                                            </Text>
                                                         ),
                                                     }),
                                                 )}
@@ -288,13 +289,13 @@ const AppearanceSettingsForm = ({ user }: { user: User }) => {
                 }}
             >
                 <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
+                    <Text as="p" size="sm" variant="muted">
                         Delete{' '}
-                        <span className="font-bold text-foreground">
+                        <Text variant="default" weight="bold">
                             {f.pendingDeleteTheme?.name ?? 'this custom theme'}
-                        </span>
+                        </Text>
                         ? This removes the locally saved CSS from this browser.
-                    </p>
+                    </Text>
                     <div className="flex justify-end gap-2">
                         <Button
                             size="sm"

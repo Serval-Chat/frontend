@@ -24,6 +24,7 @@ import type { Role } from '@/api/servers/servers.types';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { ProfilePopup } from '@/features/users/profile/ProfilePopup';
 import { Box } from '@/ui/primitives/Box';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { APP_LOCALE } from '@/utils/locale';
@@ -182,20 +183,19 @@ const UserWithAvatar = ({
 
     if (!userId) {
         return (
-            <span className="relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter">
+            <Text className="relative top-[-1px] inline-flex items-center gap-1.5 align-middle mix-blend-plus-lighter">
                 {content}
-            </span>
+            </Text>
         );
     }
 
     return (
-        <button
+        <Pressable
             className="relative top-[-1px] inline-flex cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 align-middle mix-blend-plus-lighter hover:underline"
-            type="button"
             onClick={onClick}
         >
             {content}
-        </button>
+        </Pressable>
     );
 };
 
@@ -231,7 +231,7 @@ const getAuditTargetDisplay = ({
         );
         const preposition = entry.action === 'role_given' ? 'to ' : 'from ';
         return (
-            <span className="inline-flex items-center gap-1">
+            <Text className="inline-flex items-center gap-1">
                 {roleName}
                 {userNode ? (
                     <>
@@ -241,7 +241,7 @@ const getAuditTargetDisplay = ({
                 ) : (
                     ''
                 )}
-            </span>
+            </Text>
         );
     }
 
@@ -276,9 +276,9 @@ const getAuditTargetDisplay = ({
               ? `channel ${entry.metadata.channelId}`
               : 'a channel';
         return (
-            <span className="inline-flex items-center gap-1">
+            <Text className="inline-flex items-center gap-1">
                 {author} message in {channel}
-            </span>
+            </Text>
         );
     }
 
@@ -308,7 +308,7 @@ const getAuditTargetDisplay = ({
             ? ` via ${String(entry.metadata.inviteCode)}`
             : '';
         return entry.target?.username ? (
-            <span className="inline-flex items-center gap-1">
+            <Text className="inline-flex items-center gap-1">
                 server{code} as{' '}
                 <UserWithAvatar
                     avatarUrl={entry.target.avatarUrl}
@@ -320,7 +320,7 @@ const getAuditTargetDisplay = ({
                             : undefined
                     }
                 />
-            </span>
+            </Text>
         ) : (
             `server${code}`
         );
@@ -352,7 +352,7 @@ const getAuditTargetDisplay = ({
             return `category "${entry.target.name}"`;
         if (entry.targetType === 'user')
             return (
-                <span className="inline-flex items-center gap-1">
+                <Text className="inline-flex items-center gap-1">
                     user{' '}
                     <UserWithAvatar
                         avatarUrl={entry.target.avatarUrl}
@@ -364,7 +364,7 @@ const getAuditTargetDisplay = ({
                                 : undefined
                         }
                     />
-                </span>
+                </Text>
             );
         return `target "${entry.target.name}"`;
     }
@@ -418,7 +418,7 @@ const RoleReorderVisualizer = ({
 
         return (
             <li
-                className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'bg-bg-base border border-border-subtle text-text-muted'}`}
+                className={`mb-1.5 flex items-center truncate rounded px-2 text-sm shadow-sm transition-all ${role ? 'font-medium text-white' : 'border border-border-subtle bg-background text-text-muted'}`}
                 key={String(roleName)}
                 style={{
                     height: ITEM_HEIGHT_PX,
@@ -427,7 +427,7 @@ const RoleReorderVisualizer = ({
                 title={String(roleName)}
             >
                 <AtSign className="mr-1 shrink-0" size={14} />
-                <span className="truncate">{String(roleName)}</span>
+                <Text className="truncate">{String(roleName)}</Text>
                 {indicator ? (
                     <div className="ml-auto flex items-center pl-2">
                         {indicator}
@@ -539,15 +539,23 @@ const RoleReorderVisualizer = ({
                         let indicator = null;
                         if (diff > 0) {
                             indicator = (
-                                <span className="rounded bg-black/20 px-1 text-xs font-bold text-green-300">
+                                <Text
+                                    className="rounded bg-black/20 px-1 text-green-300"
+                                    size="xs"
+                                    weight="bold"
+                                >
                                     ↑ {diff}
-                                </span>
+                                </Text>
                             );
                         } else if (diff < 0) {
                             indicator = (
-                                <span className="rounded bg-black/20 px-1 text-xs font-bold text-red-300">
+                                <Text
+                                    className="rounded bg-black/20 px-1 text-red-300"
+                                    size="xs"
+                                    weight="bold"
+                                >
                                     ↓ {Math.abs(diff)}
-                                </span>
+                                </Text>
                             );
                         }
 
@@ -621,7 +629,7 @@ export const AuditLogEntry = ({
     });
 
     return (
-        <div className="bg-bg-surface flex items-center gap-4 rounded-lg border border-border-subtle p-4 transition-colors hover:bg-bg-subtle">
+        <div className="flex items-center gap-4 rounded-lg border border-border-subtle bg-bg-subtle p-4 transition-colors hover:bg-bg-subtle">
             <div
                 className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${bg}`}
             >
@@ -679,7 +687,7 @@ export const AuditLogEntry = ({
                 ) : null}
 
                 {entry.metadata?.messageText ? (
-                    <div className="bg-bg-base mt-2 rounded border-l-2 border-red-500/50 p-2 text-sm break-words whitespace-pre-wrap text-text-muted">
+                    <div className="mt-2 rounded border-l-2 border-red-500/50 bg-background p-2 text-sm break-words whitespace-pre-wrap text-text-muted">
                         {String(entry.metadata.messageText)}
                     </div>
                 ) : null}
@@ -693,9 +701,8 @@ export const AuditLogEntry = ({
                 {entry.action === 'roles_reordered' &&
                 Array.isArray(entry.metadata?.roleOrder) ? (
                     <div className="mt-2 text-sm">
-                        <button
-                            className="hover:text-text flex items-center gap-1 text-xs text-text-muted"
-                            type="button"
+                        <Pressable
+                            className="flex items-center gap-1 text-xs text-text-muted hover:text-foreground"
                             onClick={(): void => {
                                 setExpandedRoles(!expandedRoles);
                             }}
@@ -708,9 +715,9 @@ export const AuditLogEntry = ({
                             {expandedRoles
                                 ? 'Hide Order Changes'
                                 : 'Show Order Changes'}
-                        </button>
+                        </Pressable>
                         {expandedRoles ? (
-                            <div className="bg-bg-surface mt-2 rounded-md p-3">
+                            <div className="mt-2 rounded-md bg-bg-subtle p-3">
                                 {entry.metadata.oldRoleOrder &&
                                 Array.isArray(entry.metadata.oldRoleOrder) ? (
                                     <RoleReorderVisualizer
@@ -756,21 +763,21 @@ export const AuditLogEntry = ({
                         entry.metadata?.inviteUses !== undefined ? (
                             <Text size="sm">
                                 Uses:{' '}
-                                <span className="text-text-base">
+                                <Text className="text-foreground">
                                     {
                                         (entry.metadata?.uses ??
                                             entry.metadata?.inviteUses) as
                                             | string
                                             | number
                                     }
-                                </span>
+                                </Text>
                             </Text>
                         ) : null}
                         {entry.metadata?.maxUses !== undefined ||
                         entry.metadata?.inviteMaxUses !== undefined ? (
                             <Text size="sm">
                                 Max Uses:{' '}
-                                <span className="text-text-base">
+                                <Text className="text-foreground">
                                     {Number(
                                         entry.metadata?.maxUses ??
                                             entry.metadata?.inviteMaxUses,
@@ -780,21 +787,21 @@ export const AuditLogEntry = ({
                                               | string
                                               | number)
                                         : 'Infinite'}
-                                </span>
+                                </Text>
                             </Text>
                         ) : null}
                         {entry.metadata?.expiresAt ||
                         entry.metadata?.inviteExpiresAt ? (
                             <Text size="sm">
                                 Expires:{' '}
-                                <span className="text-text-base">
+                                <Text className="text-foreground">
                                     {new Date(
                                         String(
                                             entry.metadata?.expiresAt ??
                                                 entry.metadata?.inviteExpiresAt,
                                         ),
                                     ).toLocaleString(APP_LOCALE)}
-                                </span>
+                                </Text>
                             </Text>
                         ) : null}
                     </div>

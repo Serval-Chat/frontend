@@ -32,13 +32,13 @@ export const NavigationDemo = () => (
             <div className="flex w-fit items-center gap-4 rounded-xl bg-[--color-bg-secondary] p-4">
                 <div className="flex flex-col items-center gap-1">
                     <ServerIcon server={mockServer} />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Default
                     </span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerIcon isActive server={mockServer} />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Active
                     </span>
                 </div>
@@ -49,7 +49,7 @@ export const NavigationDemo = () => (
                             icon: 'https://catfla.re/images/servals/serval-1.jpg',
                         }}
                     />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         With Icon
                     </span>
                 </div>
@@ -67,25 +67,25 @@ export const NavigationDemo = () => (
                         isUnread={false}
                         server={mockServer}
                     />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Read
                     </span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isActive isUnread={false} server={mockServer} />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Read (active)
                     </span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isUnread isActive={false} server={mockServer} />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Unread
                     </span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isActive isUnread server={mockServer} />
-                    <span className="text-foreground-muted text-[10px]">
+                    <span className="text-[10px] text-muted-foreground">
                         Unread (active)
                     </span>
                 </div>

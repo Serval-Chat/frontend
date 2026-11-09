@@ -11,6 +11,8 @@ import type { Category, Channel } from '@/api/servers/servers.types';
 import { ContextMenu } from '@/ui/primitives/ContextMenu';
 import type { ContextMenuItem } from '@/ui/primitives/ContextMenu';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 import { ChannelItem } from './ChannelItem';
@@ -257,9 +259,8 @@ export const ChannelListRow = React.memo(
                         items={getCategoryMenuItems(category)}
                     >
                         <div className="group flex items-center px-1 select-none">
-                            <button
+                            <Pressable
                                 className="flex min-h-6 min-w-0 flex-1 cursor-pointer items-center overflow-hidden border-0 bg-transparent p-0 text-left"
-                                type="button"
                                 onClick={(e): void => {
                                     e.stopPropagation();
                                     onToggleCategory(category.id);
@@ -271,10 +272,16 @@ export const ChannelListRow = React.memo(
                                         isCollapsed ? '-rotate-90' : '',
                                     )}
                                 />
-                                <span className="truncate text-[12px] font-bold tracking-wider text-muted-foreground uppercase transition-colors group-hover:text-foreground/80">
+                                <Text
+                                    className="truncate text-[12px] transition-colors group-hover:text-foreground/80"
+                                    tracking="wider"
+                                    transform="uppercase"
+                                    variant="muted"
+                                    weight="bold"
+                                >
                                     {category.name}
-                                </span>
-                            </button>
+                                </Text>
+                            </Pressable>
                             {canManageChannels ? (
                                 <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
                                     <IconButton

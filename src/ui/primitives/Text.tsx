@@ -2,17 +2,13 @@ import React from 'react';
 import type { CSSProperties } from 'react';
 
 import { Skeleton } from '@/ui/primitives/Skeleton';
-import {
-    type FontSizeKey,
-    type FontWeightKey,
-    type LetterSpacingKey,
-    type LineHeightKey,
-    colors,
-    fontSize,
-    fontWeight,
-    letterSpacing,
-    lineHeight,
+import type {
+    FontSizeKey,
+    FontWeightKey,
+    LetterSpacingKey,
+    LineHeightKey,
 } from '@/ui/theme';
+import { cn } from '@/utils/cn';
 
 export type TextVariant =
     | 'default'
@@ -56,39 +52,82 @@ export interface TextProps extends Omit<
     skeleton?: boolean;
 }
 
-const variantColorMap: Record<TextVariant, string> = {
-    default: colors.foreground,
-    muted: colors.mutedForeground,
-    subtle: colors.mutedForeground,
-    primary: colors.primary,
-    success: colors.success,
-    danger: colors.danger,
-    caution: colors.caution,
-    inverse: colors.foregroundInverse,
+const variantClass: Record<TextVariant, string> = {
+    default: 'text-foreground',
+    muted: 'text-muted-foreground',
+    subtle: 'text-muted-foreground opacity-80',
+    primary: 'text-primary',
+    success: 'text-success',
+    danger: 'text-danger',
+    caution: 'text-caution',
+    inverse: 'text-foreground-inverse',
 };
 
-const decorationMap: Record<TextDecoration, CSSProperties['textDecoration']> = {
-    none: 'none',
+const sizeClass: Record<FontSizeKey, string> = {
+    '2xs': 'text-2xs',
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+};
+
+const weightClass: Record<FontWeightKey, string> = {
+    light: 'font-light',
+    normal: 'font-normal',
+    medium: 'font-medium',
+    semibold: 'font-semibold',
+    bold: 'font-bold',
+    black: 'font-black',
+};
+
+const alignClass: Record<TextAlign, string> = {
+    left: 'text-left',
+    center: 'text-center',
+    right: 'text-right',
+    justify: 'text-justify',
+};
+
+const wrapClass: Record<TextWrap, string> = {
+    wrap: 'whitespace-normal',
+    nowrap: 'whitespace-nowrap',
+    pre: 'whitespace-pre',
+    preLine: 'whitespace-pre-line',
+    preWrap: 'whitespace-pre-wrap',
+    breakAll: 'whitespace-normal break-all',
+};
+
+const leadingClass: Record<LineHeightKey, string> = {
+    none: 'leading-none',
+    tight: 'leading-tight',
+    snug: 'leading-snug',
+    normal: 'leading-normal',
+    relaxed: 'leading-relaxed',
+    loose: 'leading-loose',
+};
+
+const trackingClass: Record<LetterSpacingKey, string> = {
+    tighter: 'tracking-tighter',
+    tight: 'tracking-tight',
+    normal: 'tracking-normal',
+    wide: 'tracking-wide',
+    wider: 'tracking-wider',
+    widest: 'tracking-widest',
+};
+
+const decorationClass: Record<TextDecoration, string> = {
+    none: 'no-underline',
     underline: 'underline',
     strike: 'line-through',
 };
 
-const transformMap: Record<TextTransform, CSSProperties['textTransform']> = {
+const transformClass: Record<TextTransform, string> = {
     uppercase: 'uppercase',
     lowercase: 'lowercase',
     capitalize: 'capitalize',
-    normal: 'none',
-};
-
-const whiteSpaceMap: Record<
-    Exclude<TextWrap, 'breakAll'>,
-    CSSProperties['whiteSpace']
-> = {
-    wrap: 'normal',
-    nowrap: 'nowrap',
-    pre: 'pre',
-    preLine: 'pre-line',
-    preWrap: 'pre-wrap',
+    normal: 'normal-case',
 };
 
 export const Text = ({
@@ -103,45 +142,33 @@ export const Text = ({
     decoration,
     transform,
     fontStyle,
+    className,
     style,
     children,
     skeleton,
     ...props
 }: TextProps) => {
-    const s: CSSProperties = {};
-
-    if (variant !== undefined) {
-        s.color = variantColorMap[variant];
-        if (variant === 'subtle') s.opacity = 0.8;
-    }
-    if (size !== undefined) s.fontSize = fontSize[size];
-    if (weight !== undefined) s.fontWeight = fontWeight[weight];
-    if (align !== undefined) s.textAlign = align;
-    if (wrap !== undefined) {
-        if (wrap === 'breakAll') {
-            s.whiteSpace = 'normal';
-            s.wordBreak = 'break-all';
-        } else {
-            s.whiteSpace = whiteSpaceMap[wrap];
-        }
-    }
-    if (leading !== undefined) s.lineHeight = lineHeight[leading];
-    if (tracking !== undefined) s.letterSpacing = letterSpacing[tracking];
-    if (decoration !== undefined) s.textDecoration = decorationMap[decoration];
-    if (transform !== undefined) s.textTransform = transformMap[transform];
-    if (fontStyle !== undefined)
-        s.fontStyle = fontStyle === 'italic' ? 'italic' : 'normal';
+    const classes = cn(
+        className,
+        variant !== undefined && variantClass[variant],
+        size !== undefined && sizeClass[size],
+        weight !== undefined && weightClass[weight],
+        align !== undefined && alignClass[align],
+        wrap !== undefined && wrapClass[wrap],
+        leading !== undefined && leadingClass[leading],
+        tracking !== undefined && trackingClass[tracking],
+        decoration !== undefined && decorationClass[decoration],
+        transform !== undefined && transformClass[transform],
+        fontStyle !== undefined &&
+            (fontStyle === 'italic' ? 'italic' : 'not-italic'),
+    );
 
     if (skeleton) {
         return (
             <Tag
                 aria-hidden
-                style={{
-                    ...s,
-                    ...style,
-                    position: 'relative',
-                    display: 'inline-block',
-                }}
+                className={cn(classes, 'relative inline-block')}
+                style={style}
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...props}
             >
@@ -153,7 +180,8 @@ export const Text = ({
 
     return (
         <Tag
-            style={{ ...s, ...style }}
+            className={classes || undefined}
+            style={style}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}
         >

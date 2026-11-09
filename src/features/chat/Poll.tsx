@@ -207,10 +207,10 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                     isExpired
                                         ? isWinner
                                             ? 'cursor-default border-caution/60 bg-caution-muted'
-                                            : 'bg-bg-tertiary cursor-default border-border-subtle opacity-70'
+                                            : 'cursor-default border-border-subtle bg-bg-secondary opacity-70'
                                         : isVoted
                                           ? 'border-primary/50 bg-primary/10 hover:bg-primary/20'
-                                          : 'bg-bg-tertiary border-border-subtle hover:bg-white/5',
+                                          : 'border-border-subtle bg-bg-secondary hover:bg-white/5',
                                     !isExpired &&
                                         isPending &&
                                         'pointer-events-none cursor-not-allowed opacity-70',

@@ -148,10 +148,10 @@ export const ServerBansSettings = ({ serverId }: ServerBansSettingsProps) => {
                                                 );
                                             }}
                                         >
-                                            <Trash2 className="text-status-error h-4 w-4" />
-                                            <span className="text-status-error ml-2">
+                                            <Trash2 className="h-4 w-4 text-danger" />
+                                            <Text className="ml-2 text-danger">
                                                 Unban
-                                            </span>
+                                            </Text>
                                         </Button>
                                     </TableCell>
                                 </TableRow>

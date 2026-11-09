@@ -221,7 +221,7 @@ const PermissionEditor = ({
             {showConfirm ? (
                 <div className="animate-in fade-in fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200">
                     <div className="animate-in zoom-in-95 w-full max-w-md scale-100 rounded-2xl border border-border-subtle bg-background p-6 shadow-2xl duration-200">
-                        <div className="text-warning mb-4 flex items-center gap-3">
+                        <div className="mb-4 flex items-center gap-3 text-caution">
                             <AlertTriangle size={24} />
                             <Heading level={3}>Confirm Changes</Heading>
                         </div>

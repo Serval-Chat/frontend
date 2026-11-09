@@ -85,7 +85,7 @@ export const FriendRequestList = () => {
                 <Box className="flex flex-1 items-center gap-4">
                     <button
                         aria-label="Back to friends list"
-                        className="text-foreground-muted hover:bg-bg-tertiary -ml-2 rounded-md p-2 transition-colors hover:text-foreground md:hidden"
+                        className="-ml-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-bg-secondary hover:text-foreground md:hidden"
                         type="button"
                         onClick={(): {
                             payload: 'friends' | 'requests';
@@ -107,7 +107,7 @@ export const FriendRequestList = () => {
                                 'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'all'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
-                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
                             type="button"
                             onClick={(): void => {
@@ -121,7 +121,7 @@ export const FriendRequestList = () => {
                                 'relative rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'pending'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
-                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
                             type="button"
                             onClick={(): void => {
@@ -140,7 +140,7 @@ export const FriendRequestList = () => {
                                 'relative rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'sent'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
-                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
                             type="button"
                             onClick={(): void => {
@@ -160,7 +160,7 @@ export const FriendRequestList = () => {
                                 'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'blocked'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
-                                    : 'text-foreground-muted hover:bg-bg-tertiary hover:text-foreground',
+                                    : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
                             type="button"
                             onClick={(): void => {
@@ -212,7 +212,7 @@ export const FriendRequestList = () => {
                     !requests || requests.length === 0 ? (
                         <Box className="animate-in fade-in zoom-in flex h-full flex-col items-center justify-center p-8 text-center duration-300">
                             <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
-                                <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
+                                <CheckCircle className="h-8 w-8 text-muted-foreground opacity-20" />
                             </Box>
                             <Heading className="mb-2" level={3}>
                                 No pending requests
@@ -238,7 +238,7 @@ export const FriendRequestList = () => {
                     !sentRequests || sentRequests.length === 0 ? (
                         <Box className="animate-in fade-in zoom-in flex h-full flex-col items-center justify-center p-8 text-center duration-300">
                             <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
-                                <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
+                                <CheckCircle className="h-8 w-8 text-muted-foreground opacity-20" />
                             </Box>
                             <Heading className="mb-2" level={3}>
                                 No sent requests

@@ -58,7 +58,7 @@ const FriendProfileRow = React.memo(
                 <button
                     className={cn(
                         'flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 text-left transition-colors',
-                        'text-foreground-muted hover:bg-bg-subtle',
+                        'text-muted-foreground hover:bg-bg-subtle',
                     )}
                     type="button"
                     onClick={handleOpenDm}
@@ -92,7 +92,7 @@ const FriendProfileRow = React.memo(
                                     </span>
                                 ) : null}
                                 {customText ? (
-                                    <Text className="text-foreground-muted truncate text-xs">
+                                    <Text className="truncate text-xs text-muted-foreground">
                                         {customText}
                                     </Text>
                                 ) : null}
@@ -102,7 +102,7 @@ const FriendProfileRow = React.memo(
                 </button>
                 <button
                     aria-label="Open direct message"
-                    className="text-foreground-muted flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary transition-colors hover:bg-bg-subtle hover:text-foreground"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
                     type="button"
                     onClick={handleOpenDm}
                 >
@@ -221,7 +221,7 @@ export const FriendListMain = React.memo(() => {
         return (
             <Box className="flex h-full flex-col items-center justify-center p-8 text-center">
                 <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
-                    <CheckCircle className="text-foreground-muted h-8 w-8 opacity-20" />
+                    <CheckCircle className="h-8 w-8 text-muted-foreground opacity-20" />
                 </Box>
                 <Heading className="mb-2" level={3}>
                     No friends yet
@@ -240,10 +240,10 @@ export const FriendListMain = React.memo(() => {
                     All Friends - {friends.length}
                 </Text>
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
-                    <Search className="text-foreground-muted" size={14} />
+                    <Search className="text-muted-foreground" size={14} />
                     <input
                         aria-label="Search friends"
-                        className="placeholder:text-foreground-muted w-full bg-transparent text-xs font-medium outline-none"
+                        className="w-full bg-transparent text-xs font-medium outline-none placeholder:text-muted-foreground"
                         placeholder="Search username"
                         type="text"
                         value={search}
@@ -261,7 +261,7 @@ export const FriendListMain = React.memo(() => {
             {groupKeys.map((key) => (
                 <Box className="flex flex-col gap-1" key={key}>
                     <Box className="flex items-center gap-2 px-3 pt-2 pb-1">
-                        <Text className="text-foreground-muted text-[10px] font-bold uppercase">
+                        <Text className="text-[10px] font-bold text-muted-foreground uppercase">
                             {key}
                         </Text>
                         <Box className="h-[1px] flex-1 bg-bg-subtle/30" />

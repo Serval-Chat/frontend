@@ -22,6 +22,7 @@ import { useMe, useUpdateSettings } from '@/api/users/users.queries';
 import type { UserSettings } from '@/api/users/users.types';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
 import { IconButton } from '@/ui/primitives/IconButton';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
@@ -441,12 +442,10 @@ export const NotificationSettings = () => {
                             )}
                             {isUploading ? 'Uploading...' : 'Upload Sound'}
                         </Button>
-                        <input
+                        <FileInput
                             accept="audio/*"
                             aria-label="Upload notification sound"
-                            className="hidden"
                             ref={fileInputRef}
-                            type="file"
                             onChange={handleFileUpload}
                         />
                     </Box>

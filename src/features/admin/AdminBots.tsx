@@ -83,13 +83,13 @@ const AdminBotRow = ({
                         'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
                         bot.verified
                             ? 'bg-primary/10 text-primary'
-                            : 'bg-bg-tertiary text-muted-foreground',
+                            : 'bg-bg-secondary text-muted-foreground',
                     )}
                 >
                     {bot.verified ? 'Yes' : 'No'}
                 </div>
                 {bot.verificationOverride ? (
-                    <div className="bg-warning/10 text-warning inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                    <div className="inline-flex rounded-full bg-caution/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-caution uppercase">
                         Override
                     </div>
                 ) : null}
@@ -256,7 +256,7 @@ export const AdminBots = (): ReactNode => {
                             <TableCell align="center" colSpan={5}>
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
                                     <Text
-                                        className="text-destructive"
+                                        className="text-danger"
                                         weight="medium"
                                     >
                                         Failed to load bots.

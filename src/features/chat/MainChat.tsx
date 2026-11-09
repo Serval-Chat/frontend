@@ -183,12 +183,12 @@ const ChatMainColumn = ({
         ) : null}
 
         {isViewingOlderMessages ? (
-            <Box className="border-warning/30 relative z-10 flex items-center justify-between border-b bg-background px-6 py-3">
-                <Text className="text-warning" size="sm">
+            <Box className="relative z-10 flex items-center justify-between border-b border-caution/30 bg-background px-6 py-3">
+                <Text className="text-caution" size="sm">
                     You are viewing older messages
                 </Text>
                 <button
-                    className="text-warning hover:text-warning/80 flex items-center gap-2 transition-colors"
+                    className="flex items-center gap-2 text-caution transition-colors hover:text-caution/80"
                     type="button"
                     onClick={onJumpToLatest}
                 >

@@ -141,7 +141,7 @@ const MenuWrapper = ({
                         className={cn(
                             'flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors max-md:py-2.5',
                             index === (selectedIndex ?? 0)
-                                ? 'text-primary-foreground bg-primary/15'
+                                ? 'bg-primary/15 text-foreground'
                                 : 'hover:bg-white/5',
                         )}
                         key={option.key}

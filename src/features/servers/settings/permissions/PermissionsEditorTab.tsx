@@ -11,6 +11,7 @@ import {
 } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
 import { Heading } from '@/ui/primitives/Heading';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { Text } from '@/ui/primitives/Text';
 import { mergeReducer } from '@/utils/mergeReducer';
@@ -370,16 +371,15 @@ export const PermissionsEditorTab = ({
                 {/* Mobile Back Header */}
                 {isMobileListOpen ? null : (
                     <div className="sticky top-0 z-20 mx-[-2rem] mb-4 flex w-full shrink-0 items-center border-b border-border-subtle bg-background px-4 px-[2rem] py-4 md:hidden">
-                        <button
+                        <Pressable
                             className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
-                            type="button"
                             onClick={(): void => {
                                 setIsMobileListOpen(true);
                             }}
                         >
                             <ChevronLeft size={20} />
                             Back
-                        </button>
+                        </Pressable>
                     </div>
                 )}
                 {selectedRole ? (

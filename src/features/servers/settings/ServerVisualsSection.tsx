@@ -2,6 +2,8 @@ import { Upload } from 'lucide-react';
 
 import type { Server } from '@/api/servers/servers.types';
 import { ServerBannerMedia } from '@/features/servers/ServerBannerMedia';
+import { Label } from '@/ui/primitives/Label';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 
 interface ServerVisualsSectionProps {
@@ -19,15 +21,9 @@ export const ServerVisualsSection = ({
 }: ServerVisualsSectionProps): React.ReactNode => (
     <div className="flex-shrink-0 space-y-8">
         <div className="space-y-3">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="server-icon-upload"
-            >
-                Server Icon
-            </label>
-            <button
+            <Label htmlFor="server-icon-upload">Server Icon</Label>
+            <Pressable
                 className="group relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-border-subtle bg-bg-subtle transition hover:border-primary"
-                type="button"
                 onClick={onIconClick}
                 onKeyDown={(e): void => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -58,19 +54,13 @@ export const ServerVisualsSection = ({
                         Change Icon
                     </Text>
                 </div>
-            </button>
+            </Pressable>
         </div>
 
         <div className="space-y-3">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="server-banner-upload"
-            >
-                Server Banner
-            </label>
-            <button
+            <Label htmlFor="server-banner-upload">Server Banner</Label>
+            <Pressable
                 className="group relative flex aspect-[16/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border-subtle bg-bg-subtle transition hover:border-primary md:w-64"
-                type="button"
                 onClick={onBannerClick}
                 onKeyDown={(e): void => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -103,7 +93,7 @@ export const ServerVisualsSection = ({
                         Change Banner
                     </Text>
                 </div>
-            </button>
+            </Pressable>
         </div>
     </div>
 );

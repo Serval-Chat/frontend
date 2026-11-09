@@ -196,7 +196,7 @@ export const ServerSidebarSection = ({
                         >
                             {item.type === 'header' ? (
                                 <div className="flex min-w-0 items-center justify-between px-3">
-                                    <div className="text-foreground-muted truncate text-xs font-semibold tracking-wider uppercase">
+                                    <div className="truncate text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                         {item.name} - {item.count}
                                     </div>
                                 </div>

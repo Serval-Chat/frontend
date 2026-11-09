@@ -1,5 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { Pressable } from '@/ui/primitives/Pressable';
+
 import { ServerMembersSettings } from './ServerMembersSettings';
 import { ServerSubpageLayout } from './ServerSubpageLayout';
 
@@ -15,14 +17,13 @@ export const ServerMembersPage = () => {
 
     return (
         <ServerSubpageLayout>
-            <button
+            <Pressable
                 aria-label="Back to server"
                 className="mb-4 flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                type="button"
                 onClick={handleBack}
             >
                 ← Back
-            </button>
+            </Pressable>
             <ServerMembersSettings serverId={serverId} />
         </ServerSubpageLayout>
     );

@@ -77,7 +77,7 @@ export const MiniProfile = () => {
                 </Box>
                 <Box className="flex min-w-0 flex-1 flex-col">
                     <StyledUserName
-                        className="!text-header-primary text-sm leading-tight font-semibold"
+                        className="text-sm leading-tight font-semibold !text-foreground"
                         disableColors={
                             user.settings?.disableCustomUsernameColors
                         }
@@ -90,7 +90,7 @@ export const MiniProfile = () => {
                         {user.displayName ?? user.username}
                     </StyledUserName>
                     <Box
-                        className="text-header-secondary flex cursor-pointer items-center truncate text-xs leading-tight opacity-70 transition-opacity hover:opacity-100"
+                        className="flex cursor-pointer items-center truncate text-xs leading-tight text-muted-foreground opacity-70 transition-opacity hover:opacity-100"
                         onClick={handleStatusClick}
                     >
                         {statusEmoji !== '' || statusText !== '' ? (

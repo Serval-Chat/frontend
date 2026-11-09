@@ -17,6 +17,8 @@ import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
+import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 
 interface AvatarDecorationPickerProps {
     className?: string;
@@ -133,10 +135,9 @@ export const AvatarDecorationPicker = ({
             >
                 Decoration
             </Heading>
-            <button
+            <Pressable
                 className="flex w-full flex-col items-center gap-3 rounded-xl border border-border-subtle bg-bg-subtle p-4 text-center transition-colors hover:border-primary/50"
                 ref={triggerRef}
-                type="button"
                 onClick={(): void => {
                     setIsOpen((v) => !v);
                 }}
@@ -156,9 +157,9 @@ export const AvatarDecorationPicker = ({
                                 src={user.profilePicture}
                             />
                         ) : (
-                            <span className="text-xl font-bold text-muted-foreground">
+                            <Text size="xl" variant="muted" weight="bold" >
                                 {user.username[0]?.toUpperCase()}
-                            </span>
+                            </Text>
                         )}
                     </div>
                     {user.decorationId ? (
@@ -179,7 +180,7 @@ export const AvatarDecorationPicker = ({
                         ? 'Click to change'
                         : 'Click to add a decoration'}
                 </Text>
-            </button>
+            </Pressable>
 
             {createPortal(
                 <AnimatePresence>
@@ -194,22 +195,17 @@ export const AvatarDecorationPicker = ({
                             transition={{ duration: 0.15, ease: 'easeOut' }}
                         >
                             <div className="border-b border-border-subtle p-3">
-                                <div className="relative">
-                                    <Search
-                                        className="absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground"
-                                        size={14}
-                                    />
-                                    <input
-                                        aria-label="Search decorations"
-                                        className="w-full rounded-md border border-border-subtle bg-bg-subtle py-1.5 pr-2 pl-8 text-sm focus:border-primary focus:outline-none"
-                                        placeholder="Search decorations..."
-                                        type="text"
-                                        value={search}
-                                        onChange={(e): void => {
-                                            setSearch(e.target.value);
-                                        }}
-                                    />
-                                </div>
+                                <Input
+                                    aria-label="Search decorations"
+                                    icon={<Search size={14} />}
+                                    placeholder="Search decorations..."
+                                    size="sm"
+                                    type="text"
+                                    value={search}
+                                    onChange={(e): void => {
+                                        setSearch(e.target.value);
+                                    }}
+                                />
                             </div>
 
                             <div className="custom-scrollbar max-h-80 overflow-y-auto p-3">
@@ -227,7 +223,7 @@ export const AvatarDecorationPicker = ({
                                             const isActive =
                                                 user.decorationId === deco.id;
                                             return (
-                                                <button
+                                                <Pressable
                                                     className={cn(
                                                         'group flex flex-col items-center gap-1 rounded-lg border p-2 transition-colors',
                                                         isActive
@@ -239,7 +235,6 @@ export const AvatarDecorationPicker = ({
                                                     }
                                                     key={deco.id}
                                                     title={deco.name}
-                                                    type="button"
                                                     onClick={(): void => {
                                                         if (!isActive) {
                                                             applyMutation.mutate(
@@ -261,10 +256,10 @@ export const AvatarDecorationPicker = ({
                                                             }}
                                                         />
                                                     </div>
-                                                    <span className="w-full truncate text-center text-[10px] text-muted-foreground">
+                                                    <Text align="center" className="w-full truncate text-[10px]" variant="muted">
                                                         {deco.name}
-                                                    </span>
-                                                </button>
+                                                    </Text>
+                                                </Pressable>
                                             );
                                         })}
                                     </div>

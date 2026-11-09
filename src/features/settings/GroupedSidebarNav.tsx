@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 export interface GroupedNavSection {
@@ -69,7 +70,7 @@ export const GroupedSidebarNav = ({
 
                 {groups.map((group, groupIndex) => (
                     <div className="flex flex-col gap-1" key={group.category}>
-                        <span
+                        <Text
                             className={cn(
                                 'px-1 text-[0.625rem] font-medium tracking-wider text-[var(--sidebar-item-text,var(--muted-foreground))] uppercase',
                                 groupIndex > 0 &&
@@ -77,7 +78,7 @@ export const GroupedSidebarNav = ({
                             )}
                         >
                             {group.category}
-                        </span>
+                        </Text>
                         {group.items.map((section) => {
                             const Icon = section.icon;
                             const isActive = activeSection === section.id;
@@ -100,10 +101,10 @@ export const GroupedSidebarNav = ({
                                         setActiveSection(section.id);
                                     }}
                                 >
-                                    <span className="flex items-center gap-2.5">
+                                    <Text className="flex items-center gap-2.5">
                                         <Icon size={18} />
                                         {section.label}
-                                    </span>
+                                    </Text>
                                 </Button>
                             );
                         })}

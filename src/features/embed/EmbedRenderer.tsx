@@ -807,7 +807,7 @@ const EmbedButtons = memo(
                     const className = cn(
                         'rounded px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60',
                         button.style === 'primary' &&
-                            'text-primary-foreground bg-primary hover:bg-primary/90',
+                            'bg-primary text-foreground hover:bg-primary/90',
                         button.style === 'secondary' &&
                             'bg-bg-secondary text-foreground hover:bg-bg-secondary/80',
                         button.style === 'success' &&

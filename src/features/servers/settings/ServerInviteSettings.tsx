@@ -17,7 +17,9 @@ import { Button } from '@/ui/primitives/Button';
 import { CopyInput } from '@/ui/primitives/CopyInput';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Select } from '@/ui/primitives/Select';
 import {
     Table,
     TableBody,
@@ -114,7 +116,7 @@ const VanityLinkSection = ({ serverId }: { serverId: string }) => {
                             variant="ghost"
                             onClick={handleDelete}
                         >
-                            <Trash2 className="text-status-error h-4 w-4" />
+                            <Trash2 className="h-4 w-4 text-danger" />
                         </Button>
                     ) : null}
                 </div>
@@ -219,12 +221,7 @@ export const ServerInviteSettings = ({
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="max-uses"
-                        >
-                            Max Uses
-                        </label>
+                        <Label htmlFor="max-uses">Max Uses</Label>
                         <Input
                             id="max-uses"
                             min={0}
@@ -242,14 +239,9 @@ export const ServerInviteSettings = ({
                     </div>
 
                     <div className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="expires-in"
-                        >
-                            Expire After
-                        </label>
-                        <select
-                            className="border-input-border bg-input-bg h-10 w-full rounded-md border px-3 text-sm transition focus:ring-2 focus:ring-primary focus:outline-none"
+                        <Label htmlFor="expires-in">Expire After</Label>
+                        <Select
+                            className="focus:ring-2 focus:ring-primary"
                             id="expires-in"
                             value={expiresIn}
                             onChange={(e): void => {
@@ -263,7 +255,7 @@ export const ServerInviteSettings = ({
                             <option value={43_200}>12 Hours</option>
                             <option value={86_400}>24 Hours</option>
                             <option value={604_800}>7 Days</option>
-                        </select>
+                        </Select>
                     </div>
                 </div>
 
@@ -344,7 +336,7 @@ export const ServerInviteSettings = ({
                                                     handleDelete(invite.id);
                                                 }}
                                             >
-                                                <Trash2 className="text-status-error h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 text-danger" />
                                             </Button>
                                         </div>
                                     </TableCell>

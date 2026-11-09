@@ -18,6 +18,7 @@ import type { RolePermissions } from '@/api/servers/servers.types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { Modal } from '@/ui/primitives/Modal';
 import { ModalCloseButton } from '@/ui/primitives/ModalCloseButton';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { SettingsSidebarLayout } from '@/ui/primitives/settings/SettingsSidebarLayout';
 import { cn } from '@/utils/cn';
 
@@ -248,16 +249,15 @@ export const ServerSettingsModal = ({
                     {/* Mobile Back Header */}
                     {isMobileSidebarOpen ? null : (
                         <div className="sticky top-0 z-40 flex shrink-0 items-center border-b border-border-subtle bg-background px-4 py-3 md:hidden">
-                            <button
+                            <Pressable
                                 className="flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
-                                type="button"
                                 onClick={(): void => {
                                     setIsMobileSidebarOpen(true);
                                 }}
                             >
                                 <ChevronLeft size={20} />
                                 Back
-                            </button>
+                            </Pressable>
                         </div>
                     )}
 

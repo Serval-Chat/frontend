@@ -24,6 +24,7 @@ import type {
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Input } from '@/ui/primitives/Input';
+import { Text } from '@/ui/primitives/Text';
 
 interface AuditLogFiltersProps {
     filters: IAuditLogFilters;
@@ -255,12 +256,13 @@ export const AuditLogFilters = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label
+                    <Text
+                        as="label"
                         className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-moderator"
                     >
                         Moderator ID
-                    </label>
+                    </Text>
                     <Input
                         className="h-10"
                         id="audit-filter-moderator"
@@ -271,12 +273,13 @@ export const AuditLogFilters = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label
+                    <Text
+                        as="label"
                         className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-target"
                     >
                         Target ID
-                    </label>
+                    </Text>
                     <Input
                         className="h-10"
                         id="audit-filter-target"
@@ -287,12 +290,13 @@ export const AuditLogFilters = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label
+                    <Text
+                        as="label"
                         className="text-xs font-medium text-text-muted"
                         htmlFor="audit-filter-reason"
                     >
                         Reason
-                    </label>
+                    </Text>
                     <Input
                         className="h-10"
                         icon={<Search className="h-4 w-4" />}
@@ -307,7 +311,7 @@ export const AuditLogFilters = ({
             {hasActiveFilters ? (
                 <div className="flex justify-end">
                     <Button
-                        className="hover:text-text text-text-muted"
+                        className="text-text-muted hover:text-foreground"
                         size="sm"
                         variant="ghost"
                         onClick={clearFilters}

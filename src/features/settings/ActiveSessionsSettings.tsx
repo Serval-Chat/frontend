@@ -25,7 +25,10 @@ import type { SessionDuration } from '@/api/users/users.types';
 import { useIsDevelopment } from '@/hooks/useIsDevelopment';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
 import { Pill } from '@/ui/primitives/Pill';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
 import { Timestamp } from '@/ui/primitives/Timestamp';
 import { useToast } from '@/ui/primitives/Toast';
@@ -177,10 +180,12 @@ export const ActiveSessionsSettings = () => {
                         again.
                     </Text>
                 </div>
-                <select
+                <Select
                     aria-label="Session duration"
-                    className="rounded-md border border-border-subtle bg-background px-2 py-1 text-sm text-foreground outline-none focus:border-primary"
+                    size="sm"
                     value={sessionDuration}
+                    variant="admin"
+                    wrapperClassName="w-auto shrink-0"
                     onChange={(event): void => {
                         updateSettings({
                             sessionDuration: event.target
@@ -195,7 +200,7 @@ export const ActiveSessionsSettings = () => {
                             </option>
                         ),
                     )}
-                </select>
+                </Select>
             </div>
 
             {isLoading ? (
@@ -280,10 +285,12 @@ export const ActiveSessionsSettings = () => {
                                         <div className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                                             {editingSessionId === session.id ? (
                                                 <span className="inline-flex items-center gap-1">
-                                                    <input
+                                                    <Input
                                                         aria-label="Session IP address"
-                                                        className="h-5 w-28 rounded border border-border-subtle bg-background px-1 text-[11px] text-foreground outline-none focus:border-primary"
+                                                        maxWidth="7rem"
+                                                        size="sm"
                                                         value={editIpValue}
+                                                        variant="admin"
                                                         onChange={(
                                                             event,
                                                         ): void => {
@@ -311,11 +318,10 @@ export const ActiveSessionsSettings = () => {
                                                             }
                                                         }}
                                                     />
-                                                    <button
+                                                    <Pressable
                                                         aria-label="Save IP edit"
-                                                        className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-success/10 hover:text-success disabled:cursor-not-allowed disabled:opacity-50"
+                                                        className="flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-success/10 hover:text-success disabled:cursor-not-allowed disabled:opacity-50"
                                                         disabled={isUpdatingIp}
-                                                        type="button"
                                                         onClick={(): void => {
                                                             confirmEditingIp(
                                                                 session.id,
@@ -323,26 +329,24 @@ export const ActiveSessionsSettings = () => {
                                                         }}
                                                     >
                                                         <Check size={10} />
-                                                    </button>
-                                                    <button
+                                                    </Pressable>
+                                                    <Pressable
                                                         aria-label="Cancel IP edit"
-                                                        className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
-                                                        type="button"
+                                                        className="flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-danger/10 hover:text-danger"
                                                         onClick={
                                                             cancelEditingIp
                                                         }
                                                     >
                                                         <X size={10} />
-                                                    </button>
+                                                    </Pressable>
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1">
+                                                <Text className="inline-flex items-center gap-1">
                                                     {session.ip}
                                                     {isDevelopment && (
-                                                        <button
+                                                        <Pressable
                                                             aria-label="Edit session IP"
-                                                            className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
-                                                            type="button"
+                                                            className="flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
                                                             onClick={(): void => {
                                                                 startEditingIp(
                                                                     session.id,
@@ -351,11 +355,11 @@ export const ActiveSessionsSettings = () => {
                                                             }}
                                                         >
                                                             <Pencil size={10} />
-                                                        </button>
+                                                        </Pressable>
                                                     )}
-                                                </span>
+                                                </Text>
                                             )}
-                                            <span>
+                                            <Text>
                                                 · logged in{' '}
                                                 <Timestamp
                                                     className="rounded-none bg-transparent p-0 text-xs font-normal text-muted-foreground"
@@ -372,7 +376,7 @@ export const ActiveSessionsSettings = () => {
                                                         session.lastSeenAt,
                                                     )}
                                                 />
-                                            </span>
+                                            </Text>
                                         </div>
                                     </div>
                                 </div>

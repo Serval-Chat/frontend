@@ -4,6 +4,7 @@ import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
@@ -104,12 +105,7 @@ export const BanUserModal = ({
                 </Box>
 
                 <Box className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="ban-reason"
-                    >
-                        Reason for ban
-                    </label>
+                    <Label htmlFor="ban-reason">Reason for ban</Label>
                     <TextArea
                         className="min-h-[100px] bg-bg-secondary"
                         id="ban-reason"

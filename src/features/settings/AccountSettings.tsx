@@ -5,6 +5,7 @@ import {
     useUpdateBanner,
     useUpdateProfilePicture,
 } from '@/api/users/users.queries';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
 
 import { AccountProfileSection } from './AccountProfileSection';
@@ -63,20 +64,16 @@ export const AccountSettings = () => {
     return (
         <div className="max-w-3xl">
             {/* Hidden file inputs */}
-            <input
+            <FileInput
                 accept="image/webp,image/gif,image/png,image/jpeg"
                 aria-label="Upload avatar"
-                className="hidden"
                 ref={avatarInputRef}
-                type="file"
                 onChange={handleAvatarChange}
             />
-            <input
+            <FileInput
                 accept="image/webp,image/gif,image/png,image/jpeg"
                 aria-label="Upload banner"
-                className="hidden"
                 ref={bannerInputRef}
-                type="file"
                 onChange={handleBannerChange}
             />
 

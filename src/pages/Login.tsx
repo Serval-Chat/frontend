@@ -231,7 +231,7 @@ export const Login = () => {
                                     <label className="flex cursor-pointer items-center gap-2">
                                         <input
                                             checked={rememberMe}
-                                            className="border-border/50 h-4 w-4 rounded bg-background/50 text-primary focus:ring-primary"
+                                            className="h-4 w-4 rounded border-border-subtle/50 bg-background/50 text-primary focus:ring-primary"
                                             type="checkbox"
                                             onChange={(e): void => {
                                                 setRememberMe(e.target.checked);

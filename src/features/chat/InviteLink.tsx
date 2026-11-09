@@ -143,7 +143,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
     if (error || !invite) {
         return (
             <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg border border-border-subtle bg-bg-secondary p-4 opacity-60">
-                <Text className="text-error" size="sm" weight="bold">
+                <Text className="text-danger" size="sm" weight="bold">
                     Invite Invalid or Expired
                 </Text>
                 <Text className="mt-1" size="xs" variant="muted">
@@ -181,7 +181,7 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
             <div className="relative">
                 <button
                     aria-label="Copy invite link"
-                    className="hover:bg-bg-tertiary absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition hover:opacity-100"
+                    className="absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition hover:bg-bg-secondary hover:opacity-100"
                     type="button"
                     onClick={handleCopy}
                 >

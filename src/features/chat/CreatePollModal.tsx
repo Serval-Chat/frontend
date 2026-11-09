@@ -199,7 +199,7 @@ const PollOptionsEditor = ({
 
             {options.length < 10 ? (
                 <Button
-                    className="bg-bg-tertiary mt-2 w-full justify-start text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
+                    className="mt-2 w-full justify-start bg-bg-secondary text-muted-foreground hover:bg-bg-subtle hover:text-foreground"
                     variant="ghost"
                     onClick={onAddOption}
                 >
@@ -268,7 +268,7 @@ const PollDurationSection = ({
             />
             <select
                 aria-label="Poll duration unit"
-                className="bg-bg-tertiary h-10 cursor-pointer rounded-md border border-border-subtle px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                className="h-10 cursor-pointer rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
                 value={durationUnit}
                 onChange={(e): void => {
                     onDurationUnitChange(

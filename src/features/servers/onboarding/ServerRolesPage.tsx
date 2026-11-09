@@ -12,6 +12,7 @@ import type { Role } from '@/api/servers/servers.types';
 import { RoleDot } from '@/features/servers/RoleDot';
 import { ServerSubpageLayout } from '@/features/servers/ServerSubpageLayout';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
@@ -28,13 +29,12 @@ const RoleAssignRow = ({
     isSelected: boolean;
     onToggle: () => void;
 }) => (
-    <button
+    <Pressable
         aria-pressed={isSelected}
         className={cn(
             'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
             isSelected ? 'bg-primary/10' : 'hover:bg-white/5',
         )}
-        type="button"
         onClick={onToggle}
     >
         <RoleDot role={role} size={10} />
@@ -58,7 +58,7 @@ const RoleAssignRow = ({
         ) : (
             <div className="h-[18px] w-[18px] shrink-0 rounded-full border border-border-subtle" />
         )}
-    </button>
+    </Pressable>
 );
 
 const RoleAssignList = ({
@@ -190,23 +190,27 @@ export const ServerRolesPage = () => {
                 </div>
             ) : (
                 <div className="max-w-3xl space-y-6">
-                    <button
+                    <Pressable
                         aria-label="Back to server"
                         className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                        type="button"
                         onClick={handleBack}
                     >
                         ← Back
-                    </button>
+                    </Pressable>
                     <div className="flex items-center gap-3">
                         <Tag className="h-6 w-6 shrink-0 text-muted-foreground" />
                         <div className="flex min-w-0 flex-1 flex-col">
-                            <span className="text-xl leading-6 font-semibold text-foreground">
+                            <Text
+                                className="leading-6"
+                                size="xl"
+                                variant="default"
+                                weight="semibold"
+                            >
                                 Self-assignable roles
-                            </span>
-                            <span className="text-sm text-muted-foreground">
+                            </Text>
+                            <Text size="sm" variant="muted">
                                 Pick the roles you want in this server.
-                            </span>
+                            </Text>
                         </div>
                     </div>
                     <RoleAssignList

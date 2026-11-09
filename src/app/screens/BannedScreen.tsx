@@ -38,7 +38,7 @@ export const BannedScreen = ({
                     Account Suspended
                 </p>
 
-                <div className="border-border bg-surface w-full rounded-lg border p-4 text-left text-sm">
+                <div className="w-full rounded-lg border border-border-subtle bg-bg-subtle p-4 text-left text-sm">
                     <p className="mb-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Reason
                     </p>
@@ -48,7 +48,7 @@ export const BannedScreen = ({
                             : 'No reason provided.'}
                     </p>
 
-                    <div className="bg-border my-3 h-px" />
+                    <div className="my-3 h-px bg-divider" />
 
                     <p className="mb-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Duration
@@ -68,7 +68,7 @@ export const BannedScreen = ({
                 </p>
 
                 <button
-                    className="border-border bg-surface hover:bg-surface/80 rounded border px-4 py-2 text-sm text-foreground"
+                    className="rounded border border-border-subtle bg-bg-subtle px-4 py-2 text-sm text-foreground hover:bg-bg-subtle/80"
                     type="button"
                     onClick={handleLogout}
                 >

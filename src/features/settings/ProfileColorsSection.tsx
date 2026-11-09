@@ -2,6 +2,8 @@ import { X } from 'lucide-react';
 
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 
 import { ColorPickerPopover } from './ColorPickerPopover';
 
@@ -65,17 +67,21 @@ export const ProfileColorsSection = ({
                 <div className="flex flex-wrap gap-6">
                     {entries.map(({ key, label, value }) => (
                         <div className="flex items-center gap-3" key={key}>
-                            <span className="w-14 shrink-0 text-sm font-medium text-foreground">
+                            <Text
+                                className="w-14 shrink-0"
+                                size="sm"
+                                variant="default"
+                                weight="medium"
+                            >
                                 {label}:
-                            </span>
+                            </Text>
                             <div className="flex items-center gap-2">
-                                <button
+                                <Pressable
                                     aria-label={`${label} color: ${value ?? 'default'}`}
                                     className="h-8 w-12 rounded border border-border-subtle transition-transform hover:scale-105"
                                     style={{
                                         backgroundColor: value ?? '#313338',
                                     }}
-                                    type="button"
                                     onClick={(e): void => {
                                         triggerRef.current = e.currentTarget;
                                         setHexDraft(value ?? '#313338');
@@ -127,9 +133,9 @@ export const ProfileColorsSection = ({
                     />
                 ) : null}
                 {accentWithoutPrimary ? (
-                    <p className="mt-2 text-xs text-danger">
+                    <Text as="p" className="mt-2" size="xs" variant="danger">
                         Accent color requires a primary color.
-                    </p>
+                    </Text>
                 ) : null}
             </div>
         </div>

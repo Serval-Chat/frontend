@@ -355,7 +355,7 @@ export const ChatHeader = ({
                 )}
             >
                 <Box className="flex min-w-0 items-center gap-2">
-                    <Box className="text-foreground-muted flex h-5 w-5 shrink-0 items-center justify-center">
+                    <Box className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground">
                         {selectedFriendId ? (
                             <UserProfilePicture
                                 noIndicator
@@ -429,7 +429,7 @@ export const ChatHeader = ({
                                 }}
                             >
                                 <span
-                                    className={`text-foreground-muted block text-xs break-words ${
+                                    className={`block text-xs break-words text-muted-foreground ${
                                         descExpanded
                                             ? 'pb-0.5 whitespace-pre-wrap'
                                             : 'truncate'
@@ -457,7 +457,7 @@ export const ChatHeader = ({
                                 strokeWidth="2"
                             />
                         </svg>
-                        <Text className="text-foreground-muted truncate text-xs">
+                        <Text className="truncate text-xs text-muted-foreground">
                             {friendUser?.customStatus?.text}
                         </Text>
                     </Box>
@@ -482,7 +482,7 @@ export const ChatHeader = ({
                             'p-2 transition-colors',
                             isSearchOpen
                                 ? 'text-primary'
-                                : 'text-foreground-muted hover:text-foreground',
+                                : 'text-muted-foreground hover:text-foreground',
                         )}
                         type="button"
                         onClick={onToggleSearch}
@@ -498,7 +498,7 @@ export const ChatHeader = ({
                                 'relative p-2 transition-colors',
                                 showPins
                                     ? 'text-primary'
-                                    : 'text-foreground-muted hover:text-foreground',
+                                    : 'text-muted-foreground hover:text-foreground',
                             )}
                             ref={pinButtonRef}
                             type="button"
@@ -533,7 +533,7 @@ export const ChatHeader = ({
                             'p-2 transition-colors',
                             memberListOpen
                                 ? 'text-foreground'
-                                : 'text-foreground-muted hover:text-foreground',
+                                : 'text-muted-foreground hover:text-foreground',
                         )}
                         type="button"
                         onClick={
@@ -552,7 +552,7 @@ export const ChatHeader = ({
                 ) : null}
                 <button
                     aria-label="Back to contacts"
-                    className="text-foreground-muted p-2 transition-colors hover:text-foreground md:hidden"
+                    className="p-2 text-muted-foreground transition-colors hover:text-foreground md:hidden"
                     type="button"
                     onClick={handleBackClick}
                 >

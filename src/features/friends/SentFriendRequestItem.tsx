@@ -24,7 +24,7 @@ export const SentFriendRequestItem = ({
         useCancelFriendRequest();
 
     return (
-        <Box className="group hover:bg-bg-tertiary flex items-center justify-between rounded-lg bg-bg-subtle p-3 transition-colors">
+        <Box className="group flex items-center justify-between rounded-lg bg-bg-subtle p-3 transition-colors hover:bg-bg-secondary">
             <Box className="flex items-center gap-3">
                 <UserProfilePicture
                     size="md"

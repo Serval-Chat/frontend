@@ -207,11 +207,11 @@ export const ChannelWebhookSettings = ({
                                                     webhook.token,
                                                 )}
                                             >
-                                                <span className="block truncate">
+                                                <Text className="block truncate">
                                                     {buildWebhookUrl(
                                                         webhook.token,
                                                     )}
-                                                </span>
+                                                </Text>
                                             </div>
                                             <Button
                                                 aria-label={

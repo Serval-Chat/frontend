@@ -226,13 +226,13 @@ export const AdminReports = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <ReportIdCopy id={report.id} />
-                                    <span className="bg-bg-tertiary rounded-full px-2 py-1 text-xs">
+                                    <span className="rounded-full bg-bg-secondary px-2 py-1 text-xs">
                                         {report.reportCount ?? 1}{' '}
                                         {(report.reportCount ?? 1) === 1
                                             ? 'report'
                                             : 'reports'}
                                     </span>
-                                    <span className="bg-bg-tertiary rounded-full px-2 py-1 text-xs capitalize">
+                                    <span className="rounded-full bg-bg-secondary px-2 py-1 text-xs capitalize">
                                         {report.status}
                                     </span>
                                 </div>

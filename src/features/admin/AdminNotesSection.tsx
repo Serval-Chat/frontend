@@ -80,7 +80,7 @@ const AdminNoteItem = ({
                             ) : null}
                             {note.history.length > 0 && !isDeleted ? (
                                 <button
-                                    className="bg-info/10 text-info hover:bg-info/20 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-tight uppercase transition-colors"
+                                    className="flex items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-tight text-primary uppercase transition-colors hover:bg-primary/20"
                                     type="button"
                                     onClick={onToggleHistory}
                                 >
@@ -134,15 +134,15 @@ const AdminNoteItem = ({
             </div>
 
             {isHistoryExpanded && note.history.length > 0 ? (
-                <div className="border-info/20 bg-info/5 animate-in fade-in slide-in-from-top-2 mt-4 space-y-3 rounded-xl border p-3 duration-200">
-                    <div className="text-info flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                <div className="animate-in fade-in slide-in-from-top-2 mt-4 space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-3 duration-200">
+                    <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-primary uppercase">
                         <History size={12} />
                         Note Revision History
                     </div>
                     <div className="space-y-4">
                         {[...note.history].reverse().map((history) => (
                             <div
-                                className="border-info/20 relative border-l-2 py-1 pl-4"
+                                className="relative border-l-2 border-primary/20 py-1 pl-4"
                                 key={history.editedAt.toString()}
                             >
                                 <div className="mb-2 flex items-center justify-between">
@@ -176,7 +176,7 @@ const AdminNoteItem = ({
                                 </Text>
                             </div>
                         ))}
-                        <div className="border-info/20 relative border-l-2 py-1 pl-4">
+                        <div className="relative border-l-2 border-primary/20 py-1 pl-4">
                             <div className="mb-1 flex items-center justify-between">
                                 <div className="flex items-center gap-2 opacity-50">
                                     <User size={12} />

@@ -14,6 +14,7 @@ import { useMe } from '@/api/users/users.queries';
 import type { ServerFolder as IServerFolder } from '@/api/users/users.types';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { openFolder } from '@/store/slices/navSlice';
+import { Pressable } from '@/ui/primitives/Pressable';
 
 import { ServerFolder } from './ServerFolder';
 import { ServerItem } from './ServerItem';
@@ -269,16 +270,15 @@ export const ServerList = () => {
             <div className="no-scrollbar flex w-full flex-1 touch-pan-y flex-col items-center gap-3 overflow-y-auto pt-3">
                 {mobileReorderItem ? (
                     <div className="sticky top-2 z-20 flex w-[60px] flex-col items-center gap-2 rounded-2xl border border-border-subtle bg-background/95 p-2 shadow-xl backdrop-blur">
-                        <button
+                        <Pressable
                             aria-label="Cancel server reorder"
-                            className="text-foreground-muted flex h-10 w-10 items-center justify-center rounded-xl bg-bg-subtle"
-                            type="button"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-bg-subtle text-muted-foreground"
                             onClick={(): void => {
                                 setMobileReorderItem(null);
                             }}
                         >
                             <X className="h-5 w-5" />
-                        </button>
+                        </Pressable>
                     </div>
                 ) : null}
                 {renderedItems}
@@ -415,16 +415,15 @@ const MobileTopLevelDropTarget = React.memo(
         index: number;
         onConfirm: (index: number) => void;
     }) => (
-        <button
+        <Pressable
             aria-label="Place item here"
             className="relative z-[2] flex h-8 w-14 items-center justify-center rounded-full border border-primary/40 bg-primary/15 text-primary shadow-lg backdrop-blur-sm"
-            type="button"
             onClick={(): void => {
                 onConfirm(index);
             }}
         >
             <Check className="h-5 w-5" />
-        </button>
+        </Pressable>
     ),
 );
 

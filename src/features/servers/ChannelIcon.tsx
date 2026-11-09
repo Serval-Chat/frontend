@@ -5,6 +5,7 @@ import { Hash, Link, Volume2 } from 'lucide-react';
 import type { ChannelType } from '@/api/servers/servers.types';
 import { ParsedEmoji } from '@/features/messages/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
+import { Text } from '@/ui/primitives/Text';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
 
@@ -29,7 +30,7 @@ export const ChannelIcon = ({
 
     if (emoji && emojiType) {
         return (
-            <span
+            <Text
                 className={cn(
                     'flex items-center justify-center',
                     resolvedClassName,
@@ -43,7 +44,7 @@ export const ChannelIcon = ({
                         content={emoji}
                     />
                 )}
-            </span>
+            </Text>
         );
     }
 

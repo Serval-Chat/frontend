@@ -25,7 +25,7 @@ export const ReportIdCopy = ({ id }: { id: string }) => {
             <code className="font-mono text-xs break-all">{id}</code>
             <button
                 aria-label={`Copy report ID ${id}`}
-                className="hover:bg-bg-tertiary rounded p-1 text-muted-foreground hover:text-foreground"
+                className="rounded p-1 text-muted-foreground hover:bg-bg-secondary hover:text-foreground"
                 title={copied ? 'Copied' : 'Copy report ID'}
                 type="button"
                 onClick={(): void => {

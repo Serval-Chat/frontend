@@ -11,7 +11,9 @@ import {
 } from '@/api/servers/servers.queries';
 import { ServerSubpageLayout } from '@/features/servers/ServerSubpageLayout';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
+import { Text } from '@/ui/primitives/Text';
 
 import { ChannelPreferenceGroup } from './ServerOnboardingModals';
 
@@ -133,31 +135,35 @@ export const ServerChannelsPage = () => {
                 </div>
             ) : (
                 <div className="max-w-3xl space-y-6">
-                    <button
+                    <Pressable
                         aria-label="Back to server"
                         className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                        type="button"
                         onClick={handleBack}
                     >
                         ← Back
-                    </button>
+                    </Pressable>
                     <div className="flex items-center gap-3">
                         <Hash className="h-6 w-6 shrink-0 text-muted-foreground" />
                         <div className="flex min-w-0 flex-1 flex-col">
-                            <span className="text-xl leading-6 font-semibold text-foreground">
+                            <Text
+                                className="leading-6"
+                                size="xl"
+                                variant="default"
+                                weight="semibold"
+                            >
                                 Channels &amp; Categories
-                            </span>
-                            <span className="text-sm text-muted-foreground">
+                            </Text>
+                            <Text size="sm" variant="muted">
                                 Configure which channels you want to see.
-                            </span>
+                            </Text>
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <EyeOff className="h-3.5 w-3.5 shrink-0" />
-                        <span>
+                        <Text>
                             Click a channel or category to hide it from your
                             sidebar.
-                        </span>
+                        </Text>
                     </div>
                     <div className="space-y-3">
                         {groupedChannels.map((group) => (

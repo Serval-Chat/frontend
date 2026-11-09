@@ -8,6 +8,7 @@ import {
 } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import { ImageCropModal } from '@/features/settings/ImageCropModal';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
@@ -176,22 +177,18 @@ export const ServerOverviewSettings = ({
 
     return (
         <div className="max-w-3xl space-y-10 pb-20">
-            <input
+            <FileInput
                 accept="image/*"
                 aria-label="Upload server icon"
-                className="hidden"
                 id="server-icon-upload"
                 ref={iconInputRef}
-                type="file"
                 onChange={handleIconChange}
             />
-            <input
+            <FileInput
                 accept="image/*"
                 aria-label="Upload server banner"
-                className="hidden"
                 id="server-banner-upload"
                 ref={bannerInputRef}
-                type="file"
                 onChange={handleBannerChange}
             />
 

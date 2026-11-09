@@ -18,9 +18,11 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { Popover } from '@/ui/primitives/Popover';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
+import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
@@ -165,14 +167,9 @@ const ChannelSlowModeControl = ({
 }) => (
     <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
-            <label
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                htmlFor="slow-mode"
-            >
-                Slow Mode
-            </label>
+            <Label htmlFor="slow-mode">Slow Mode</Label>
             <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-primary">
+                <Text size="sm" variant="primary" weight="medium">
                     {slowMode === 0
                         ? 'Off'
                         : slowMode < 60
@@ -180,7 +177,7 @@ const ChannelSlowModeControl = ({
                           : slowMode < 3600
                             ? `${Math.floor(slowMode / 60)}m`
                             : `${Math.floor(slowMode / 3600)}h`}
-                </span>
+                </Text>
                 <div className="flex items-center gap-1.5">
                     <Input
                         aria-label="Slow mode duration in seconds"
@@ -205,13 +202,18 @@ const ChannelSlowModeControl = ({
                             }
                         }}
                     />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                    <Text
+                        className="text-[10px]"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="bold"
+                    >
                         sec
-                    </span>
+                    </Text>
                 </div>
             </div>
         </div>
-        <input
+        <Slider
             className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-bg-secondary accent-primary"
             id="slow-mode"
             max="21600"
@@ -225,7 +227,6 @@ const ChannelSlowModeControl = ({
                         ? 60
                         : 3600
             }
-            type="range"
             value={slowMode}
             onChange={(e): void => {
                 dispatchForm({
@@ -278,12 +279,7 @@ const ChannelFieldsSection = ({
     return (
         <div className="space-y-8">
             <div className="space-y-2">
-                <label
-                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="channel-name"
-                >
-                    Channel Name
-                </label>
+                <Label htmlFor="channel-name">Channel Name</Label>
                 <Input
                     id="channel-name"
                     placeholder="new-channel"
@@ -298,12 +294,7 @@ const ChannelFieldsSection = ({
             </div>
 
             <div className="space-y-2">
-                <label
-                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="channel-description"
-                >
-                    Description
-                </label>
+                <Label htmlFor="channel-description">Description</Label>
                 <Input
                     id="channel-description"
                     placeholder="What's this channel about?"
@@ -319,12 +310,7 @@ const ChannelFieldsSection = ({
 
             {channelType === 'link' ? (
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="channel-link"
-                    >
-                        Channel URL
-                    </label>
+                    <Label htmlFor="channel-link">Channel URL</Label>
                     <Input
                         id="channel-link"
                         placeholder="https://example.com"
@@ -345,12 +331,7 @@ const ChannelFieldsSection = ({
             ) : null}
 
             <div className="space-y-2">
-                <label
-                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="channel-icons"
-                >
-                    Channel Icon
-                </label>
+                <Label htmlFor="channel-icons">Channel Icon</Label>
                 <div
                     className="custom-scrollbar grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-md border border-border-subtle bg-bg-secondary p-3 md:grid-cols-10"
                     id="channel-icons"
@@ -392,12 +373,7 @@ const ChannelFieldsSection = ({
             </div>
 
             <div className="space-y-2">
-                <label
-                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="channel-emoji"
-                >
-                    Or choose an Emoji
-                </label>
+                <Label htmlFor="channel-emoji">Or choose an Emoji</Label>
                 <div className="flex items-center gap-4">
                     <Button
                         className="h-20 w-20 border border-dashed border-border-subtle bg-bg-secondary hover:bg-white/5"
@@ -498,10 +474,10 @@ const ChannelDeleteModal = ({
         onClose={onClose}
     >
         <div className="space-y-6">
-            <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
+            <div className="rounded-md border border-danger bg-danger-muted p-4 text-sm text-danger">
                 Are you sure you want to delete{' '}
-                <span className="font-bold">#{channelName}</span>? This action
-                cannot be undone.
+                <Text weight="bold">#{channelName}</Text>? This action cannot be
+                undone.
             </div>
             <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                 <Button variant="ghost" onClick={onClose}>
@@ -703,7 +679,7 @@ export const ChannelOverviewSettings = ({
 
                                 {exportState?.state === 'cooling_down' &&
                                 exportState.nextExportAt ? (
-                                    <div className="bg-warning/10 text-warning mt-2 flex items-center gap-2 rounded-md p-2">
+                                    <div className="mt-2 flex items-center gap-2 rounded-md bg-caution/10 p-2 text-caution">
                                         <Clock className="h-3.5 w-3.5" />
                                         <Text size="xs" weight="medium">
                                             Export cooling down. Next available:{' '}
@@ -763,7 +739,11 @@ export const ChannelOverviewSettings = ({
             {/* Danger Zone */}
             <div className="space-y-6 pt-10">
                 <div className="border-b border-border-subtle pb-4">
-                    <Heading className="text-error" level={2} variant="section">
+                    <Heading
+                        className="text-danger"
+                        level={2}
+                        variant="section"
+                    >
                         Danger Zone
                     </Heading>
                 </div>

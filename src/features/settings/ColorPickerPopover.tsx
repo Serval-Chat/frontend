@@ -1,6 +1,9 @@
 import { HexColorPicker } from 'react-colorful';
 import { createPortal } from 'react-dom';
 
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
+
 interface ColorPickerPopoverProps {
     color: string;
     hexDraft: string;
@@ -31,11 +34,10 @@ export const ColorPickerPopover = ({
             ref={pickerRef}
             style={{ position: 'fixed', left: coords.x, top: coords.y }}
         >
-            <button
+            <Pressable
                 aria-label="Close color picker"
                 className="fixed inset-0"
                 tabIndex={-1}
-                type="button"
                 onClick={onClose}
                 onKeyDown={(e): void => {
                     if (e.key === 'Escape') onClose();
@@ -50,9 +52,14 @@ export const ColorPickerPopover = ({
                     }}
                 />
                 <div className="flex items-center gap-2 bg-bg-secondary px-3 py-2">
-                    <span className="font-mono text-xs text-muted-foreground select-none">
+                    <Text
+                        className="font-mono select-none"
+                        size="xs"
+                        variant="muted"
+                    >
                         #
-                    </span>
+                    </Text>
+                    {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- borderless field inside the swatch row's own #-prefixed chrome */}
                     <input
                         aria-label="Hex color value"
                         className="w-full bg-transparent font-mono text-xs text-foreground outline-none"

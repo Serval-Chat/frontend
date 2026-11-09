@@ -50,9 +50,9 @@ export const RoleColorSection = ({
 }: RoleColorSectionProps): React.ReactNode => (
     <div className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground uppercase">
+            <Text size="xs" transform="uppercase" variant="muted" weight="bold">
                 Role Color
-            </span>
+            </Text>
             <div className="flex rounded-md border border-border-subtle bg-bg-secondary p-1">
                 {(['solid', 'custom'] as const).map((type) => (
                     <Button

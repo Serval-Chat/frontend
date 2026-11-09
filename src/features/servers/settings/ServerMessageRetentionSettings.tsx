@@ -166,7 +166,7 @@ const ServerMessageRetentionSettingsForm = ({
                 }}
             >
                 <div className="space-y-6">
-                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
+                    <div className="rounded-md border border-danger bg-danger-muted p-4 text-sm text-danger">
                         This permanently deletes every already-deleted message
                         in this server, including messages still within their
                         retention period. Active messages will remain. This

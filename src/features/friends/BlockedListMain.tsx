@@ -53,7 +53,7 @@ export const BlockedListMain = () => {
         return (
             <Box className="flex h-full flex-col items-center justify-center p-8 text-center">
                 <Box className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-subtle">
-                    <UserX className="text-foreground-muted h-8 w-8 opacity-20" />
+                    <UserX className="h-8 w-8 text-muted-foreground opacity-20" />
                 </Box>
                 <Heading className="mb-2" level={3}>
                     No blocked users
@@ -70,10 +70,10 @@ export const BlockedListMain = () => {
                     Blocked Users - {blocks.length}
                 </Text>
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
-                    <Search className="text-foreground-muted" size={14} />
+                    <Search className="text-muted-foreground" size={14} />
                     <input
                         aria-label="Search blocked users"
-                        className="placeholder:text-foreground-muted w-full bg-transparent text-xs font-medium outline-none"
+                        className="w-full bg-transparent text-xs font-medium outline-none placeholder:text-muted-foreground"
                         placeholder="Search username"
                         type="text"
                         value={search}

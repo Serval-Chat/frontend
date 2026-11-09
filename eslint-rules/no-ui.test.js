@@ -17,6 +17,9 @@ ruleTester.run("no-raw-controls-outside-primitives", rule, {
   valid: [
     { code: "<div className='flex'><ul><li /></ul><img alt='' /></div>", filename: feature },
     { code: "<svg><path d='M0 0' /></svg>", filename: feature },
+    { code: "<span className='flex gap-1'><Icon /><Badge /></span>", filename: feature },
+    { code: "<span className='h-2 w-2 rounded-full bg-success' />", filename: feature },
+    { code: "<span>{/* note */}</span>", filename: feature },
     { code: "<Button onClick={go}>Go</Button>", filename: feature },
     { code: "<button type='button' />", filename: primitive },
     { code: "<p><span>text</span></p>", filename: primitive },
@@ -56,6 +59,16 @@ ruleTester.run("no-raw-controls-outside-primitives", rule, {
       code: "<button />",
       filename: "/repo/frontend/src/ui/components/common/Button.tsx",
       errors: [{ messageId: "rawElement" }],
+    },
+    {
+      code: "<span className='text-sm'>{user.name}</span>",
+      filename: feature,
+      errors: [{ messageId: "rawElement", data: { element: "span" } }],
+    },
+    {
+      code: "<span>Total: <b>{n}</b></span>",
+      filename: feature,
+      errors: [{ messageId: "rawElement", data: { element: "span" } }],
     },
     {
       code: "<dialog />",

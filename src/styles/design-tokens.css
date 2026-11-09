@@ -6,6 +6,9 @@
     --spacing-lg: calc(var(--spacing) * 6);
     --spacing-xl: calc(var(--spacing) * 8);
 
+    --text-2xs: 0.625rem;
+    --text-2xs--line-height: 0.875rem;
+
     --max-width-xs: 20rem;
     --max-width-sm: 24rem;
     --max-width-md: 28rem;

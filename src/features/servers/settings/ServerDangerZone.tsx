@@ -14,6 +14,7 @@ import { useMe } from '@/api/users/users.queries';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -122,7 +123,11 @@ export const ServerDangerZone = ({
                 </div>
 
                 <div className="border-b border-border-subtle pt-4 pb-4">
-                    <Heading className="text-error" level={2} variant="section">
+                    <Heading
+                        className="text-danger"
+                        level={2}
+                        variant="section"
+                    >
                         Danger Zone
                     </Heading>
                 </div>
@@ -184,7 +189,7 @@ export const ServerDangerZone = ({
                 }}
             >
                 <div className="space-y-6">
-                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
+                    <div className="rounded-md border border-danger bg-danger-muted p-4 text-sm text-danger">
                         Are you sure you want to delete{' '}
                         <strong>{server.name}</strong>? This action cannot be
                         undone. All messages, channels, and roles will be
@@ -192,12 +197,9 @@ export const ServerDangerZone = ({
                     </div>
 
                     <div className="space-y-2">
-                        <label
-                            className="text-xs font-bold text-muted-foreground uppercase"
-                            htmlFor="confirm-delete-name"
-                        >
+                        <Label htmlFor="confirm-delete-name">
                             Enter Server Name
-                        </label>
+                        </Label>
                         <Input
                             id="confirm-delete-name"
                             placeholder={server.name}

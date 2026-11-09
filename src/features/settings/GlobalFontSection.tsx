@@ -1,5 +1,8 @@
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
+import { Text } from '@/ui/primitives/Text';
 
 interface GlobalFontSectionProps {
     localCustomFontUrl: string;
@@ -29,41 +32,31 @@ export const GlobalFontSection = ({
                     Reset to Default
                 </Button>
             </div>
-            <span className="text-sm text-muted-foreground">
+            <Text size="sm" variant="muted">
                 Apply a custom font by providing a Google APIs link to the font.
-            </span>
+            </Text>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold text-muted-foreground uppercase"
-                        htmlFor="custom-font-url"
-                    >
-                        Google Font CDN URL
-                    </label>
-                    <input
-                        className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                    <Label htmlFor="custom-font-url">Google Font CDN URL</Label>
+                    <Input
                         id="custom-font-url"
                         placeholder="https://fonts.googleapis.com/css2?family=..."
                         type="text"
                         value={localCustomFontUrl}
+                        variant="secondary"
                         onChange={(e): void => {
                             setLocalCustomFontUrl(e.target.value);
                         }}
                     />
                 </div>
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold text-muted-foreground uppercase"
-                        htmlFor="custom-font-family"
-                    >
-                        Font Family Name
-                    </label>
-                    <input
-                        className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                    <Label htmlFor="custom-font-family">Font Family Name</Label>
+                    <Input
                         id="custom-font-family"
                         placeholder="e.g. Open Sans"
                         type="text"
                         value={localCustomFontFamily}
+                        variant="secondary"
                         onChange={(e): void => {
                             setLocalCustomFontFamily(e.target.value);
                         }}

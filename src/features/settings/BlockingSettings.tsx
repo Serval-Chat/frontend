@@ -31,7 +31,10 @@ import { BlockFlags } from '@/types/blocks';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -201,10 +204,11 @@ const BlockProfilesView = ({
                             <Box className="flex items-center justify-between p-3 px-4">
                                 {renamingProfileId === profile.id ? (
                                     <Box className="flex items-center gap-2">
-                                        <input
+                                        <Input
                                             aria-label="Rename block profile"
-                                            className="rounded border border-primary/50 bg-[var(--settings-edit-control-bg)] px-2 py-1 text-sm outline-none"
+                                            maxWidth="16rem"
                                             ref={(node): void => node?.focus()}
+                                            size="sm"
                                             title="Rename Profile"
                                             value={renameValue}
                                             onChange={(e): void => {
@@ -276,7 +280,7 @@ const BlockProfilesView = ({
                                         }}
                                     />
                                     <IconButton
-                                        className="text-destructive hover:bg-destructive/10"
+                                        className="text-danger hover:bg-danger/10"
                                         disabled={profiles.length <= 1}
                                         icon={Trash2}
                                         size="sm"
@@ -322,7 +326,7 @@ const BlockProfilesView = ({
                                                                     flag) ===
                                                                 flag;
                                                             return (
-                                                                <button
+                                                                <Pressable
                                                                     className={cn(
                                                                         'group flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition-all duration-200',
                                                                         isActive
@@ -330,7 +334,6 @@ const BlockProfilesView = ({
                                                                             : 'border-transparent bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground',
                                                                     )}
                                                                     key={flag}
-                                                                    type="button"
                                                                     onClick={(): void => {
                                                                         handleToggleFlag(
                                                                             profile.id,
@@ -371,7 +374,7 @@ const BlockProfilesView = ({
                                                                             <Box className="h-1.5 w-1.5 rounded-full bg-white" />
                                                                         ) : null}
                                                                     </Box>
-                                                                </button>
+                                                                </Pressable>
                                                             );
                                                         },
                                                     )}
@@ -380,9 +383,9 @@ const BlockProfilesView = ({
                                         ))}
                                     </Box>
 
-                                    <Box className="border-destructive/20 bg-destructive/5 mt-4 rounded border p-3">
+                                    <Box className="mt-4 rounded border border-danger/20 bg-danger/5 p-3">
                                         <Text
-                                            className="text-destructive/80 leading-relaxed"
+                                            className="leading-relaxed text-danger/80"
                                             size="xs"
                                         >
                                             Modifying these flags will
@@ -439,30 +442,26 @@ export const BlockingSettings = () => {
                     </Text>
 
                     <Box className="relative w-64">
-                        <Search
-                            className="absolute top-1/2 left-3 -translate-y-1/2 text-[var(--settings-search-icon)]"
-                            size={14}
-                        />
-                        <input
+                        <Input
                             aria-label="Search blocked users"
-                            className="w-full rounded-md border border-[var(--settings-search-border)] bg-[var(--settings-search-bg)] py-1.5 pr-3 pl-9 text-xs text-foreground transition outline-none placeholder:text-[var(--settings-search-placeholder)] focus:border-primary/50 focus:bg-[var(--settings-search-bg-focus)]"
+                            icon={<Search size={14} />}
                             placeholder="Search blocked users..."
+                            size="sm"
                             value={searchQuery}
                             onChange={(e): void => {
                                 setSearchQuery(e.target.value);
                             }}
                         />
                         {searchQuery === '' ? null : (
-                            <button
+                            <Pressable
                                 aria-label="Clear search"
                                 className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--settings-search-icon)] hover:text-foreground"
-                                type="button"
                                 onClick={(): void => {
                                     setSearchQuery('');
                                 }}
                             >
                                 <X size={12} />
-                            </button>
+                            </Pressable>
                         )}
                     </Box>
                 </Box>
@@ -515,11 +514,12 @@ export const BlockingSettings = () => {
                                             userId={block.targetUserId}
                                         />
                                         <Box className="flex items-center gap-3">
-                                            <select
+                                            <Select
                                                 aria-label={`Assigned block profile for ${block.targetUsername}`}
-                                                className="rounded-md border border-[var(--settings-edit-control-border)] bg-[var(--settings-edit-control-bg)] px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
+                                                size="sm"
                                                 title="Assigned Block Profile"
                                                 value={block.profileId}
+                                                wrapperClassName="w-auto"
                                                 onChange={(e): void => {
                                                     upsertBlock({
                                                         targetUserId:
@@ -537,10 +537,10 @@ export const BlockingSettings = () => {
                                                         {p.name}
                                                     </option>
                                                 ))}
-                                            </select>
+                                            </Select>
 
                                             <IconButton
-                                                className="text-destructive hover:bg-destructive/10"
+                                                className="text-danger hover:bg-danger/10"
                                                 icon={UserMinus}
                                                 size="sm"
                                                 title="Unblock"

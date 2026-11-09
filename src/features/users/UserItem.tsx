@@ -1020,7 +1020,7 @@ const UserItemInner = React.memo(
                                 ? 'bg-bg-subtle text-foreground'
                                 : hasUnread
                                   ? 'bg-bg-subtle/40 font-medium text-foreground'
-                                  : 'text-foreground-muted',
+                                  : 'text-muted-foreground',
                             className,
                         )}
                         ref={itemRef}
@@ -1099,7 +1099,7 @@ const UserItemInner = React.memo(
                                         </span>
                                     ) : null}
                                     {presenceCustomText ? (
-                                        <span className="text-foreground-muted min-w-0 flex-1 truncate text-xs">
+                                        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
                                             {presenceCustomText}
                                         </span>
                                     ) : null}
@@ -1122,13 +1122,13 @@ const UserItemInner = React.memo(
                                 <>
                                     {userVoiceState?.isMuted ? (
                                         <MicOff
-                                            className="text-destructive"
+                                            className="text-danger"
                                             size={14}
                                         />
                                     ) : null}
                                     {userVoiceState?.isDeafened ? (
                                         <HeadphoneOff
-                                            className="text-destructive"
+                                            className="text-danger"
                                             size={14}
                                         />
                                     ) : null}

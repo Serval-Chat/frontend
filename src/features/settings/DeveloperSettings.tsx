@@ -11,6 +11,8 @@ import { toggleThemeTweaker } from '@/store/slices/themeTweakerSlice';
 import { Button } from '@/ui/primitives/Button';
 import { CopyInput } from '@/ui/primitives/CopyInput';
 import { Heading } from '@/ui/primitives/Heading';
+import { Link } from '@/ui/primitives/Link';
+import { Text } from '@/ui/primitives/Text';
 import { Toggle } from '@/ui/primitives/Toggle';
 import { colors } from '@/ui/theme';
 import { getAuthToken } from '@/utils/authToken';
@@ -58,18 +60,18 @@ export const DeveloperSettings = () => {
                 <Heading level={2} variant="section">
                     Developer Parameters
                 </Heading>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <Text as="p" className="mt-1" size="sm" variant="muted">
                     (Not) Advanced debugging tools and logs.
-                </p>
+                </Text>
             </div>
 
             {import.meta.env.DEV && (
-                <a
-                    className="rounded-md border border-border-subtle bg-bg-subtle p-4 text-sm font-semibold text-primary hover:bg-bg-secondary"
+                <Link
+                    className="rounded-md border border-border-subtle bg-bg-subtle p-4 text-sm font-semibold hover:bg-bg-secondary"
                     href="/wcag-reporter"
                 >
                     Open WCAG Reporter
-                </a>
+                </Link>
             )}
 
             <div className="flex flex-col gap-4">
@@ -80,9 +82,9 @@ export const DeveloperSettings = () => {
                                 <Server size={18} />
                                 Backend Instance
                             </div>
-                            <span className="text-sm text-muted-foreground">
+                            <Text size="sm" variant="muted">
                                 Instance serving your current connection.
-                            </span>
+                            </Text>
                         </div>
                         <CopyInput
                             readOnly
@@ -106,11 +108,11 @@ export const DeveloperSettings = () => {
                             <KeyRound size={18} />
                             User Token
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Your session token in case you use a custom client.
                             Do not share this ANYWHERE and do not send it to
                             anyone.
-                        </span>
+                        </Text>
                     </div>
                     <CopyInput
                         readOnly
@@ -132,9 +134,9 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             WebSocket Logger
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Open floating window to vuew all real-time events.
-                        </span>
+                        </Text>
                     </div>
                     <Button
                         variant={isWsWindowOpen ? 'danger' : 'primary'}
@@ -152,10 +154,10 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             Serval Fur Tweaker
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Adjust procedural fur pattern parameters in
                             real-time.
-                        </span>
+                        </Text>
                     </div>
                     <Button
                         variant={isFurTweakerOpen ? 'danger' : 'primary'}
@@ -174,9 +176,9 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             Theme Switcher
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Switch themes without having to open settings.
-                        </span>
+                        </Text>
                     </div>
                     <Button
                         variant={isThemeTweakerOpen ? 'danger' : 'primary'}
@@ -195,9 +197,9 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             Console
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Open a Windows NT styled console window.
-                        </span>
+                        </Text>
                     </div>
                     <Button
                         variant={isConsoleOpen ? 'danger' : 'primary'}
@@ -216,10 +218,10 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             Enable username color resolver context menu
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Adds a username context menu item that shows color,
                             glow, input data, and resolver order.
-                        </span>
+                        </Text>
                     </div>
                     <Toggle
                         checked={usernameColorResolverContextMenu}
@@ -236,11 +238,11 @@ export const DeveloperSettings = () => {
                             <Bug size={18} />
                             Crash Frontend
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <Text size="sm" variant="muted">
                             Unsafely throws an uncaught browser error for
                             telemetry testing (oh btw the said teletry isnt
                             connected anywhere).
-                        </span>
+                        </Text>
                     </div>
                     <Button
                         variant="danger"

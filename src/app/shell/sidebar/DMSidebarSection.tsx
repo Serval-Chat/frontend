@@ -18,7 +18,7 @@ export const DMSidebarSection = ({ friend, me }: DMSidebarSectionProps) => {
 
     return (
         <div className="min-w-0 space-y-4">
-            <div className="text-foreground-muted truncate px-1 text-xs font-semibold tracking-wider uppercase">
+            <div className="truncate px-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Direct Message
             </div>
             <div className="min-w-0 space-y-0">

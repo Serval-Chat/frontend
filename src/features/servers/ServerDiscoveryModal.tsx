@@ -15,6 +15,7 @@ import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 
@@ -207,16 +208,15 @@ export const ServerDiscoveryModal = ({
                                 }}
                             />
                             {search === '' ? null : (
-                                <button
+                                <Pressable
                                     aria-label="Clear search"
                                     className="absolute top-1/2 right-3 rounded p-1 text-muted-foreground hover:bg-bg-secondary hover:text-foreground"
-                                    type="button"
                                     onClick={(): void => {
                                         setSearch('');
                                     }}
                                 >
                                     <X size={16} />
-                                </button>
+                                </Pressable>
                             )}
                         </div>
 
@@ -225,21 +225,20 @@ export const ServerDiscoveryModal = ({
                                 {visibleTags.map((tag) => {
                                     const selected = selectedTags.includes(tag);
                                     return (
-                                        <button
+                                        <Pressable
                                             className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-bold transition-colors ${
                                                 selected
                                                     ? 'border-primary bg-primary text-foreground-inverse'
                                                     : 'border-border-subtle bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground'
                                             }`}
                                             key={tag}
-                                            type="button"
                                             onClick={(): void => {
                                                 toggleTag(tag);
                                             }}
                                         >
                                             <Tag size={12} />
                                             {tag}
-                                        </button>
+                                        </Pressable>
                                     );
                                 })}
                             </div>
@@ -374,16 +373,15 @@ const DiscoveryServerCard = ({
 
                 <div className="flex flex-wrap gap-1.5">
                     {server.tags.map((tag) => (
-                        <button
+                        <Pressable
                             className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary hover:bg-primary/20"
                             key={tag}
-                            type="button"
                             onClick={(): void => {
                                 onTagClick(tag);
                             }}
                         >
                             {tag}
-                        </button>
+                        </Pressable>
                     ))}
                 </div>
 

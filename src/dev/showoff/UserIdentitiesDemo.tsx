@@ -77,7 +77,7 @@ export const UserIdentitiesDemo = () => (
                         status="online"
                         username="Small"
                     />
-                    <span className="text-foreground-muted text-xs">
+                    <span className="text-xs text-muted-foreground">
                         sm (32px)
                     </span>
                 </div>
@@ -88,7 +88,7 @@ export const UserIdentitiesDemo = () => (
                         status="offline"
                         username="Medium"
                     />
-                    <span className="text-foreground-muted text-xs">
+                    <span className="text-xs text-muted-foreground">
                         md (40px)
                     </span>
                 </div>
@@ -99,7 +99,7 @@ export const UserIdentitiesDemo = () => (
                         status="online"
                         username="Large"
                     />
-                    <span className="text-foreground-muted text-xs">
+                    <span className="text-xs text-muted-foreground">
                         lg (48px)
                     </span>
                 </div>
@@ -120,7 +120,7 @@ export const UserIdentitiesDemo = () => (
         <DemoItem id="styled-usernames" title="Styled Usernames">
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2">
-                    <span className="text-foreground-muted w-24 text-sm">
+                    <span className="w-24 text-sm text-muted-foreground">
                         Default:
                     </span>
                     <StyledUserName user={mockUsers.normal}>
@@ -128,7 +128,7 @@ export const UserIdentitiesDemo = () => (
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-foreground-muted w-24 text-sm">
+                    <span className="w-24 text-sm text-muted-foreground">
                         Glow:
                     </span>
                     <StyledUserName user={mockUsers.glowing}>
@@ -136,7 +136,7 @@ export const UserIdentitiesDemo = () => (
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-foreground-muted w-24 text-sm">
+                    <span className="w-24 text-sm text-muted-foreground">
                         Gradient:
                     </span>
                     <StyledUserName user={mockUsers.gradient}>
@@ -144,7 +144,7 @@ export const UserIdentitiesDemo = () => (
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-foreground-muted w-24 text-sm">
+                    <span className="w-24 text-sm text-muted-foreground">
                         The Full Lux:
                     </span>
                     <StyledUserName user={mockUsers.fancy}>
@@ -158,7 +158,7 @@ export const UserIdentitiesDemo = () => (
             <div className="flex flex-col gap-4">
                 {ALL_FONTS.map((font) => (
                     <div className="flex items-center gap-2" key={font}>
-                        <span className="text-foreground-muted w-32 text-sm">
+                        <span className="w-32 text-sm text-muted-foreground">
                             {font}:
                         </span>
                         <StyledUserName

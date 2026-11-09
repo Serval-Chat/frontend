@@ -148,7 +148,7 @@ export const AutocompleteSuggestion = ({
                     <Box
                         className={`
                             flex cursor-pointer items-center gap-3 rounded-md px-3 py-1.5 transition-colors max-md:py-2.5
-                            ${index === selectedIndex ? 'text-primary-foreground bg-primary/15' : 'hover:bg-white/5'}
+                            ${index === selectedIndex ? 'bg-primary/15 text-foreground' : 'hover:bg-white/5'}
                         `}
                         key={getSuggestionKey(suggestion)}
                         onMouseDown={(e: React.MouseEvent): void => {

@@ -4,6 +4,7 @@ import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';
+import { Text } from '@/ui/primitives/Text';
 
 interface RenameFolderModalProps {
     isOpen: boolean;
@@ -46,12 +47,13 @@ export const RenameFolderModal = ({
             <form onSubmit={handleSubmit}>
                 <Box className="flex flex-col gap-4">
                     <Box className="flex flex-col gap-1.5">
-                        <label
+                        <Text
+                            as="label"
                             className="text-[10px] font-bold tracking-wider text-text-muted uppercase"
                             htmlFor="folder-name"
                         >
                             Folder Name
-                        </label>
+                        </Text>
                         <Input
                             id="folder-name"
                             placeholder="Enter folder name"

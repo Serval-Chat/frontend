@@ -35,8 +35,12 @@ const Stat = ({
     value: number;
 }): React.ReactElement => (
     <div className="flex flex-col items-center rounded-md bg-bg-secondary px-3 py-2">
-        <span className="text-lg font-bold tabular-nums">{value}</span>
-        <span className="text-xs opacity-70">{label}</span>
+        <Text className="tabular-nums" size="lg" weight="bold">
+            {value}
+        </Text>
+        <Text className="opacity-70" size="xs">
+            {label}
+        </Text>
     </div>
 );
 
@@ -96,22 +100,27 @@ export const PingDebugModal = ({
         >
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                    <span className="text-xs font-semibold uppercase opacity-60">
+                    <Text
+                        className="opacity-60"
+                        size="xs"
+                        transform="uppercase"
+                        weight="semibold"
+                    >
                         Unread
-                    </span>
+                    </Text>
                     <div className="flex flex-wrap items-center gap-2">
-                        <span
+                        <Text
                             className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
                                 unreadStatus?.hasUnread
-                                    ? 'bg-warning/10 text-warning'
+                                    ? 'bg-caution/10 text-caution'
                                     : 'bg-bg-secondary opacity-70'
                             }`}
                         >
                             {unreadStatus?.hasUnread ? 'UNREAD' : 'read'}
-                        </span>
-                        <span className="text-xs opacity-70">
+                        </Text>
+                        <Text className="opacity-70" size="xs">
                             pill tracks messages, pings track mentions only
-                        </span>
+                        </Text>
                     </div>
                     {isActive ? (
                         <Text className="text-xs opacity-60">
@@ -131,42 +140,50 @@ export const PingDebugModal = ({
                                         className="flex items-baseline gap-2 rounded-md border border-divider px-3 py-2 text-xs"
                                         key={row.id}
                                     >
-                                        <span className="w-28 shrink-0 truncate font-medium">
+                                        <Text
+                                            className="w-28 shrink-0 truncate"
+                                            weight="medium"
+                                        >
                                             #{row.name}
-                                        </span>
-                                        <span className="flex-1 truncate opacity-70">
+                                        </Text>
+                                        <Text className="flex-1 truncate opacity-70">
                                             msg{' '}
                                             {formatTimeAgo(row.lastMessageAt)}
-                                        </span>
-                                        <span className="flex-1 truncate opacity-70">
+                                        </Text>
+                                        <Text className="flex-1 truncate opacity-70">
                                             read {formatTimeAgo(row.lastReadAt)}
-                                        </span>
-                                        <span
+                                        </Text>
+                                        <Text
                                             className={
                                                 row.unread
-                                                    ? 'text-warning shrink-0 font-bold'
+                                                    ? 'shrink-0 font-bold text-caution'
                                                     : 'shrink-0 opacity-40'
                                             }
                                         >
                                             {row.unread ? 'UNREAD' : '-'}
-                                        </span>
+                                        </Text>
                                     </div>
                                 ),
                             )}
                         </div>
                     )}
                     <div className="flex flex-wrap gap-3 text-xs opacity-70">
-                        <span>
+                        <Text>
                             last unread sync {formatTimeAgo(lastSyncAt)}
-                        </span>
-                        <span>WS: {status}</span>
+                        </Text>
+                        <Text>WS: {status}</Text>
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2 border-t border-divider pt-3">
-                    <span className="text-xs font-semibold uppercase opacity-60">
+                    <Text
+                        className="opacity-60"
+                        size="xs"
+                        transform="uppercase"
+                        weight="semibold"
+                    >
                         Pings
-                    </span>
+                    </Text>
                     <div className="flex items-end gap-2">
                         <Stat label="Badge" value={report.badgeCount} />
                         <Stat label="In list" value={report.listCount} />
@@ -175,7 +192,7 @@ export const PingDebugModal = ({
                 </div>
 
                 {report.mismatch ? (
-                    <Text className="text-warning">
+                    <Text className="text-caution">
                         Badge and list disagree ({report.badgeCount} vs{' '}
                         {report.listCount}). The badge is maintained live by
                         WebSocket events; the list is the last REST fetch of{' '}
@@ -201,23 +218,32 @@ export const PingDebugModal = ({
                                     key={row.id}
                                 >
                                     <div className="flex items-baseline justify-between gap-2">
-                                        <span className="truncate font-mono text-xs">
+                                        <Text
+                                            className="truncate font-mono"
+                                            size="xs"
+                                        >
                                             {row.id}
-                                        </span>
-                                        <span className="shrink-0 text-xs opacity-70">
+                                        </Text>
+                                        <Text
+                                            className="shrink-0 opacity-70"
+                                            size="xs"
+                                        >
                                             {formatAge(row.ageMs)} ago
-                                        </span>
+                                        </Text>
                                     </div>
                                     <div className="flex items-baseline gap-2 text-xs">
-                                        <span className="shrink-0 rounded bg-bg-secondary px-1.5 py-0.5 font-mono">
+                                        <Text className="shrink-0 rounded bg-bg-secondary px-1.5 py-0.5 font-mono">
                                             {row.channelId ?? 'DM'}
-                                        </span>
-                                        <span className="shrink-0 font-medium">
+                                        </Text>
+                                        <Text
+                                            className="shrink-0"
+                                            weight="medium"
+                                        >
                                             {row.sender}
-                                        </span>
-                                        <span className="truncate opacity-80">
+                                        </Text>
+                                        <Text className="truncate opacity-80">
                                             {row.detail}
-                                        </span>
+                                        </Text>
                                     </div>
                                 </div>
                             ),

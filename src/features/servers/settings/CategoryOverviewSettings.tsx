@@ -10,6 +10,7 @@ import type { Category } from '@/api/servers/servers.types';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { Text } from '@/ui/primitives/Text';
@@ -84,12 +85,7 @@ export const CategoryOverviewSettings = ({
 
             <div className="space-y-8">
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="category-name"
-                    >
-                        Category Name
-                    </label>
+                    <Label htmlFor="category-name">Category Name</Label>
                     <Input
                         id="category-name"
                         placeholder="new-category"
@@ -104,7 +100,11 @@ export const CategoryOverviewSettings = ({
             {/* Danger Zone */}
             <div className="space-y-6 pt-10">
                 <div className="border-b border-border-subtle pb-4">
-                    <Heading className="text-error" level={2} variant="section">
+                    <Heading
+                        className="text-danger"
+                        level={2}
+                        variant="section"
+                    >
                         Danger Zone
                     </Heading>
                 </div>
@@ -152,11 +152,11 @@ export const CategoryOverviewSettings = ({
                 }}
             >
                 <div className="space-y-6">
-                    <div className="border-status-error bg-status-error-bg text-status-error rounded-md border p-4 text-sm">
+                    <div className="rounded-md border border-danger bg-danger-muted p-4 text-sm text-danger">
                         Are you sure you want to delete{' '}
-                        <span className="font-bold">{category.name}</span>?
-                        Channels within this category will not be deleted, but
-                        will become uncategorized. This action cannot be undone.
+                        <Text weight="bold">{category.name}</Text>? Channels
+                        within this category will not be deleted, but will
+                        become uncategorized. This action cannot be undone.
                     </div>
                     <div className="-mx-6 -mb-6 flex justify-end gap-3 bg-bg-secondary p-6 pt-4">
                         <Button

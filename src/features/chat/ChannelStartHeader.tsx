@@ -39,7 +39,7 @@ export const ChannelStartHeader = ({
                 <Text className="text-2xl font-bold text-foreground md:text-3xl">
                     {displayName}
                 </Text>
-                <Text className="text-foreground-muted mt-1 text-sm">
+                <Text className="mt-1 text-sm text-muted-foreground">
                     This is the start of your direct message history with{' '}
                     <span className="font-semibold text-foreground">
                         {displayName}
@@ -69,7 +69,7 @@ export const ChannelStartHeader = ({
                     Welcome to {prefix}
                     {channel.name}!
                 </Text>
-                <Text className="text-foreground-muted mt-1 text-sm">
+                <Text className="mt-1 text-sm text-muted-foreground">
                     This is the start of the{' '}
                     <span className="font-semibold text-foreground">
                         {prefix}

@@ -7,6 +7,7 @@ import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Pill } from '@/ui/primitives/Pill';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 
@@ -150,15 +151,14 @@ export const TwoFactorSettings = ({
                                     }}
                                 />
                                 <div className="flex items-center justify-between">
-                                    <button
+                                    <Pressable
                                         className="text-xs text-primary hover:underline"
-                                        type="button"
                                         onClick={toggleDisableBackupInput}
                                     >
                                         {showDisableBackupInput
                                             ? 'Use authenticator code'
                                             : 'Use backup code'}
-                                    </button>
+                                    </Pressable>
                                     <Button
                                         loading={isConfirmLoading}
                                         size="sm"
@@ -196,13 +196,12 @@ export const TwoFactorSettings = ({
                         </div>
                         <Text size="xs" variant="muted">
                             If scanning fails,{' '}
-                            <button
+                            <Pressable
                                 className="font-medium text-primary hover:underline"
-                                type="button"
                                 onClick={handleCopySetupUri}
                             >
                                 copy the setup URI
-                            </button>{' '}
+                            </Pressable>{' '}
                             into your authenticator app instead.
                         </Text>
                         <div className="flex gap-2">

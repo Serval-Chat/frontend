@@ -97,14 +97,14 @@ const AwaitingReviewRow = ({
                         'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase',
                         server.verified
                             ? 'bg-primary/10 text-primary'
-                            : 'bg-bg-tertiary text-muted-foreground',
+                            : 'bg-bg-secondary text-muted-foreground',
                     )}
                 >
                     {server.verified ? 'Yes' : 'No'}
                 </div>
                 {server.verificationOverride !== null &&
                 server.verificationOverride !== undefined ? (
-                    <div className="bg-warning/10 text-warning inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+                    <div className="inline-flex rounded-full bg-caution/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-caution uppercase">
                         Override
                     </div>
                 ) : null}
@@ -239,7 +239,7 @@ export const AdminAwaitingReview = ({
                     level={2}
                     variant="admin-page"
                 >
-                    <BadgeCheck className="text-warning" />
+                    <BadgeCheck className="text-caution" />
                     Eligibility Requests
                 </Heading>
                 <Text as="p" variant="muted">

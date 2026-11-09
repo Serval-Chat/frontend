@@ -6,6 +6,8 @@ import { useServerDiscoveryStatus } from '@/api/servers/servers.queries';
 import { Button } from '@/ui/primitives/Button';
 import { CalloutBox } from '@/ui/primitives/CalloutBox';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { TextArea } from '@/ui/primitives/TextArea';
 import { Toggle } from '@/ui/primitives/Toggle';
@@ -83,12 +85,7 @@ export const ServerInfoSection = ({
     return (
         <div className="flex-1 space-y-8">
             <div className="space-y-2">
-                <label
-                    className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                    htmlFor="serverName"
-                >
-                    Server Name
-                </label>
+                <Label htmlFor="serverName">Server Name</Label>
                 <Input
                     id="serverName"
                     placeholder="Enter server name"
@@ -101,12 +98,9 @@ export const ServerInfoSection = ({
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="serverDescription"
-                    >
+                    <Label htmlFor="serverDescription">
                         Server Description
-                    </label>
+                    </Label>
                     <Text size="2xs" variant="muted" weight="bold">
                         {description.length}/500
                     </Text>
@@ -125,12 +119,7 @@ export const ServerInfoSection = ({
 
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="serverTags"
-                    >
-                        Server Tags
-                    </label>
+                    <Label htmlFor="serverTags">Server Tags</Label>
                     <Text size="2xs" variant="muted" weight="bold">
                         {tags.length}/8 Tags
                     </Text>
@@ -172,16 +161,15 @@ export const ServerInfoSection = ({
                             >
                                 <Tag className="opacity-60" size={12} />
                                 {tag}
-                                <button
+                                <Pressable
                                     aria-label={`Remove tag ${tag}`}
                                     className="rounded-full p-1 opacity-60 transition hover:bg-primary/20 hover:opacity-100"
-                                    type="button"
                                     onClick={(): void => {
                                         onRemoveTag(tag);
                                     }}
                                 >
                                     <X size={12} />
-                                </button>
+                                </Pressable>
                             </div>
                         ))}
                         {tags.length === 0 ? (

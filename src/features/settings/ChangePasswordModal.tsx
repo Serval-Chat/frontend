@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useChangePassword } from '@/api/auth/auth.queries';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';
 import { Text } from '@/ui/primitives/Text';
@@ -84,12 +85,9 @@ export const ChangePasswordModal = ({
             <form className="space-y-6" onSubmit={handleSubmit}>
                 <Box className="space-y-4">
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="current-password"
-                        >
+                        <Label htmlFor="current-password">
                             Current Password
-                        </label>
+                        </Label>
                         <PasswordInput
                             autoComplete="current-password"
                             id="current-password"
@@ -100,19 +98,14 @@ export const ChangePasswordModal = ({
                             }}
                         />
                         {errors.current ? (
-                            <Text className="text-status-error" size="xs">
+                            <Text className="text-danger" size="xs">
                                 {errors.current}
                             </Text>
                         ) : null}
                     </Box>
 
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="new-password"
-                        >
-                            New Password
-                        </label>
+                        <Label htmlFor="new-password">New Password</Label>
                         <PasswordInput
                             autoComplete="new-password"
                             id="new-password"
@@ -123,19 +116,16 @@ export const ChangePasswordModal = ({
                             }}
                         />
                         {errors.new ? (
-                            <Text className="text-status-error" size="xs">
+                            <Text className="text-danger" size="xs">
                                 {errors.new}
                             </Text>
                         ) : null}
                     </Box>
 
                     <Box className="space-y-2">
-                        <label
-                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                            htmlFor="confirm-password"
-                        >
+                        <Label htmlFor="confirm-password">
                             Confirm New Password
-                        </label>
+                        </Label>
                         <PasswordInput
                             autoComplete="new-password"
                             id="confirm-password"
@@ -146,7 +136,7 @@ export const ChangePasswordModal = ({
                             }}
                         />
                         {errors.confirm ? (
-                            <Text className="text-status-error" size="xs">
+                            <Text className="text-danger" size="xs">
                                 {errors.confirm}
                             </Text>
                         ) : null}

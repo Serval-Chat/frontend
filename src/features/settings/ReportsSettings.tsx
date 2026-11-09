@@ -1,6 +1,7 @@
 import type { ReportStatus } from '@/api/reports/reports.api';
 import { ReportIdCopy } from '@/features/moderation/ReportIdCopy';
 import { useMyReports } from '@/hooks/useReports';
+import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Text } from '@/ui/primitives/Text';
 
@@ -23,7 +24,9 @@ export const ReportsSettings = () => {
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h2 className="text-lg font-semibold">My Reports</h2>
+                <Heading className="mb-0" level={2} variant="sub">
+                    My Reports
+                </Heading>
                 <Text as="p" size="sm" variant="muted">
                     Check the current status of reports you submitted.
                 </Text>
@@ -35,7 +38,7 @@ export const ReportsSettings = () => {
                         key={report.id}
                     >
                         <div className="flex items-center justify-between gap-3">
-                            <span className="font-medium">
+                            <Text weight="medium">
                                 {report.targetType === 'message'
                                     ? 'Message report'
                                     : 'User report'}{' '}
@@ -48,12 +51,12 @@ export const ReportsSettings = () => {
                                 ]
                                     .filter(Boolean)
                                     .join(' · ')}
-                            </span>
-                            <span
+                            </Text>
+                            <Text
                                 className={`rounded-full border px-2 py-1 text-xs capitalize ${STATUS_STYLES[report.status]}`}
                             >
                                 {report.status}
-                            </span>
+                            </Text>
                         </div>
                         <Text as="p" className="mt-2" size="xs" variant="muted">
                             Submitted{' '}

@@ -19,8 +19,11 @@ import { ImageCropModal } from '@/features/settings/ImageCropModal';
 import { useBulkAssetUpload } from '@/hooks/useBulkAssetUpload';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { Button } from '@/ui/primitives/Button';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { WsEvents } from '@/ws';
@@ -203,12 +206,7 @@ export const ServerStickerSettings = ({
 
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="sticker-name"
-                    >
-                        Sticker Name
-                    </label>
+                    <Label htmlFor="sticker-name">Sticker Name</Label>
                     <Input
                         id="sticker-name"
                         maxLength={STICKER_NAME_MAX_LENGTH}
@@ -223,20 +221,16 @@ export const ServerStickerSettings = ({
                     </Text>
                 </div>
 
-                <input
+                <FileInput
                     accept="image/png,image/jpeg,image/gif,image/webp"
                     aria-label="Upload sticker image"
-                    className="hidden"
                     ref={fileInputRef}
-                    type="file"
                     onChange={handleFileSelect}
                 />
-                <input
+                <FileInput
                     accept=".zip,application/zip"
                     aria-label="Upload sticker archive"
-                    className="hidden"
                     ref={bulkFileInputRef}
-                    type="file"
                     onChange={(e): undefined => void handleBulkFileSelect(e)}
                 />
 
@@ -247,12 +241,11 @@ export const ServerStickerSettings = ({
                 ) : (
                     <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                         {/* Upload Box */}
-                        <button
+                        <Pressable
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={
                                 isUploading || isBulkUploading || !stickerName
                             }
-                            type="button"
                             onClick={handleUploadClick}
                         >
                             {isUploading ? (
@@ -270,13 +263,12 @@ export const ServerStickerSettings = ({
                                     </Text>
                                 </>
                             )}
-                        </button>
+                        </Pressable>
 
                         {/* Bulk Upload Box */}
-                        <button
+                        <Pressable
                             className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border-subtle p-3 transition hover:border-primary hover:bg-bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isUploading || isBulkUploading}
-                            type="button"
                             onClick={(): void | undefined =>
                                 bulkFileInputRef.current?.click()
                             }
@@ -296,7 +288,7 @@ export const ServerStickerSettings = ({
                                     </Text>
                                 </>
                             )}
-                        </button>
+                        </Pressable>
 
                         {/* Sticker Grid */}
                         {stickers.map((sticker) => (

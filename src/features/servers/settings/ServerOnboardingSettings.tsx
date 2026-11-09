@@ -21,6 +21,7 @@ import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { Text } from '@/ui/primitives/Text';
 import { TextArea } from '@/ui/primitives/TextArea';
@@ -78,22 +79,21 @@ const RoleSelectGrid = ({
             {selectableRoles.map((role) => {
                 const isSelected = selected.has(role.id);
                 return (
-                    <button
+                    <Pressable
                         className={cn(
                             'flex w-full flex-col gap-1.5 rounded-xl border px-4 py-3 text-left transition-all duration-200',
                             isSelected
                                 ? 'border-primary bg-primary/10'
-                                : 'hover:border-border border-border-subtle bg-bg-subtle hover:bg-bg-secondary/60',
+                                : 'border-border-subtle bg-bg-subtle hover:border-border-subtle hover:bg-bg-secondary/60',
                         )}
                         key={role.id}
-                        type="button"
                         onClick={(): void => {
                             toggleRole(role.id);
                         }}
                     >
                         <div className="flex items-center gap-2">
                             <RoleDot role={role} />
-                            <span
+                            <Text
                                 className={cn(
                                     'truncate text-sm font-medium',
                                     isSelected
@@ -102,10 +102,11 @@ const RoleSelectGrid = ({
                                 )}
                             >
                                 {role.name}
-                            </span>
+                            </Text>
                         </div>
                         {role.description ? (
-                            <p
+                            <Text
+                                as="p"
                                 className={cn(
                                     'line-clamp-2 text-xs leading-relaxed',
                                     isSelected
@@ -114,9 +115,9 @@ const RoleSelectGrid = ({
                                 )}
                             >
                                 {role.description}
-                            </p>
+                            </Text>
                         ) : null}
-                    </button>
+                    </Pressable>
                 );
             })}
         </div>
@@ -210,9 +211,9 @@ const WelcomeChannelGrid = ({
                                     }}
                                 >
                                     {channelIcon(channel)}
-                                    <span className="truncate">
+                                    <Text className="truncate">
                                         {channel.name}
-                                    </span>
+                                    </Text>
                                 </Button>
                             );
                         })}
@@ -467,9 +468,9 @@ export const ServerOnboardingSettings = ({
                     <Text as="p" weight="semibold">
                         Server Guidelines (Rules)
                     </Text>
-                    <span className="text-xs text-muted-foreground">
+                    <Text size="xs" variant="muted">
                         {rules.length} rule{rules.length === 1 ? null : 's'}
-                    </span>
+                    </Text>
                 </div>
 
                 {rules.length === 0 ? (
@@ -486,9 +487,14 @@ export const ServerOnboardingSettings = ({
                                 className="flex items-center gap-3 p-3 transition-colors hover:bg-white/5"
                                 key={`rule-${rule}`}
                             >
-                                <span className="flex h-6 w-6 shrink-0 items-center justify-center text-base font-bold text-muted-foreground">
+                                <Text
+                                    className="flex h-6 w-6 shrink-0 items-center justify-center"
+                                    size="base"
+                                    variant="muted"
+                                    weight="bold"
+                                >
                                     {idx + 1}
-                                </span>
+                                </Text>
                                 <div className="flex-1">
                                     <TextArea
                                         autoResize

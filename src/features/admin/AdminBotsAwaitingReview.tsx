@@ -135,7 +135,7 @@ export const AdminBotsAwaitingReview = (): ReactNode => {
                     level={2}
                     variant="admin-page"
                 >
-                    <BadgeCheck className="text-warning" />
+                    <BadgeCheck className="text-caution" />
                     Bot Verification Requests
                 </Heading>
                 <Text as="p" variant="muted">
@@ -165,7 +165,7 @@ export const AdminBotsAwaitingReview = (): ReactNode => {
                         <TableRow>
                             <TableCell align="center" colSpan={4}>
                                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                                    <Text className="text-destructive" weight="medium">
+                                    <Text className="text-danger" weight="medium">
                                         Failed to load verification requests.
                                     </Text>
                                     <Text

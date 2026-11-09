@@ -10,6 +10,7 @@ import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
 
 import { UsernameGradientSection } from './UsernameGradientSection';
+import { Text } from '@/ui/primitives/Text';
 
 type ActivePicker = {
     type: 'glow' | 'gradient' | 'profilePrimary' | 'profileAccent';
@@ -146,9 +147,9 @@ export const UsernameStylePicker = ({
     return (
         <div className={cn('min-w-0 space-y-4', className)}>
             <div className="rounded-lg border border-border-subtle bg-bg-subtle p-4 text-center">
-                <span className="mb-2 block text-sm font-bold text-muted-foreground uppercase">
+                <Text className="mb-2 block" size="sm" transform="uppercase" variant="muted" weight="bold">
                     Preview
-                </span>
+                </Text>
                 <StyledUserName
                     className="text-lg font-bold"
                     user={previewUser}

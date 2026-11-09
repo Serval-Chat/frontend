@@ -694,7 +694,7 @@ export const MessagesList = React.memo(
                             <LoadingSpinner size="sm" />
                         ) : (
                             <Button
-                                className="text-foreground-muted border-none bg-transparent text-xs shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
+                                className="border-none bg-transparent text-xs text-muted-foreground shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
                                 size="sm"
                                 variant="ghost"
                                 onClick={onLoadMore}
@@ -768,7 +768,7 @@ export const MessagesList = React.memo(
                 return (
                     <Box className="my-1 px-4 py-2">
                         <Box
-                            className="text-foreground-muted flex cursor-pointer items-center gap-2 text-xs font-medium transition-colors hover:text-foreground"
+                            className="flex cursor-pointer items-center gap-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                             onClick={(): void => {
                                 toggleGroup(item.id);
                             }}
@@ -866,7 +866,7 @@ export const MessagesList = React.memo(
                             <LoadingSpinner size="sm" />
                         ) : (
                             <Button
-                                className="text-foreground-muted border-none bg-transparent text-xs shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
+                                className="border-none bg-transparent text-xs text-muted-foreground shadow-none transition-colors hover:bg-bg-subtle hover:text-foreground"
                                 size="sm"
                                 variant="ghost"
                                 onClick={onLoadMoreNewer}

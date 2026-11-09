@@ -120,6 +120,23 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/features/*', '@/app/*', '@/pages/*'],
+              message:
+                'src/ui is the design system: it must not depend on features, the app shell or pages.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

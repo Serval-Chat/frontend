@@ -1,5 +1,6 @@
 import type { Role } from '@/api/servers/servers.types';
 import { Button } from '@/ui/primitives/Button';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 import { RoleColorDot } from './RoleColorDot';
@@ -28,7 +29,7 @@ export const RoleListItem = ({
     >
         <div className="flex items-center gap-2 truncate">
             <RoleColorDot role={role} />
-            <span className="truncate">{role.name}</span>
+            <Text className="truncate">{role.name}</Text>
         </div>
     </Button>
 );

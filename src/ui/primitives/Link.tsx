@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
-import { ConfirmLinkModal } from '@/features/messages/ConfirmLinkModal';
+import { ConfirmLinkModal } from '@/ui/primitives/ConfirmLinkModal';
 import { colors } from '@/ui/theme';
 import { cn } from '@/utils/cn';
 

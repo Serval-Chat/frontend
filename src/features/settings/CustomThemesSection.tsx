@@ -3,7 +3,12 @@ import type { ChangeEvent } from 'react';
 import { Download, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/ui/primitives/Button';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
+import { Label } from '@/ui/primitives/Label';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 
 interface CustomThemeItem {
     id: string;
@@ -70,10 +75,10 @@ export const CustomThemesSection = ({
         <div className="flex items-center justify-between gap-4">
             <div>
                 <Heading level={4}>Custom CSS Themes</Heading>
-                <span className="text-sm text-muted-foreground">
+                <Text size="sm" variant="muted">
                     Saved CSS is stored locally in this browser and injected
                     when selected.
-                </span>
+                </Text>
             </div>
             <Button size="sm" variant="ghost" onClick={onNewCustomTheme}>
                 New CSS Theme
@@ -87,32 +92,48 @@ export const CustomThemesSection = ({
                         className="flex items-start justify-between gap-3 rounded-md border border-border-subtle bg-bg-subtle p-3"
                         key={customTheme.id}
                     >
-                        <button
+                        <Pressable
                             className="min-w-0 flex-1 text-left"
-                            type="button"
                             onClick={(): void => {
                                 onEditCustomTheme(customTheme.id);
                             }}
                         >
-                            <span className="block truncate text-sm font-bold text-foreground">
+                            <Text
+                                className="block truncate"
+                                size="sm"
+                                variant="default"
+                                weight="bold"
+                            >
                                 {customTheme.name}
-                            </span>
+                            </Text>
                             {customTheme.metadata?.author ? (
-                                <span className="block text-xs text-muted-foreground">
+                                <Text
+                                    className="block"
+                                    size="xs"
+                                    variant="muted"
+                                >
                                     by {customTheme.metadata.author}
-                                </span>
+                                </Text>
                             ) : null}
                             {customTheme.metadata?.description ? (
-                                <span className="mt-1 block text-xs text-muted-foreground">
+                                <Text
+                                    className="mt-1 block"
+                                    size="xs"
+                                    variant="muted"
+                                >
                                     {customTheme.metadata.description}
-                                </span>
+                                </Text>
                             ) : null}
-                            <span className="mt-1 block text-xs text-muted-foreground">
+                            <Text
+                                className="mt-1 block"
+                                size="xs"
+                                variant="muted"
+                            >
                                 {theme === `custom:${customTheme.id}`
                                     ? '✓ Active'
                                     : 'Saved locally'}
-                            </span>
-                        </button>
+                            </Text>
+                        </Pressable>
                         <div className="flex flex-col gap-1">
                             <Button
                                 size="sm"
@@ -155,22 +176,30 @@ export const CustomThemesSection = ({
         ) : null}
 
         <div className="grid grid-cols-1 gap-3 rounded-lg border border-border-subtle bg-bg-subtle p-4">
-            <input
+            <FileInput
                 accept=".css,text/css"
                 aria-label="Upload custom theme CSS"
-                className="hidden"
                 ref={customThemeFileInputRef}
-                type="file"
                 onChange={onCustomThemeFileChange}
             />
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
-                    <span className="block text-xs font-bold text-muted-foreground uppercase">
+                    <Text
+                        className="block"
+                        size="xs"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="bold"
+                    >
                         CSS Theme File
-                    </span>
-                    <span className="block truncate text-sm text-foreground">
+                    </Text>
+                    <Text
+                        className="block truncate"
+                        size="sm"
+                        variant="default"
+                    >
                         {customThemeFileName || 'No CSS file selected'}
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     <Button
@@ -198,28 +227,19 @@ export const CustomThemesSection = ({
                     </Button>
                 </div>
             </div>
-            <label
-                className="text-xs font-bold text-muted-foreground uppercase"
-                htmlFor="custom-theme-name"
-            >
-                Theme Name
-            </label>
-            <input
-                className="w-full rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm focus:border-primary focus:outline-none"
+            <Label htmlFor="custom-theme-name">Theme Name</Label>
+            <Input
                 id="custom-theme-name"
                 placeholder="My Serchat Theme"
                 type="text"
                 value={customThemeName}
+                variant="secondary"
                 onChange={(e): void => {
                     setCustomThemeName(e.target.value);
                 }}
             />
-            <label
-                className="text-xs font-bold text-muted-foreground uppercase"
-                htmlFor="custom-theme-css"
-            >
-                CSS
-            </label>
+            <Label htmlFor="custom-theme-css">CSS</Label>
+            {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- code editor: needs monospace, min-h-64 and manual resize, which the auto-growing TextArea does not support */}
             <textarea
                 className="custom-scrollbar min-h-64 w-full resize-y rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 font-mono text-sm leading-6 text-foreground focus:border-primary focus:outline-none"
                 id="custom-theme-css"

@@ -2,6 +2,9 @@ import React from 'react';
 
 import { Image as ImageIcon, Upload } from 'lucide-react';
 
+import { FileInput } from '@/ui/primitives/FileInput';
+import { Label } from '@/ui/primitives/Label';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { Toggle } from '@/ui/primitives/Toggle';
 
@@ -24,12 +27,7 @@ export const RoleAppearanceBasics = ({
 }: RoleAppearanceBasicsProps): React.ReactNode => (
     <>
         <div className="space-y-2">
-            <label
-                className="text-xs font-bold text-muted-foreground uppercase"
-                htmlFor="roleIcon"
-            >
-                Role Icon
-            </label>
+            <Label htmlFor="roleIcon">Role Icon</Label>
             <div className="flex items-center gap-4">
                 <div className="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded border border-border-subtle bg-bg-secondary">
                     {previewIcon ? (
@@ -44,10 +42,9 @@ export const RoleAppearanceBasics = ({
                             size={24}
                         />
                     )}
-                    <button
+                    <Pressable
                         aria-label="Upload role icon"
                         className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center border-none bg-black/50 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                        type="button"
                         onClick={(): void | undefined =>
                             (
                                 document.querySelector(
@@ -57,19 +54,17 @@ export const RoleAppearanceBasics = ({
                         }
                     >
                         <Upload className="text-white" size={20} />
-                    </button>
+                    </Pressable>
                 </div>
                 <div className="flex-1 space-y-1">
                     <Text size="sm" variant="muted">
                         Upload an image to be displayed next to the role name.
                     </Text>
 
-                    <input
+                    <FileInput
                         accept=".png,.jpg,.jpeg,.webp,.gif"
                         aria-label="Upload role icon"
-                        className="hidden"
                         id="role-icon-upload"
-                        type="file"
                         onChange={onIconSelect}
                     />
                 </div>

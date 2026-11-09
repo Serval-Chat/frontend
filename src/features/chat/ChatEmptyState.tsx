@@ -6,7 +6,7 @@ import { Text } from '@/ui/primitives/Text';
  */
 export const ChatEmptyState = () => (
     <Box className="flex flex-1 flex-col items-center justify-center">
-        <Text className="text-foreground-muted">
+        <Text className="text-muted-foreground">
             nothing here yet but us servals~!
         </Text>
     </Box>

@@ -6,6 +6,8 @@ import type { Role } from '@/api/servers/servers.types';
 import { RoleDot } from '@/features/servers/RoleDot';
 import { Button } from '@/ui/primitives/Button';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 export const RoleColorDot = ({ role }: { role?: Role }) => (
@@ -36,7 +38,7 @@ export const RoleListItem = ({
     >
         <div className="flex items-center gap-2 truncate">
             <RoleColorDot role={role} />
-            <span className="truncate">{role.name}</span>
+            <Text className="truncate">{role.name}</Text>
         </div>
     </Button>
 );
@@ -65,11 +67,10 @@ export const AddRoleDropdown = ({
             />
             {isOpen ? (
                 <>
-                    <button
+                    <Pressable
                         aria-label="Close menu"
                         className="fixed inset-0 z-40 border-0 bg-transparent p-0"
                         tabIndex={-1}
-                        type="button"
                         onClick={(): void => {
                             setIsOpen(false);
                         }}
@@ -82,25 +83,29 @@ export const AddRoleDropdown = ({
                         <div className="h-full max-h-60 w-full overflow-y-auto bg-bg-secondary">
                             {availableRoles.length > 0 ? (
                                 availableRoles.map((role) => (
-                                    <button
+                                    <Pressable
                                         className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-bg-subtle"
                                         key={role.id}
-                                        type="button"
                                         onClick={(): void => {
                                             onAdd(role);
                                             setIsOpen(false);
                                         }}
                                     >
                                         <RoleColorDot role={role} />
-                                        <span className="truncate">
+                                        <Text className="truncate">
                                             {role.name}
-                                        </span>
-                                    </button>
+                                        </Text>
+                                    </Pressable>
                                 ))
                             ) : (
-                                <p className="px-3 py-2 text-sm text-muted-foreground">
+                                <Text
+                                    as="p"
+                                    className="px-3 py-2"
+                                    size="sm"
+                                    variant="muted"
+                                >
                                     No roles left to add
-                                </p>
+                                </Text>
                             )}
                         </div>
                     </div>

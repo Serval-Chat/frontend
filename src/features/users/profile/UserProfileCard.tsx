@@ -206,7 +206,7 @@ const RoleSelector = ({
                                     className={cn(
                                         'flex items-center justify-between rounded-md px-2 py-1.5 text-xs transition-colors',
                                         canManageThisRole
-                                            ? 'hover:bg-bg-tertiary cursor-pointer'
+                                            ? 'cursor-pointer hover:bg-bg-secondary'
                                             : 'cursor-not-allowed opacity-50',
                                     )}
                                     disabled={!canManageThisRole}

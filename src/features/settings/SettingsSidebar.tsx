@@ -22,6 +22,7 @@ import { StyledUserName } from '@/features/users/StyledUserName';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { useAppSelector } from '@/store/hooks';
+import { Pressable } from '@/ui/primitives/Pressable';
 
 import { type GroupedNavSection, GroupedSidebarNav } from './GroupedSidebarNav';
 import { LogoutConfirmModal } from './LogoutConfirmModal';
@@ -150,9 +151,8 @@ export const SettingsSidebar = ({
                                     </div>
                                 </div>
                             ) : null}
-                            <button
+                            <Pressable
                                 className="flex shrink-0 items-center gap-2 p-3 text-left transition-colors hover:bg-[var(--sidebar-item-hover-bg,var(--bg-subtle))]"
-                                type="button"
                                 onClick={(): void => {
                                     setIsProfileModalOpen(true);
                                 }}
@@ -187,7 +187,7 @@ export const SettingsSidebar = ({
                                         @{me.username}
                                     </div>
                                 </div>
-                            </button>
+                            </Pressable>
                             <ProfileSettingsModal
                                 isOpen={isProfileModalOpen}
                                 onClose={(): void => {

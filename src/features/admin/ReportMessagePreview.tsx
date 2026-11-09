@@ -54,7 +54,7 @@ function renderContextMessage(message: ReportMessageContextEntry) {
                     </p>
                 );
             })}
-            <p className="text-text-primary text-sm break-words whitespace-pre-wrap">
+            <p className="text-sm break-words whitespace-pre-wrap text-foreground">
                 {message.text}
                 {message.isEdited ? (
                     <span className="ml-1 text-xs text-text-muted italic">
