@@ -14,6 +14,8 @@ import mermaid from 'mermaid';
 import { useTheme } from '@/providers/ThemeProvider';
 import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 3;
@@ -168,9 +170,9 @@ const MermaidChartRenderer = ({
     if (!svgContent) {
         return (
             <div className="flex min-h-[100px] min-w-50 animate-pulse items-center justify-center">
-                <span className="text-sm font-medium text-muted-foreground">
+                <Text size="sm" variant="muted" weight="medium">
                     Rendering chart...
-                </span>
+                </Text>
             </div>
         );
     }
@@ -427,9 +429,15 @@ const MermaidChartViewer = ({ content }: MermaidChartProps) => {
                 >
                     <ZoomOut size={16} />
                 </Button>
-                <span className="min-w-14 text-center text-xs font-medium text-muted-foreground">
+                <Text
+                    align="center"
+                    className="min-w-14"
+                    size="xs"
+                    variant="muted"
+                    weight="medium"
+                >
                     {Math.round(zoom * 100)}%
-                </span>
+                </Text>
                 <Button
                     aria-label="Zoom in"
                     disabled={zoom >= MAX_ZOOM}
@@ -478,9 +486,8 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
 
     return (
         <>
-            <button
+            <Pressable
                 className="group my-2 inline-flex items-center gap-3 rounded-lg border border-border-subtle bg-bg-secondary p-3 text-left shadow-sm transition hover:border-primary/40 hover:bg-bg-secondary/80"
-                type="button"
                 onClick={(): void => {
                     setIsOpen(true);
                 }}
@@ -489,14 +496,14 @@ export const MermaidChart = ({ content }: MermaidChartProps) => {
                     <Workflow size={18} />
                 </span>
                 <span className="flex min-w-0 flex-col">
-                    <span className="text-sm font-semibold text-foreground">
+                    <Text size="sm" variant="default" weight="semibold">
                         Mermaid diagram
-                    </span>
-                    <span className="text-xs text-muted-foreground">
+                    </Text>
+                    <Text size="xs" variant="muted">
                         Click to view chart
-                    </span>
+                    </Text>
                 </span>
-            </button>
+            </Pressable>
 
             <Modal
                 fullScreen

@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { ContextMenu, type ContextMenuItem } from '@/ui/primitives/ContextMenu';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
 import { buttonVariants } from '@/ui/primitives/buttonVariants';
 import { cn } from '@/utils/cn';
@@ -215,14 +216,12 @@ export const VoiceParticipant = React.memo(({ userId }: { userId: string }) => {
                                 %
                             </Text>
                         </div>
-                        {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- Slider's custom-range track and margins would change this compact volume control's layout */}
-                        <input
+                        <Slider
                             aria-label="Volume"
                             className="w-full cursor-pointer accent-primary"
                             max="2"
                             min="0"
                             step="0.01"
-                            type="range"
                             value={volume}
                             onChange={(e): void => {
                                 dispatch(

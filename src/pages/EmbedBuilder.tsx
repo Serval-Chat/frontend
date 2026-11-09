@@ -3,6 +3,8 @@ import { type ReactNode, useState } from 'react';
 import { EmbedCreator } from '@/features/embed/EmbedCreator';
 import { EmbedRenderer } from '@/features/embed/EmbedRenderer';
 import type { MessagePayload } from '@/types/embed';
+import { Heading } from '@/ui/primitives/Heading';
+import { Text } from '@/ui/primitives/Text';
 
 const DEFAULT_PAYLOAD: MessagePayload = {
     embeds: [
@@ -24,12 +26,16 @@ export const EmbedBuilder = (): ReactNode => {
             {/* header */}
             <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border-subtle bg-background/80 px-6 py-4 backdrop-blur-sm">
                 <div>
-                    <h1 className="text-lg font-bold tracking-tight text-foreground">
+                    <Heading
+                        className="text-lg font-bold tracking-tight text-foreground"
+                        level={1}
+                        variant="page"
+                    >
                         Embed Builder
-                    </h1>
-                    <p className="text-xs text-muted-foreground">
+                    </Heading>
+                    <Text as="p" size="xs" variant="muted">
                         Compose Serchat message embeds with a preview
-                    </p>
+                    </Text>
                 </div>
             </header>
 
@@ -39,9 +45,17 @@ export const EmbedBuilder = (): ReactNode => {
                 </div>
 
                 <div className="custom-scrollbar flex w-[480px] shrink-0 flex-col overflow-y-auto bg-bg-subtle px-6 py-6">
-                    <p className="mb-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                    <Text
+                        as="p"
+                        className="mb-4"
+                        size="xs"
+                        tracking="wider"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="semibold"
+                    >
                         Live preview
-                    </p>
+                    </Text>
                     <EmbedRenderer className="w-full" payload={payload} />
                 </div>
             </div>

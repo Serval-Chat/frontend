@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Book, Bot, ExternalLink, Plus } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
+import { Link } from '@/ui/primitives/Link';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -38,8 +39,8 @@ export const DevSidebar = (): ReactNode => (
                     </NavLink>
                 ))}
                 <div className="my-2 h-px bg-border-subtle" />
-                <a
-                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
+                <Link
+                    className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground hover:no-underline"
                     href="/docs/index.html"
                     rel="noreferrer"
                     target="_blank"
@@ -49,7 +50,7 @@ export const DevSidebar = (): ReactNode => (
                         SDK Docs
                     </div>
                     <ExternalLink size={14} />
-                </a>
+                </Link>
             </nav>
         </div>
     </div>

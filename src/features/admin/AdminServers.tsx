@@ -88,13 +88,20 @@ const AdminServerRow = ({
                                 strokeWidth={2.5}
                             />
                         ) : null}
-                        <span className="truncate font-bold text-foreground">
+                        <Text
+                            className="truncate"
+                            variant="default"
+                            weight="bold"
+                        >
                             {server.name}
-                        </span>
+                        </Text>
                     </div>
-                    <span className="font-mono text-[10px] text-muted-foreground opacity-60">
+                    <Text
+                        className="font-mono text-[10px] opacity-60"
+                        variant="muted"
+                    >
                         {server.id}
-                    </span>
+                    </Text>
                 </div>
             </div>
         </TableCell>
@@ -142,10 +149,10 @@ const AdminServerRow = ({
                     -
                 </Text>
             ) : (
-                <span className="line-clamp-2 text-xs text-muted-foreground">
+                <Text className="line-clamp-2" size="xs" variant="muted">
                     {server.verificationFailureReasons?.join(', ') ||
                         'Not computed'}
-                </span>
+                </Text>
             )}
         </TableCell>
 
@@ -158,9 +165,9 @@ const AdminServerRow = ({
                         username={server.owner.username}
                     />
                     <div className="flex min-w-0 flex-col truncate">
-                        <span className="truncate text-sm font-medium">
+                        <Text className="truncate" size="sm" weight="medium">
                             {server.owner.username}
-                        </span>
+                        </Text>
                     </div>
                 </div>
             ) : (
@@ -173,7 +180,7 @@ const AdminServerRow = ({
         <TableCell>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="opacity-40" size={14} />
-                <span className="font-bold">{server.memberCount}</span>
+                <Text weight="bold">{server.memberCount}</Text>
             </div>
         </TableCell>
 
@@ -368,9 +375,9 @@ export const AdminServers = ({
                     >
                         P80 threshold
                     </Text>
-                    <span className="font-mono font-bold">
+                    <Text className="font-mono" weight="bold">
                         {formatScore(verificationStats?.p80Threshold)}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -380,9 +387,9 @@ export const AdminServers = ({
                     >
                         P65 threshold
                     </Text>
-                    <span className="font-mono font-bold">
+                    <Text className="font-mono" weight="bold">
                         {formatScore(verificationStats?.p65Threshold)}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -392,9 +399,9 @@ export const AdminServers = ({
                     >
                         Eligible
                     </Text>
-                    <span className="font-bold">
+                    <Text weight="bold">
                         {verificationStats?.eligibleServerCount ?? 0}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -404,9 +411,9 @@ export const AdminServers = ({
                     >
                         Verified
                     </Text>
-                    <span className="font-bold">
+                    <Text weight="bold">
                         {verificationStats?.verifiedServerCount ?? 0}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -416,9 +423,9 @@ export const AdminServers = ({
                     >
                         Last run
                     </Text>
-                    <span className="text-xs font-medium">
+                    <Text size="xs" weight="medium">
                         {formatDate(verificationStats?.lastRunAt)}
-                    </span>
+                    </Text>
                 </div>
             </div>
 
@@ -497,9 +504,9 @@ export const AdminServers = ({
                     >
                         Previous
                     </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <Text size="sm" variant="muted" weight="medium">
                         Page {page + 1}
-                    </span>
+                    </Text>
                     <Button
                         disabled={servers.length < LIMIT}
                         variant="ghost"

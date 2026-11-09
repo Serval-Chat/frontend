@@ -29,9 +29,9 @@ export const App = (): ReactNode => (
                     level={1}
                 >
                     Text with your <br />
-                    <span className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                    <Text className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
                         Friends
-                    </span>{' '}
+                    </Text>{' '}
                     on Serchat
                 </Heading>
 
@@ -44,9 +44,14 @@ export const App = (): ReactNode => (
                     A modern chat for servals and normal people
                 </Text>
 
-                <span className="mb-3 text-sm font-medium text-muted-foreground opacity-80">
+                <Text
+                    className="mb-3 opacity-80"
+                    size="sm"
+                    variant="muted"
+                    weight="medium"
+                >
                     Already logged in? Get me in!!!!
-                </span>
+                </Text>
 
                 <div className="flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row">
                     <Link to="/chat">

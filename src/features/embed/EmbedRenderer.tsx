@@ -18,6 +18,8 @@ import type {
 } from '@/types/embed';
 import { ImageLightbox } from '@/ui/primitives/ImageLightbox';
 import { Link } from '@/ui/primitives/Link';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
 import { extractApiError } from '@/utils/extractApiError';
@@ -154,13 +156,12 @@ const EmbedImage = memo(
 
         return (
             <>
-                <button
+                <Pressable
                     aria-label={`View ${alt}`}
                     className={cn(
                         'cursor-pointer border-0 bg-transparent p-0 text-left',
                         className,
                     )}
-                    type="button"
                     onClick={(): void => {
                         setIsLightboxOpen(true);
                     }}
@@ -174,7 +175,7 @@ const EmbedImage = memo(
                         style={style}
                         onLoad={onResize}
                     />
-                </button>
+                </Pressable>
                 <ImageLightbox
                     alt={alt}
                     isOpen={isLightboxOpen}
@@ -303,7 +304,8 @@ const EmbedCard = memo(
                     >
                         {/* Provider */}
                         <div className="px-4 pt-3 pb-1">
-                            <p
+                            <Text
+                                as="p"
                                 className={cn(
                                     'mb-0.5 text-xs',
                                     isDeleted
@@ -321,11 +323,12 @@ const EmbedCard = memo(
                                 ) : (
                                     (embed.provider?.name ?? 'YouTube')
                                 )}
-                            </p>
+                            </Text>
 
                             {/* Title */}
                             {embed.title ? (
-                                <p
+                                <Text
+                                    as="p"
                                     className={cn(
                                         'mb-0.5 text-sm font-semibold',
                                         isDeleted
@@ -343,12 +346,13 @@ const EmbedCard = memo(
                                     ) : (
                                         embed.title
                                     )}
-                                </p>
+                                </Text>
                             ) : null}
 
                             {/* Author / channel */}
                             {embed.author?.name ? (
-                                <p
+                                <Text
+                                    as="p"
                                     className={cn(
                                         'mb-2 text-xs',
                                         isDeleted
@@ -366,7 +370,7 @@ const EmbedCard = memo(
                                     ) : (
                                         embed.author.name
                                     )}
-                                </p>
+                                </Text>
                             ) : null}
                         </div>
 
@@ -456,7 +460,8 @@ const EmbedCard = memo(
                 >
                     {/* Provider */}
                     {embed.provider?.name ? (
-                        <p
+                        <Text
+                            as="p"
                             className={cn(
                                 'mb-0.5 text-xs',
                                 isDeleted
@@ -490,7 +495,7 @@ const EmbedCard = memo(
                                     onResize={onResize}
                                 />
                             )}
-                        </p>
+                        </Text>
                     ) : null}
 
                     {/* Author */}
@@ -505,7 +510,7 @@ const EmbedCard = memo(
                                     src={authorIconUrl}
                                 />
                             ) : null}
-                            <span
+                            <Text
                                 className={cn(
                                     'text-sm font-semibold',
                                     isDeleted
@@ -541,7 +546,7 @@ const EmbedCard = memo(
                                         onResize={onResize}
                                     />
                                 )}
-                            </span>
+                            </Text>
                         </div>
                     ) : null}
 
@@ -550,7 +555,8 @@ const EmbedCard = memo(
                         <div className="flex-1">
                             {/* Title */}
                             {embed.title ? (
-                                <p
+                                <Text
+                                    as="p"
                                     className={cn(
                                         'mb-1 text-base font-semibold',
                                         isDeleted
@@ -590,7 +596,7 @@ const EmbedCard = memo(
                                             onResize={onResize}
                                         />
                                     )}
-                                </p>
+                                </Text>
                             ) : null}
 
                             {/* Description */}
@@ -832,17 +838,16 @@ const EmbedButtons = memo(
                     }
 
                     return (
-                        <button
+                        <Pressable
                             className={className}
                             disabled={disabled}
                             key={buttonKey}
-                            type="button"
                             onClick={(): void => {
                                 onButtonClick(buttonIndex, button);
                             }}
                         >
                             {label}
-                        </button>
+                        </Pressable>
                     );
                 })}
             </div>
@@ -1043,18 +1048,19 @@ export const EmbedRenderer = ({
                     </div>
                 ))}
                 {payload.components?.map((component, index) => (
-                    <span
-                        className="rounded-md border border-border-subtle px-2 py-1 text-sm"
+                    <Text
+                        className="rounded-md border border-border-subtle px-2 py-1"
                         // Components can repeat labels and URLs; preserve each row.
                         // eslint-disable-next-line react/no-array-index-key
                         key={`${component.custom_id ?? component.url ?? component.label ?? 'button'}-${index}`}
+                        size="sm"
                     >
                         {component.emoji?.name
                             ? `${component.emoji.name} `
                             : ''}
                         {component.label ?? 'Button'}
                         {component.url ? ` · ${component.url}` : ''}
-                    </span>
+                    </Text>
                 ))}
             </div>
         );
@@ -1071,9 +1077,9 @@ export const EmbedRenderer = ({
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg-secondary text-2xl">
                     📋
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <Text as="p" size="sm" variant="muted">
                     Nothing to preview yet. Fill in the form on the left.
-                </p>
+                </Text>
             </div>
         );
     }
@@ -1147,13 +1153,26 @@ export const EmbedRenderer = ({
                 >
                     {/* Header */}
                     <div className="px-4 pt-4 pb-3">
-                        <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                        <Text
+                            className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-bg-subtle px-2.5 py-0.5 text-[10px]"
+                            tracking="widest"
+                            transform="uppercase"
+                            variant="muted"
+                            weight="semibold"
+                        >
                             Poll
-                        </span>
+                        </Text>
                         {payload.poll.question.trim() ? (
-                            <p className="mt-2 text-base leading-snug font-semibold text-foreground">
+                            <Text
+                                as="p"
+                                className="mt-2"
+                                leading="snug"
+                                size="base"
+                                variant="default"
+                                weight="semibold"
+                            >
                                 {payload.poll.question}
-                            </p>
+                            </Text>
                         ) : null}
                     </div>
 
@@ -1162,20 +1181,17 @@ export const EmbedRenderer = ({
                         <ul className="flex flex-col gap-1.5 px-4 pb-3">
                             {visiblePollAnswers.map((answer) => (
                                 <li key={`answer-${answer.text}`}>
-                                    <button
-                                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-bg-subtle px-3 py-2.5 text-left text-sm text-foreground hover:bg-bg-secondary"
-                                        type="button"
-                                    >
+                                    <Pressable className="flex w-full cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-bg-subtle px-3 py-2.5 text-left text-sm text-foreground hover:bg-bg-secondary">
                                         <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-border-subtle">
                                             <span className="h-1.5 w-1.5 rounded-full" />
                                         </span>
                                         {answer.emoji?.name ? (
-                                            <span>{answer.emoji.name}</span>
+                                            <Text>{answer.emoji.name}</Text>
                                         ) : null}
-                                        <span className="flex-1">
+                                        <Text className="flex-1">
                                             {answer.text}
-                                        </span>
-                                    </button>
+                                        </Text>
+                                    </Pressable>
                                 </li>
                             ))}
                         </ul>
@@ -1183,17 +1199,21 @@ export const EmbedRenderer = ({
 
                     {/* Footer meta */}
                     <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2.5">
-                        <span className="text-xs text-muted-foreground">
+                        <Text size="xs" variant="muted">
                             {payload.poll.duration}h
-                        </span>
+                        </Text>
                         {payload.poll.allow_multiselect ? (
-                            <span className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            <Text
+                                className="rounded-full bg-bg-subtle px-2 py-0.5 text-[10px]"
+                                variant="muted"
+                                weight="medium"
+                            >
                                 Can select multiple
-                            </span>
+                            </Text>
                         ) : null}
-                        <span className="ml-auto text-[10px] text-muted-foreground">
+                        <Text className="ml-auto text-[10px]" variant="muted">
                             0 votes · poll not started
-                        </span>
+                        </Text>
                     </div>
                 </div>
             ) : null}

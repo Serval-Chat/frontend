@@ -6,6 +6,7 @@ import { Box } from '@/ui/primitives/Box';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
+import { Text } from '@/ui/primitives/Text';
 
 interface ProfileBannerProps {
     banner?: string | null;
@@ -62,7 +63,7 @@ export const ProfileBanner = ({
             {onBannerClick ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 text-xs font-bold text-white uppercase opacity-0 transition-opacity duration-200 group-hover/banner:opacity-100">
                     <Camera size={24} />
-                    <span>Change Banner</span>
+                    <Text>Change Banner</Text>
                 </div>
             ) : null}
         </Box>

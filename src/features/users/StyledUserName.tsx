@@ -201,7 +201,7 @@ export const StyledUserName = React.memo(
                     : baseStyle;
 
                 return (
-                    <span
+                    <Text
                         className="relative isolate inline-block"
                         // eslint-disable-next-line react/no-array-index-key
                         key={`char-${char}-${i}`}
@@ -210,7 +210,7 @@ export const StyledUserName = React.memo(
                         {hasGlow ? (
                             <>
                                 {/* Inner intense glow */}
-                                <span
+                                <Text
                                     aria-hidden="true"
                                     className="pointer-events-none absolute inset-0 select-none"
                                     style={{
@@ -225,9 +225,9 @@ export const StyledUserName = React.memo(
                                     }}
                                 >
                                     {char}
-                                </span>
+                                </Text>
                                 {/* Middle soft glow */}
-                                <span
+                                <Text
                                     aria-hidden="true"
                                     className="pointer-events-none absolute inset-0 select-none"
                                     style={{
@@ -242,9 +242,9 @@ export const StyledUserName = React.memo(
                                     }}
                                 >
                                     {char}
-                                </span>
+                                </Text>
                                 {/* Outer broad glow */}
-                                <span
+                                <Text
                                     aria-hidden="true"
                                     className="pointer-events-none absolute inset-0 select-none"
                                     style={{
@@ -259,11 +259,11 @@ export const StyledUserName = React.memo(
                                     }}
                                 >
                                     {char}
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                         {char}
-                    </span>
+                    </Text>
                 );
             });
         };

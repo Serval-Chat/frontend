@@ -54,6 +54,7 @@ import { Box } from '@/ui/primitives/Box';
 import { Heading } from '@/ui/primitives/Heading';
 import { Link } from '@/ui/primitives/Link';
 import { Popover } from '@/ui/primitives/Popover';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { Tooltip } from '@/ui/primitives/Tooltip';
@@ -153,12 +154,11 @@ const RoleSelector = ({
 
     return (
         <>
-            <button
+            <Pressable
                 aria-expanded={isOpen}
                 className="flex h-5 w-5 cursor-pointer items-center justify-center"
                 ref={triggerRef}
                 title="Add Role"
-                type="button"
                 onClick={(): void => {
                     if (!isOpen) {
                         const triggerRect =
@@ -180,7 +180,7 @@ const RoleSelector = ({
                 ) : (
                     <Plus size={16} />
                 )}
-            </button>
+            </Pressable>
 
             <Popover
                 className="z-[var(--z-index-profile-menu)] w-48 p-1"
@@ -202,7 +202,7 @@ const RoleSelector = ({
                                     myHighestRolePosition > role.position);
 
                             return (
-                                <button
+                                <Pressable
                                     className={cn(
                                         'flex items-center justify-between rounded-md px-2 py-1.5 text-xs transition-colors',
                                         canManageThisRole
@@ -211,7 +211,6 @@ const RoleSelector = ({
                                     )}
                                     disabled={!canManageThisRole}
                                     key={role.id}
-                                    type="button"
                                     onClick={(): void => {
                                         if (hasRole) {
                                             onRemoveRole(role.id);
@@ -222,9 +221,9 @@ const RoleSelector = ({
                                 >
                                     <Box className="flex items-center gap-2 truncate">
                                         <RoleDot role={role} size={8} />
-                                        <span className="truncate">
+                                        <Text className="truncate">
                                             {role.name}
-                                        </span>
+                                        </Text>
                                     </Box>
                                     {hasRole ? (
                                         <Check
@@ -232,7 +231,7 @@ const RoleSelector = ({
                                             size={14}
                                         />
                                     ) : null}
-                                </button>
+                                </Pressable>
                             );
                         })
                     ) : (
@@ -279,6 +278,7 @@ const InlineEditableField = ({
 
     if (isEditing && multiline) {
         return (
+            // eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- inline bio editor sized by inputClassName to the card; TextArea's wrapper and chrome would change the card layout
             <textarea
                 aria-label={title}
                 className={inputClassName}
@@ -303,6 +303,7 @@ const InlineEditableField = ({
 
     if (isEditing) {
         return (
+            // eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- inline rename editor sized by inputClassName to the text it replaces; Input's fixed height and chrome would change the card layout
             <input
                 aria-label={title}
                 className={inputClassName}
@@ -325,13 +326,12 @@ const InlineEditableField = ({
     }
 
     return (
-        <button
+        <Pressable
             className={cn(
                 'group/inline-edit -mx-1 inline-flex min-w-0 items-center gap-1.5 rounded px-1 text-left hover:bg-bg-subtle',
                 buttonClassName,
             )}
             title={title}
-            type="button"
             onClick={(): void => {
                 setIsEditing(true);
             }}
@@ -344,7 +344,7 @@ const InlineEditableField = ({
                 )}
                 size={12}
             />
-        </button>
+        </Pressable>
     );
 };
 
@@ -429,10 +429,16 @@ const ProfileCardAdminView = ({
 
         <div className="grid grid-cols-2 gap-2">
             <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-2">
-                <span className="block text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
+                <Text
+                    className="block text-[9px]"
+                    tracking="tight"
+                    transform="uppercase"
+                    variant="muted"
+                    weight="bold"
+                >
                     Warnings
-                </span>
-                <span
+                </Text>
+                <Text
                     className={cn(
                         'text-sm font-black',
                         adminData.warningCount > 0
@@ -441,24 +447,32 @@ const ProfileCardAdminView = ({
                     )}
                 >
                     {adminData.warningCount}
-                </span>
+                </Text>
             </div>
             <div className="rounded-lg border border-border-subtle bg-bg-secondary/50 p-2">
-                <span className="block text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
+                <Text
+                    className="block text-[9px]"
+                    tracking="tight"
+                    transform="uppercase"
+                    variant="muted"
+                    weight="bold"
+                >
                     Account Status
-                </span>
-                <span className="text-sm font-black text-success">Active</span>
+                </Text>
+                <Text size="sm" variant="success" weight="black">
+                    Active
+                </Text>
             </div>
         </div>
 
         {adminData.banExpiry !== undefined && adminData.banExpiry !== '' ? (
             <div className="rounded-lg border border-danger/20 bg-danger/10 p-3 text-xs text-danger">
-                <span className="font-bold tracking-tight uppercase">
+                <Text tracking="tight" transform="uppercase" weight="bold">
                     Banned Until:
-                </span>
-                <span className="mt-0.5 block font-black">
+                </Text>
+                <Text className="mt-0.5 block" weight="black">
                     {new Date(adminData.banExpiry).toLocaleString(APP_LOCALE)}
-                </span>
+                </Text>
             </div>
         ) : null}
 
@@ -492,9 +506,14 @@ const ProfileCardAdminView = ({
                             <div className="truncate text-[11px] leading-tight font-bold">
                                 {server.name}
                                 {server.isOwner ? (
-                                    <span className="ml-1 text-[8px] font-black text-caution uppercase">
+                                    <Text
+                                        className="ml-1 text-[8px]"
+                                        transform="uppercase"
+                                        variant="caution"
+                                        weight="black"
+                                    >
                                         Owner
-                                    </span>
+                                    </Text>
                                 ) : null}
                             </div>
                             <div className="text-[9px] font-medium text-muted-foreground uppercase">
@@ -608,9 +627,12 @@ const ProfileCardDetails = ({
                                     wrap="preWrap"
                                 />
                             ) : (
-                                <span className="text-muted-foreground/70 italic">
+                                <Text
+                                    className="text-muted-foreground/70"
+                                    fontStyle="italic"
+                                >
                                     Tell us about yourself...
-                                </span>
+                                </Text>
                             )}
                         </Box>
                     </InlineEditableField>
@@ -647,7 +669,7 @@ const ProfileCardDetails = ({
                             size="xs"
                         >
                             <Globe className="shrink-0" size={13} />
-                            <span className="truncate">{connection.value}</span>
+                            <Text className="truncate">{connection.value}</Text>
                         </Link>
                     ))}
                 </Box>
@@ -789,16 +811,15 @@ const ProfileCardRoles = ({
                                 {canManageRoles &&
                                 canManageThisRole &&
                                 userId ? (
-                                    <button
+                                    <Pressable
                                         className="ml-0.5 hidden text-muted-foreground group-hover:block hover:text-danger"
                                         title="Remove Role"
-                                        type="button"
                                         onClick={(): void => {
                                             onRemoveRole(r.id);
                                         }}
                                     >
                                         <X size={12} />
-                                    </button>
+                                    </Pressable>
                                 ) : null}
                             </Box>
                         );
@@ -887,18 +908,17 @@ const ProfileCardActions = ({
     return (
         <>
             <div className="absolute top-3 right-3 z-30">
-                <button
+                <Pressable
                     aria-expanded={isMenuOpen}
                     aria-haspopup="menu"
                     aria-label="Profile actions"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/50 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-black/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
                     ref={triggerRef}
                     title="Profile actions"
-                    type="button"
                     onClick={(): void => setIsMenuOpen((open) => !open)}
                 >
                     <Settings size={18} />
-                </button>
+                </Pressable>
                 <Popover
                     className="w-56 p-1"
                     isOpen={isMenuOpen}
@@ -906,10 +926,9 @@ const ProfileCardActions = ({
                     onClose={(): void => setIsMenuOpen(false)}
                 >
                     <div role="menu">
-                        <button
+                        <Pressable
                             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
                             role="menuitem"
-                            type="button"
                             onClick={handleFriendAction}
                         >
                             {friendStatus === 'friend' ? (
@@ -928,11 +947,10 @@ const ProfileCardActions = ({
                                   : friendStatus === 'incoming'
                                     ? 'Accept Friend Request'
                                     : 'Send a Friend Request'}
-                        </button>
-                        <button
+                        </Pressable>
+                        <Pressable
                             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
                             role="menuitem"
-                            type="button"
                             onClick={(): void => {
                                 setIsMenuOpen(false);
                                 onMessage();
@@ -940,26 +958,24 @@ const ProfileCardActions = ({
                         >
                             <MessageSquare size={16} />
                             Message
-                        </button>
-                        <button
+                        </Pressable>
+                        <Pressable
                             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
                             role="menuitem"
-                            type="button"
                             onClick={(): void => {
                                 void handleCopyUserId();
                             }}
                         >
                             <Copy size={16} />
                             Copy User ID
-                        </button>
+                        </Pressable>
                         <div
                             aria-hidden
                             className="my-1 border-t border-border-subtle"
                         />
-                        <button
+                        <Pressable
                             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors hover:bg-bg-secondary focus-visible:bg-bg-secondary focus-visible:outline-none"
                             role="menuitem"
-                            type="button"
                             onClick={(): void => {
                                 setIsMenuOpen(false);
                                 setIsReportModalOpen(true);
@@ -967,7 +983,7 @@ const ProfileCardActions = ({
                         >
                             <Flag size={16} />
                             Report User Profile
-                        </button>
+                        </Pressable>
                     </div>
                 </Popover>
             </div>
@@ -1295,7 +1311,7 @@ export const UserProfileCard = ({
                                         : 'ml-1 inline-flex items-center gap-1 text-muted-foreground/60'
                                 }
                             >
-                                <span>•</span>
+                                <Text>•</Text>
                                 {onPronounsChange ? (
                                     <InlineEditableField
                                         inputClassName="min-w-0 rounded-md border border-primary bg-bg-subtle px-1.5 py-0.5 text-xs text-foreground focus:outline-none"

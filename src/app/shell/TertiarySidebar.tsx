@@ -12,7 +12,9 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileMemberList } from '@/store/slices/navSlice';
 import { Box } from '@/ui/primitives/Box';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Resizer } from '@/ui/primitives/Resizer';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 const MEMBER_SEARCH_PLACEHOLDER_FULL = 'Search (supports regex /pattern/)...';
@@ -188,31 +190,35 @@ export const TertiarySidebar = ({
                             selectedFriendId && 'md:hidden',
                         )}
                     >
-                        <span className="text-xs font-bold tracking-wider text-(--member-list-header-text,var(--muted-foreground)) uppercase">
+                        <Text
+                            className="text-(--member-list-header-text,var(--muted-foreground))"
+                            size="xs"
+                            tracking="wider"
+                            transform="uppercase"
+                            weight="bold"
+                        >
                             Members
-                        </span>
+                        </Text>
                         <div className="flex items-center gap-1">
                             {selectedServerId ? (
-                                <button
+                                <Pressable
                                     aria-label="Toggle search"
                                     className={cn(
                                         'p-1 text-muted-foreground transition-colors hover:text-foreground',
                                         isSearchOpen && 'text-primary',
                                     )}
-                                    type="button"
                                     onClick={(): void => {
                                         setIsSearchOpen(!isSearchOpen);
                                         if (isSearchOpen) setSearchQuery('');
                                     }}
                                 >
                                     <Search className="h-4 w-4" />
-                                </button>
+                                </Pressable>
                             ) : null}
                             {showMobileMemberList ? (
-                                <button
+                                <Pressable
                                     aria-label="Close member list"
                                     className="p-1 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                                    type="button"
                                     onClick={(): void | {
                                         payload: undefined;
                                         type: 'nav/toggleMobileMemberList';
@@ -223,7 +229,7 @@ export const TertiarySidebar = ({
                                     }
                                 >
                                     <X className="h-4 w-4" />
-                                </button>
+                                </Pressable>
                             ) : null}
                         </div>
                     </div>
@@ -242,12 +248,12 @@ export const TertiarySidebar = ({
                                     className="relative"
                                     ref={searchWrapperRef}
                                 >
-                                    <span
+                                    <Text
                                         className="pointer-events-none invisible absolute text-xs whitespace-nowrap"
                                         ref={searchPlaceholderMeasureRef}
                                     >
                                         {MEMBER_SEARCH_PLACEHOLDER_FULL}
-                                    </span>
+                                    </Text>
                                     <Input
                                         placeholder={
                                             isSearchPlaceholderTooWide

@@ -7,6 +7,7 @@ import { Hash, MessageCircle, Search, X } from 'lucide-react';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { colors, fontWeight, radius, shadow } from '@/ui/theme';
 
@@ -294,10 +295,9 @@ function MockChatHeader({
             >
                 {name}
             </Text>
-            <button
+            <Pressable
                 aria-label={isSearchOpen ? 'Close search' : 'Search messages'}
                 style={iconBtnStyle(isSearchOpen)}
-                type="button"
                 onClick={onToggleSearch}
                 onMouseEnter={(e) => {
                     if (!isSearchOpen)
@@ -311,7 +311,7 @@ function MockChatHeader({
                 }}
             >
                 <Search size={18} />
-            </button>
+            </Pressable>
         </div>
     );
 }
@@ -373,14 +373,13 @@ function SearchPanel({ messages, onClose }: SearchPanelProps): ReactNode {
                         }}
                     />
                 </div>
-                <button
+                <Pressable
                     aria-label="Close search"
                     style={closeSearchButtonStyle}
-                    type="button"
                     onClick={onClose}
                 >
                     <X size={16} />
-                </button>
+                </Pressable>
             </div>
 
             {/* results */}

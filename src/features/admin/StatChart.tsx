@@ -81,10 +81,12 @@ const StatTooltip = ({
     }
     return (
         <div className="rounded-lg border border-border-subtle bg-background px-3 py-1.5 text-xs shadow-lg">
-            <p className="font-semibold text-foreground">
+            <Text as="p" variant="default" weight="semibold">
                 {payload[0]?.value ?? 0}
-            </p>
-            <p className="text-muted-foreground">{timeLabel}</p>
+            </Text>
+            <Text as="p" variant="muted">
+                {timeLabel}
+            </Text>
         </div>
     );
 };

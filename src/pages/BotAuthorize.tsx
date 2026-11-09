@@ -25,6 +25,7 @@ import { CalloutBox } from '@/ui/primitives/CalloutBox';
 import { Divider } from '@/ui/primitives/Divider';
 import { Heading } from '@/ui/primitives/Heading';
 import { MutedText } from '@/ui/primitives/MutedText';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Skeleton } from '@/ui/primitives/Skeleton';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
@@ -157,12 +158,11 @@ const ServerSelectDropdown = ({
     onSelect: (serverId: string) => void;
 }) => (
     <div className="relative">
-        <button
+        <Pressable
             className={cn(
                 'flex w-full items-center justify-between gap-3 rounded-lg border border-border-subtle bg-bg-secondary/30 px-3.5 py-2.5 text-left transition-colors hover:bg-bg-secondary/50',
                 dropdownOpen && 'border-primary/40 bg-bg-secondary/50',
             )}
-            type="button"
             onClick={onToggle}
         >
             {selectedServer ? (
@@ -198,20 +198,19 @@ const ServerSelectDropdown = ({
                 )}
                 size={15}
             />
-        </button>
+        </Pressable>
 
         {dropdownOpen && servers.length > 0 ? (
             <div className="absolute top-full left-0 z-[200] mt-1 w-full overflow-hidden rounded-lg border border-border-subtle bg-background shadow-xl">
                 <div className="custom-scrollbar max-h-52 overflow-y-auto">
                     {servers.map((server) => (
-                        <button
+                        <Pressable
                             className={cn(
                                 'flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-bg-secondary/50',
                                 selectedServerId === server.id &&
                                     'bg-primary/10',
                             )}
                             key={server.id}
-                            type="button"
                             onClick={(): void => {
                                 onSelect(server.id);
                             }}
@@ -227,11 +226,11 @@ const ServerSelectDropdown = ({
                                     {server.name.charAt(0).toUpperCase()}
                                 </div>
                             )}
-                            <span className="flex-1">{server.name}</span>
+                            <Text className="flex-1">{server.name}</Text>
                             {selectedServerId === server.id ? (
                                 <Check className="text-primary" size={13} />
                             ) : null}
-                        </button>
+                        </Pressable>
                     ))}
                 </div>
             </div>
@@ -344,9 +343,14 @@ export const BotAuthorize = (): ReactNode => {
                                     >
                                         {botName}
                                     </Heading>
-                                    <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-widest text-primary/80 uppercase">
+                                    <Text
+                                        className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[9px] text-primary/80"
+                                        tracking="widest"
+                                        transform="uppercase"
+                                        weight="bold"
+                                    >
                                         BOT
-                                    </span>
+                                    </Text>
                                 </div>
                                 <Text
                                     as="p"
@@ -396,16 +400,18 @@ export const BotAuthorize = (): ReactNode => {
                                     <div className="grid grid-cols-2 gap-1.5">
                                         {requestedPerms.map(
                                             (key: BotPermissionKey) => (
-                                                <span
-                                                    className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary/50 px-2.5 py-2 text-xs font-medium"
+                                                <Text
+                                                    className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-bg-secondary/50 px-2.5 py-2"
                                                     key={key}
+                                                    size="xs"
+                                                    weight="medium"
                                                 >
                                                     <Check
                                                         className="shrink-0 text-primary"
                                                         size={11}
                                                     />
                                                     {BOT_PERMISSION_LABELS[key]}
-                                                </span>
+                                                </Text>
                                             ),
                                         )}
                                     </div>
@@ -443,7 +449,7 @@ export const BotAuthorize = (): ReactNode => {
                                     className="px-3.5 py-3 text-left text-sm"
                                     icon={AlertTriangle}
                                 >
-                                    <span className="text-muted-foreground">
+                                    <Text variant="muted">
                                         You must be{' '}
                                         <Link
                                             className="font-semibold text-primary underline-offset-2 hover:underline"
@@ -452,7 +458,7 @@ export const BotAuthorize = (): ReactNode => {
                                             signed in
                                         </Link>{' '}
                                         to add this bot.
-                                    </span>
+                                    </Text>
                                 </CalloutBox>
                             )}
                         </div>

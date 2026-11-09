@@ -18,6 +18,7 @@ import type { AuditLog } from '@/types/admin';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Select } from '@/ui/primitives/Select';
 import {
     Table,
     TableBody,
@@ -251,86 +252,79 @@ export const AdminAuditLogs = (): ReactNode => {
             <div className="grid grid-cols-1 gap-4 rounded-2xl border border-border-subtle bg-bg-subtle p-5 lg:grid-cols-3">
                 {/* Admin Select */}
                 <div className="space-y-2">
-                    <label
+                    <Text
+                        as="label"
                         className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="admin-select"
                     >
                         <User size={12} />
                         Administrator
-                    </label>
-                    <div className="relative">
-                        <select
-                            className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
-                            id="admin-select"
-                            value={filters.actorId}
-                            onChange={(e): void => {
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    actorId: e.target.value,
-                                }));
-                            }}
-                        >
-                            <option value="">All Administrators</option>
-                            {admins?.map((admin) => (
-                                <option key={admin.id} value={admin.id}>
-                                    {admin.username}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown
-                            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
-                            size={14}
-                        />
-                    </div>
+                    </Text>
+                    <Select
+                        className="transition-focus focus:ring-2 focus:ring-primary/10"
+                        id="admin-select"
+                        size="admin"
+                        value={filters.actorId}
+                        variant="admin"
+                        onChange={(e): void => {
+                            setFilters((prev) => ({
+                                ...prev,
+                                actorId: e.target.value,
+                            }));
+                        }}
+                    >
+                        <option value="">All Administrators</option>
+                        {admins?.map((admin) => (
+                            <option key={admin.id} value={admin.id}>
+                                {admin.username}
+                            </option>
+                        ))}
+                    </Select>
                 </div>
 
                 {/* Action Select */}
                 <div className="space-y-2">
-                    <label
+                    <Text
+                        as="label"
                         className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="action-select"
                     >
                         <Filter size={12} />
                         Action Type
-                    </label>
-                    <div className="relative">
-                        <select
-                            className="transition-focus w-full cursor-pointer appearance-none rounded-xl border border-border-subtle bg-background py-2.5 pr-10 pl-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10"
-                            id="action-select"
-                            value={filters.actionType}
-                            onChange={(e): void => {
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    actionType: e.target.value,
-                                }));
-                            }}
-                        >
-                            <option value="">All Actions</option>
-                            <option value="ban_user">Ban User</option>
-                            <option value="unban_user">Unban User</option>
-                            <option value="warn_user">Warn User</option>
-                            <option value="delete_message">
-                                Delete Message
-                            </option>
-                            <option value="update_user">Update User</option>
-                            <option value="delete_server">Delete Server</option>
-                        </select>
-                        <ChevronDown
-                            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground"
-                            size={14}
-                        />
-                    </div>
+                    </Text>
+                    <Select
+                        className="transition-focus focus:ring-2 focus:ring-primary/10"
+                        id="action-select"
+                        size="admin"
+                        value={filters.actionType}
+                        variant="admin"
+                        onChange={(e): void => {
+                            setFilters((prev) => ({
+                                ...prev,
+                                actionType: e.target.value,
+                            }));
+                        }}
+                    >
+                        <option value="">All Actions</option>
+                        <option value="ban_user">Ban User</option>
+                        <option value="unban_user">Unban User</option>
+                        <option value="warn_user">Warn User</option>
+                        <option value="delete_message">Delete Message</option>
+                        <option value="update_user">Update User</option>
+                        <option value="delete_server">Delete Server</option>
+                    </Select>
                 </div>
 
                 {/* Target ID Input */}
                 <div className="space-y-2">
-                    <label
+                    <Text
+                        as="label"
                         className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase"
                         htmlFor="target-user-input"
                     >
                         <Search size={12} />
                         Target User ID
-                    </label>
+                    </Text>
                     <Input
                         id="target-user-input"
                         placeholder="Paste User ID here..."
@@ -359,7 +353,7 @@ export const AdminAuditLogs = (): ReactNode => {
                         <TableHead>Action Performed</TableHead>
                         <TableHead>Target User</TableHead>
                         <TableHead align="right">
-                            <span className="sr-only">Actions</span>
+                            <Text className="sr-only">Actions</Text>
                         </TableHead>
                     </TableRow>
                 </TableHeader>

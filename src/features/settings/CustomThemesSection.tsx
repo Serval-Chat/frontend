@@ -9,6 +9,7 @@ import { Input } from '@/ui/primitives/Input';
 import { Label } from '@/ui/primitives/Label';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
+import { TextArea } from '@/ui/primitives/TextArea';
 
 interface CustomThemeItem {
     id: string;
@@ -239,12 +240,13 @@ export const CustomThemesSection = ({
                 }}
             />
             <Label htmlFor="custom-theme-css">CSS</Label>
-            {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- code editor: needs monospace, min-h-64 and manual resize, which the auto-growing TextArea does not support */}
-            <textarea
-                className="custom-scrollbar min-h-64 w-full resize-y rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 font-mono text-sm leading-6 text-foreground focus:border-primary focus:outline-none"
+            <TextArea
+                autoResize={false}
+                className="bg-bg-secondary"
                 id="custom-theme-css"
                 placeholder="[data-custom-theme] {&#10;  --background: #101014;&#10;  --foreground: #f4f4f5;&#10;  --primary: #7cdbff;&#10;}"
                 spellCheck={false}
+                textareaClassName="min-h-64 max-h-none resize-y font-mono leading-6"
                 value={customThemeCss}
                 onChange={(e): void => {
                     setCustomThemeCss(e.target.value);

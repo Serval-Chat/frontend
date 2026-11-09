@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn';
 import { getSafeUrl } from '@/utils/proxy';
 
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Text } from '@/ui/primitives/Text';
 
 interface UserProfilePictureIconProps {
     src?: string | null;
@@ -83,7 +84,7 @@ export const UserProfilePictureIcon = ({
                     }}
                 />
             ) : (
-                <span className="text-(--avatar-fallback-text)">{letter}</span>
+                <Text className="text-(--avatar-fallback-text)">{letter}</Text>
             )}
         </Box>
     );

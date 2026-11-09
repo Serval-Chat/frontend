@@ -1,6 +1,7 @@
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Link } from '@/ui/primitives/Link';
+import { Text } from '@/ui/primitives/Text';
 
 export const TopNavBar = () => (
     <Box className="sticky top-0 z-[var(--z-index-sticky)] w-full border-b border-border-subtle bg-background">
@@ -10,9 +11,14 @@ export const TopNavBar = () => (
                 to="/"
             >
                 <img alt="Serchat" className="h-8 w-8" src="/serchat.svg" />
-                <span className="text-xl font-bold tracking-tight text-foreground">
+                <Text
+                    size="xl"
+                    tracking="tight"
+                    variant="default"
+                    weight="bold"
+                >
                     Serchat
-                </span>
+                </Text>
             </Link>
 
             <div className="flex items-center gap-2 md:gap-4">

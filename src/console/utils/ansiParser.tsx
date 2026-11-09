@@ -1,6 +1,8 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 
+import { Text } from '@/ui/primitives/Text';
+
 interface AnsiSegment {
     text: string;
     color?: string;
@@ -220,7 +222,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
     return segments.map((seg, idx) => {
         if (seg.color || seg.backgroundColor) {
             return (
-                <span
+                <Text
                     key={idx}
                     style={{
                         color: seg.color,
@@ -228,7 +230,7 @@ export function parseAnsi(text: string): React.ReactNode[] {
                     }}
                 >
                     {seg.text}
-                </span>
+                </Text>
             );
         }
         return seg.text;

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAutoHighlight } from '@/hooks/useAutoHighlight';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Link } from '@/ui/primitives/Link';
 import { cn } from '@/utils/cn';
 
 export interface TOCSection {
@@ -41,14 +42,14 @@ const TOCItem = ({ section }: { section: TOCSection }) => {
                     </Button>
                 ) : null}
                 {hasChildren ? null : <span className="h-4 w-4 shrink-0" />}
-                <a
+                <Link
                     className={cn(
-                        'font-sans transition-colors duration-150 hover:text-primary hover:underline',
+                        'font-sans text-[length:inherit] text-[color:inherit] transition-colors duration-150 hover:text-primary hover:underline',
                     )}
                     href={`#${section.id}`}
                 >
                     {section.title}
-                </a>
+                </Link>
             </div>
 
             {hasChildren && isOpen ? (

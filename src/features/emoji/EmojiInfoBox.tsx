@@ -7,6 +7,7 @@ import type { Server } from '@/api/servers/servers.types';
 import { ServerIcon } from '@/features/servers/ServerIcon';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { Box } from '@/ui/primitives/Box';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -44,10 +45,9 @@ export const EmojiInfoBox = ({
     const content = (
         <>
             {onClose ? (
-                <button
+                <Pressable
                     aria-label="Close emoji info"
-                    className="fixed inset-0 z-[1060]"
-                    type="button"
+                    className="fixed inset-0 z-[1060] cursor-default"
                     onClick={onClose}
                     onContextMenu={onClose}
                     onKeyDown={(e): void => {

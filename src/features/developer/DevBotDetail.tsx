@@ -24,9 +24,12 @@ import {
 } from '@/hooks/developer/useBots';
 import type { BotPermissionKey, BotPermissions } from '@/types/bot';
 import { Button } from '@/ui/primitives/Button';
+import { Checkbox } from '@/ui/primitives/Checkbox';
 import { CopyInput } from '@/ui/primitives/CopyInput';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { TextArea } from '@/ui/primitives/TextArea';
 import { colors } from '@/ui/theme';
@@ -51,17 +54,21 @@ const PermissionRow = ({
     value: boolean;
     onChange: (v: boolean) => void;
 }): React.ReactNode => (
-    <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-bg-subtle">
-        <input
+    <Text
+        as="label"
+        className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-bg-subtle"
+    >
+        <Checkbox
             checked={value}
             className="h-4 w-4 accent-primary"
-            type="checkbox"
             onChange={(e): void => {
                 onChange(e.target.checked);
             }}
         />
-        <span className="text-sm text-foreground">{label}</span>
-    </label>
+        <Text size="sm" variant="default">
+            {label}
+        </Text>
+    </Text>
 );
 
 const Section = ({
@@ -72,7 +79,9 @@ const Section = ({
     children: React.ReactNode;
 }): React.ReactNode => (
     <div className="rounded-xl border border-border-subtle bg-bg-secondary p-5">
-        <p className="mb-4 font-semibold text-foreground">{title}</p>
+        <Text as="p" className="mb-4" variant="default" weight="semibold">
+            {title}
+        </Text>
         {children}
     </div>
 );
@@ -103,12 +112,13 @@ const BotAboutSection = ({
     <Section title="About Bot">
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-                <label
+                <Text
+                    as="label"
                     className="text-sm font-medium text-foreground"
                     htmlFor="bot-name"
                 >
                     Name
-                </label>
+                </Text>
                 <Input
                     id="bot-name"
                     maxLength={32}
@@ -120,12 +130,13 @@ const BotAboutSection = ({
             </div>
 
             <div className="flex flex-col gap-1">
-                <label
+                <Text
+                    as="label"
                     className="text-sm font-medium text-foreground"
                     htmlFor="bot-desc"
                 >
                     Description
-                </label>
+                </Text>
                 <TextArea
                     autoResize
                     className="min-h-25"
@@ -139,12 +150,13 @@ const BotAboutSection = ({
             </div>
 
             <div className="flex flex-col gap-1">
-                <label
+                <Text
+                    as="label"
                     className="text-sm font-medium text-foreground"
                     htmlFor="bot-banner-color"
                 >
                     Banner Color (Hex)
-                </label>
+                </Text>
                 <div className="flex items-center gap-2">
                     <Input
                         className="w-32"
@@ -276,9 +288,16 @@ const BotConfigSections = ({
             <div className="flex flex-col gap-5">
                 {BOT_PERMISSION_GROUPS.map((group) => (
                     <div className="flex flex-col gap-2" key={group.title}>
-                        <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                        <Text
+                            as="p"
+                            size="xs"
+                            tracking="wider"
+                            transform="uppercase"
+                            variant="muted"
+                            weight="semibold"
+                        >
                             {group.title}
-                        </p>
+                        </Text>
                         <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                             {group.keys.map((key: BotPermissionKey) => (
                                 <PermissionRow
@@ -520,14 +539,13 @@ export const DevBotDetail = ({
     return (
         <div className="flex items-start gap-12 pb-12">
             <div className="flex max-w-2xl flex-1 flex-col gap-5">
-                <button
+                <Pressable
                     className="flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    type="button"
                     onClick={onBack}
                 >
                     <ArrowLeft size={14} />
                     Back to bots
-                </button>
+                </Pressable>
 
                 <BotAboutSection
                     bannerColor={bannerColor}
@@ -599,12 +617,10 @@ export const DevBotDetail = ({
                         bannerInputRef.current?.click()
                     }
                 />
-                <input
-                    hidden
+                <FileInput
                     accept="image/*"
                     aria-label="Upload bot avatar"
                     ref={avatarInputRef}
-                    type="file"
                     onChange={(e): void => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -614,12 +630,10 @@ export const DevBotDetail = ({
                         e.target.value = '';
                     }}
                 />
-                <input
-                    hidden
+                <FileInput
                     accept="image/*"
                     aria-label="Upload bot banner"
                     ref={bannerInputRef}
-                    type="file"
                     onChange={(e): void => {
                         const file = e.target.files?.[0];
                         if (file) {

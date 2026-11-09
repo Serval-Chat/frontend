@@ -71,6 +71,7 @@ export const BlockedListMain = () => {
                 </Text>
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
                     <Search className="text-muted-foreground" size={14} />
+                    {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- borderless search field inside the parent's pill; Input's field chrome would add a second border and fixed height */}
                     <input
                         aria-label="Search blocked users"
                         className="w-full bg-transparent text-xs font-medium outline-none placeholder:text-muted-foreground"

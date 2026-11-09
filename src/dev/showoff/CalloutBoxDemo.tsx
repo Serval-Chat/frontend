@@ -89,13 +89,13 @@ export const CalloutBoxDemo = (): ReactNode => (
                     className="px-3.5 py-3 text-left text-sm"
                     icon={AlertTriangle}
                 >
-                    <span className="text-muted-foreground">
+                    <Text variant="muted" >
                         You must be{' '}
-                        <span className="font-semibold text-primary underline-offset-2 hover:underline">
+                        <Text className="underline-offset-2 hover:underline" variant="primary" weight="semibold">
                             signed in
-                        </span>{' '}
+                        </Text>{' '}
                         to add this bot.
-                    </span>
+                    </Text>
                 </CalloutBox>
             </DemoItem>
         </Stack>

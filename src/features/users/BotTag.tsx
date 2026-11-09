@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Check } from 'lucide-react';
 
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 interface BotTagProps {
@@ -18,7 +19,7 @@ export const BotTag = React.memo(
         const isWebhook = label === 'WEBHOOK';
 
         return (
-            <span
+            <Text
                 className={cn(
                     'ml-1 inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] leading-none font-bold uppercase select-none',
                     className,
@@ -36,7 +37,7 @@ export const BotTag = React.memo(
                     <Check aria-label="Verified bot" size={9} strokeWidth={3} />
                 ) : null}
                 {label}
-            </span>
+            </Text>
         );
     },
 );

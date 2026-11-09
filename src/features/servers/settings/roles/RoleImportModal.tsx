@@ -8,6 +8,7 @@ import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
+import { TextArea } from '@/ui/primitives/TextArea';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import {
     type ExportedRole,
@@ -238,12 +239,12 @@ export const RoleImportModal = ({
                             >
                                 Export code
                             </Text>
-                            {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- monospace paste box with manual vertical resize; TextArea auto-grows in the body font */}
-                            <textarea
-                                className="custom-scrollbar min-h-[100px] w-full resize-y rounded-md border border-border-subtle bg-bg-subtle px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:outline-none"
+                            <TextArea
+                                autoResize={false}
                                 id="role-import-code"
                                 placeholder="Paste export code here…"
                                 spellCheck={false}
+                                textareaClassName="min-h-[100px] max-h-none resize-y font-mono text-xs placeholder:text-muted-foreground"
                                 value={code}
                                 onChange={(e): void => {
                                     setCode(e.target.value);

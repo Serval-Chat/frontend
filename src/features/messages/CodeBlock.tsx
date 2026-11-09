@@ -5,6 +5,8 @@ import { Check, Copy, Download, ExternalLink, Maximize } from 'lucide-react';
 import { buildGodboltUrl, getGodboltLanguageId } from '@/lib/godbolt';
 import { addToCache, getCachedHighlight } from '@/lib/syntax-highlighter';
 import { Button } from '@/ui/primitives/Button';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import SyntaxWorker from '@/workers/syntax.worker?worker';
 
 import { type AstNode, AstRenderer, CodeModal } from './CodeModal';
@@ -149,13 +151,23 @@ export const CodeBlock = ({
             <div className="group relative my-2 overflow-hidden rounded-lg border border-border-subtle bg-background shadow-sm">
                 <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
                     {filename ? (
-                        <span className="truncate text-xs font-bold text-foreground/80">
+                        <Text
+                            className="truncate text-foreground/80"
+                            size="xs"
+                            weight="bold"
+                        >
                             {filename}
-                        </span>
+                        </Text>
                     ) : (
-                        <span className="text-[10px] font-black tracking-wider text-primary uppercase">
+                        <Text
+                            className="text-[10px]"
+                            tracking="wider"
+                            transform="uppercase"
+                            variant="primary"
+                            weight="black"
+                        >
                             {language || 'text'}
-                        </span>
+                        </Text>
                     )}
                     <div className="flex items-center gap-1">
                         {godboltLanguageId !== null && (
@@ -168,9 +180,9 @@ export const CodeBlock = ({
                                     onClick={handleOpenGodbolt}
                                 >
                                     <ExternalLink size={14} />
-                                    <span className="text-[10px] font-bold">
+                                    <Text className="text-[10px]" weight="bold">
                                         TRY IN GODBOLT
-                                    </span>
+                                    </Text>
                                 </Button>
                                 <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
                             </>
@@ -183,9 +195,9 @@ export const CodeBlock = ({
                             onClick={handleOpenFullScreen}
                         >
                             <Maximize size={14} />
-                            <span className="text-[10px] font-bold">
+                            <Text className="text-[10px]" weight="bold">
                                 FULL SCREEN
-                            </span>
+                            </Text>
                         </Button>
                         <div className="mx-1 h-3 w-[1px] bg-border-subtle" />
                         <Button
@@ -199,9 +211,9 @@ export const CodeBlock = ({
                             ) : (
                                 <Copy size={14} />
                             )}
-                            <span className="text-[10px] font-bold">
+                            <Text className="text-[10px]" weight="bold">
                                 {isCopied ? 'COPIED' : 'COPY CODE'}
-                            </span>
+                            </Text>
                         </Button>
                         {onDownload ? (
                             <>
@@ -222,9 +234,8 @@ export const CodeBlock = ({
                         ) : null}
                     </div>
                 </div>
-                <button
+                <Pressable
                     className="custom-scrollbar block w-full cursor-pointer overflow-hidden border-0 bg-bg-secondary/50 p-0 text-left font-mono text-sm"
-                    type="button"
                     onClick={handleContainerClick}
                 >
                     <pre className="m-0 overflow-x-auto bg-transparent text-sm leading-6 whitespace-pre-wrap">
@@ -234,9 +245,12 @@ export const CodeBlock = ({
                                 // eslint-disable-next-line react/no-array-index-key
                                 key={`${index}-${line.length}`}
                             >
-                                <span className="code-block-line-number mr-4 min-w-12 border-r border-border-subtle pr-3 text-right text-muted-foreground/50 select-none">
+                                <Text
+                                    align="right"
+                                    className="code-block-line-number mr-4 min-w-12 border-r border-border-subtle pr-3 text-muted-foreground/50 select-none"
+                                >
                                     {index + 1}
-                                </span>
+                                </Text>
                                 <code className="min-w-0 flex-1 break-all text-foreground">
                                     {Array.isArray(line) ? (
                                         <>
@@ -252,7 +266,7 @@ export const CodeBlock = ({
                             </div>
                         ))}
                     </pre>
-                </button>
+                </Pressable>
                 {isTruncatable ? (
                     <div className="flex justify-center border-t border-border-subtle bg-bg-subtle px-3 py-2">
                         <Button

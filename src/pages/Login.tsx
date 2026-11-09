@@ -14,11 +14,13 @@ import { useLoginWithRecoveryKey } from '@/hooks/useLoginWithRecoveryKey';
 import { Admonition } from '@/ui/primitives/Admonition';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Checkbox } from '@/ui/primitives/Checkbox';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
 import { InputWrapper } from '@/ui/primitives/InputWrapper';
 import { MutedText } from '@/ui/primitives/MutedText';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { StatusMessage } from '@/ui/primitives/StatusMessage';
 import { Text } from '@/ui/primitives/Text';
 import { canUsePasskeys } from '@/utils/webauthn';
@@ -143,15 +145,14 @@ export const Login = () => {
                             />
                         </InputWrapper>
                         <div className="flex justify-end text-sm">
-                            <button
+                            <Pressable
                                 className="text-muted-foreground hover:underline"
-                                type="button"
                                 onClick={(): void => {
                                     setShowRecoveryKeyForm(false);
                                 }}
                             >
                                 Back to sign in
-                            </button>
+                            </Pressable>
                         </div>
                         <div className="flex justify-center">
                             <Turnstile
@@ -228,11 +229,13 @@ export const Login = () => {
                                     />
                                 </InputWrapper>
                                 <div className="flex items-center justify-between text-sm">
-                                    <label className="flex cursor-pointer items-center gap-2">
-                                        <input
+                                    <Text
+                                        as="label"
+                                        className="flex cursor-pointer items-center gap-2"
+                                    >
+                                        <Checkbox
                                             checked={rememberMe}
                                             className="h-4 w-4 rounded border-border-subtle/50 bg-background/50 text-primary focus:ring-primary"
-                                            type="checkbox"
                                             onChange={(e): void => {
                                                 setRememberMe(e.target.checked);
                                             }}
@@ -240,7 +243,7 @@ export const Login = () => {
                                         <Text className="text-muted-foreground select-none">
                                             Remember Me
                                         </Text>
-                                    </label>
+                                    </Text>
                                     <Link
                                         className="text-primary hover:underline"
                                         to="/forgot-password"
@@ -252,9 +255,8 @@ export const Login = () => {
                         )}
                         {requiresTwoFactor ? (
                             <div className="flex items-center justify-between text-sm">
-                                <button
+                                <Pressable
                                     className="text-primary hover:underline"
-                                    type="button"
                                     onClick={(): void => {
                                         setUseBackupCode(
                                             (current): boolean => !current,
@@ -264,14 +266,13 @@ export const Login = () => {
                                     {useBackupCode
                                         ? 'Use authenticator code'
                                         : 'Use backup code'}
-                                </button>
-                                <button
+                                </Pressable>
+                                <Pressable
                                     className="text-muted-foreground hover:underline"
-                                    type="button"
                                     onClick={resetTwoFactorState}
                                 >
                                     Back
-                                </button>
+                                </Pressable>
                             </div>
                         ) : null}
                         {!requiresTwoFactor && (
@@ -308,7 +309,7 @@ export const Login = () => {
                     <>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <div className="h-px flex-1 bg-border-subtle" />
-                            <span>OR</span>
+                            <Text>OR</Text>
                             <div className="h-px flex-1 bg-border-subtle" />
                         </div>
                         <Button
@@ -325,15 +326,14 @@ export const Login = () => {
                             )}
                         </Button>
                         <div className="flex justify-center text-sm">
-                            <button
+                            <Pressable
                                 className="text-muted-foreground hover:underline"
-                                type="button"
                                 onClick={(): void => {
                                     setShowRecoveryKeyForm(true);
                                 }}
                             >
                                 Lost access to your passkey? Use a recovery key
-                            </button>
+                            </Pressable>
                         </div>
                     </>
                 ) : null}

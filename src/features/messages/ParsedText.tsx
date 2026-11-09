@@ -220,7 +220,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
         );
 
         return (
-            <span className={className}>
+            <Text className={className}>
                 {groupedNodes.map((item, idx) => {
                     if (item.type === '_cl_group') {
                         const { items } = item as {
@@ -233,7 +233,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
                                 nodes={items}
                                 renderContent={(node) =>
                                     typeof node.content === 'string' ? (
-                                        <span>{node.content}</span>
+                                        <Text>{node.content}</Text>
                                     ) : (
                                         <ParsedText
                                             {...nestedProps}
@@ -770,7 +770,7 @@ export const ParsedText = React.memo<ParsedTextProps>(
 
                         case 'invite': {
                             if (disableUrlEmbeds) {
-                                return <span key={idx}>{node.url}</span>;
+                                return <Text key={idx}>{node.url}</Text>;
                             }
                             if (condenseInvites) {
                                 return (
@@ -800,9 +800,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         case 'file': {
                             if (disableUrlEmbeds) {
                                 return (
-                                    <span className="break-all" key={idx}>
+                                    <Text className="break-all" key={idx}>
                                         {node.url}
-                                    </span>
+                                    </Text>
                                 );
                             }
                             return (
@@ -1002,9 +1002,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             return (
                                 <React.Suspense
                                     fallback={
-                                        <span className="opacity-50">
+                                        <Text className="opacity-50">
                                             Loading math...
-                                        </span>
+                                        </Text>
                                     }
                                     key={idx}
                                 >
@@ -1020,9 +1020,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                             return (
                                 <React.Suspense
                                     fallback={
-                                        <span className="opacity-50">
+                                        <Text className="opacity-50">
                                             Loading math...
-                                        </span>
+                                        </Text>
                                     }
                                     key={idx}
                                 >
@@ -1092,9 +1092,9 @@ export const ParsedText = React.memo<ParsedTextProps>(
                         case 'klipy': {
                             if (disableUrlEmbeds) {
                                 return (
-                                    <span className="break-all" key={idx}>
+                                    <Text className="break-all" key={idx}>
                                         {node.url}
-                                    </span>
+                                    </Text>
                                 );
                             }
                             return (
@@ -1125,11 +1125,14 @@ export const ParsedText = React.memo<ParsedTextProps>(
                 fileNodesCount > 0 &&
                 !hasVisibleContent &&
                 !isNested ? (
-                    <span className="ml-1 text-[11px] italic opacity-80">
+                    <Text
+                        className="ml-1 text-[11px] opacity-80"
+                        fontStyle="italic"
+                    >
                         Attachments: {fileNodesCount}
-                    </span>
+                    </Text>
                 ) : null}
-            </span>
+            </Text>
         );
     },
 );

@@ -11,6 +11,7 @@ import {
 import { type StatsRange, useAdminStats } from '@/hooks/admin/useAdminStats';
 import { Box } from '@/ui/primitives/Box';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Stack } from '@/ui/primitives/Stack';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
@@ -93,7 +94,7 @@ export const AdminOverview = (): ReactNode => {
                     </Text>
                     <Box className="flex items-center gap-1 rounded-xl border border-border-subtle bg-bg-subtle p-1">
                         {RANGES.map(({ label, value }) => (
-                            <button
+                            <Pressable
                                 className={cn(
                                     'rounded-lg px-3 py-1 text-xs font-medium transition-all duration-200',
                                     range === value
@@ -101,13 +102,12 @@ export const AdminOverview = (): ReactNode => {
                                         : 'text-muted-foreground hover:text-foreground',
                                 )}
                                 key={value}
-                                type="button"
                                 onClick={(): void => {
                                     setRange(value);
                                 }}
                             >
                                 {label}
-                            </button>
+                            </Pressable>
                         ))}
                     </Box>
                 </Box>

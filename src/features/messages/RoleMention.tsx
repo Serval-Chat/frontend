@@ -6,6 +6,7 @@ import { useRoles } from '@/api/servers/servers.queries';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/primitives/Box';
 import type { TextProps } from '@/ui/primitives/Text';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { getReadableRoleTextStyleAt, getRoleStyle } from '@/utils/roleColor';
 
@@ -232,7 +233,7 @@ export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
                 }
                 style={iconTextStyle}
             />
-            <span
+            <Text
                 className={cn(
                     'flex items-center leading-normal',
                     roleMentionTextSize[normalizedSize] ??
@@ -241,16 +242,16 @@ export const RoleMention = ({ roleId, size = 'sm' }: RoleMentionProps) => {
                 ref={textRef}
             >
                 {glyphSegments.map(({ glyph, key, order }) => (
-                    <span
+                    <Text
                         aria-hidden="true"
                         key={key}
                         style={glyphTextStyles[order]}
                     >
                         {glyph}
-                    </span>
+                    </Text>
                 ))}
-                <span className="sr-only">{roleName}</span>
-            </span>
+                <Text className="sr-only">{roleName}</Text>
+            </Text>
         </Box>
     );
 };

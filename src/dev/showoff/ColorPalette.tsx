@@ -90,8 +90,10 @@ export const ColorPalette = () => (
         <div className="mt-8 rounded-xl border border-border-subtle bg-bg-subtle p-6">
             <Text as="p" className="leading-relaxed" variant="muted">
                 This pallete is very{' '}
-                <span className="font-bold text-primary italic">serval</span>.
-                Serval serval serval serval serval serval.
+                <Text fontStyle="italic" variant="primary" weight="bold">
+                    serval
+                </Text>
+                . Serval serval serval serval serval serval.
             </Text>
         </div>
     </section>

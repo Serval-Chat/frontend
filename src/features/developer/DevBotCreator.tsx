@@ -7,6 +7,7 @@ import { useCreateBot } from '@/hooks/developer/useBots';
 import { Button } from '@/ui/primitives/Button';
 import { CopyInput } from '@/ui/primitives/CopyInput';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { colors } from '@/ui/theme';
 import { censorToken } from '@/utils/censorToken';
@@ -122,14 +123,13 @@ export const DevBotCreator = (): ReactNode => {
 
     return (
         <div className="flex flex-col gap-5 pb-12">
-            <button
+            <Pressable
                 className="flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                type="button"
                 onClick={leave}
             >
                 <ArrowLeft size={14} />
                 Back to bots
-            </button>
+            </Pressable>
 
             {newToken !== null ? (
                 <div
@@ -142,9 +142,14 @@ export const DevBotCreator = (): ReactNode => {
                                 : `min(${tokenSizing.boxMinWidth}px, 100%)`,
                     }}
                 >
-                    <p className="mb-4 font-semibold text-foreground">
+                    <Text
+                        as="p"
+                        className="mb-4"
+                        variant="default"
+                        weight="semibold"
+                    >
                         Bot Created
-                    </p>
+                    </Text>
                     <div className="flex flex-col gap-4">
                         <Text
                             as="p"
@@ -188,17 +193,23 @@ export const DevBotCreator = (): ReactNode => {
                 </div>
             ) : (
                 <div className="max-w-2xl rounded-xl border border-border-subtle bg-bg-secondary p-5">
-                    <p className="mb-4 font-semibold text-foreground">
+                    <Text
+                        as="p"
+                        className="mb-4"
+                        variant="default"
+                        weight="semibold"
+                    >
                         Bot Details
-                    </p>
+                    </Text>
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1">
-                            <label
+                            <Text
+                                as="label"
                                 className="text-sm font-medium text-foreground"
                                 htmlFor="bot-name"
                             >
                                 Name
-                            </label>
+                            </Text>
                             <Input
                                 id="bot-name"
                                 maxLength={32}

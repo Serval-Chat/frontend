@@ -5,6 +5,7 @@ import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
 import { SHOWOFF_SECTIONS } from './config';
+import { Text } from '@/ui/primitives/Text';
 
 const ALL_FONTS: UsernameFont[] = [
     'default',
@@ -77,9 +78,9 @@ export const UserIdentitiesDemo = () => (
                         status="online"
                         username="Small"
                     />
-                    <span className="text-xs text-muted-foreground">
+                    <Text size="xs" variant="muted" >
                         sm (32px)
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                     <UserProfilePicture
@@ -88,9 +89,9 @@ export const UserIdentitiesDemo = () => (
                         status="offline"
                         username="Medium"
                     />
-                    <span className="text-xs text-muted-foreground">
+                    <Text size="xs" variant="muted" >
                         md (40px)
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                     <UserProfilePicture
@@ -99,9 +100,9 @@ export const UserIdentitiesDemo = () => (
                         status="online"
                         username="Large"
                     />
-                    <span className="text-xs text-muted-foreground">
+                    <Text size="xs" variant="muted" >
                         lg (48px)
-                    </span>
+                    </Text>
                 </div>
             </div>
         </DemoItem>
@@ -120,33 +121,33 @@ export const UserIdentitiesDemo = () => (
         <DemoItem id="styled-usernames" title="Styled Usernames">
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-2">
-                    <span className="w-24 text-sm text-muted-foreground">
+                    <Text className="w-24" size="sm" variant="muted">
                         Default:
-                    </span>
+                    </Text>
                     <StyledUserName user={mockUsers.normal}>
                         NormalUser
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-24 text-sm text-muted-foreground">
+                    <Text className="w-24" size="sm" variant="muted">
                         Glow:
-                    </span>
+                    </Text>
                     <StyledUserName user={mockUsers.glowing}>
                         {mockUsers.glowing.username}
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-24 text-sm text-muted-foreground">
+                    <Text className="w-24" size="sm" variant="muted">
                         Gradient:
-                    </span>
+                    </Text>
                     <StyledUserName user={mockUsers.gradient}>
                         {mockUsers.gradient.username}
                     </StyledUserName>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-24 text-sm text-muted-foreground">
+                    <Text className="w-24" size="sm" variant="muted">
                         The Full Lux:
-                    </span>
+                    </Text>
                     <StyledUserName user={mockUsers.fancy}>
                         {mockUsers.fancy.username}
                     </StyledUserName>
@@ -158,9 +159,9 @@ export const UserIdentitiesDemo = () => (
             <div className="flex flex-col gap-4">
                 {ALL_FONTS.map((font) => (
                     <div className="flex items-center gap-2" key={font}>
-                        <span className="w-32 text-sm text-muted-foreground">
+                        <Text className="w-32" size="sm" variant="muted">
                             {font}:
-                        </span>
+                        </Text>
                         <StyledUserName
                             user={
                                 {

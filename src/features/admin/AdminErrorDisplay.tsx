@@ -93,13 +93,19 @@ export const AdminErrorDisplay = ({
                 </Text>
 
                 <div className="mt-6 inline-block rounded-lg border border-border-subtle bg-bg-secondary/50 px-4 py-2">
-                    <span className="mr-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+                    <Text
+                        className="mr-2 text-[10px]"
+                        tracking="widest"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="black"
+                    >
                         Error Details:
-                    </span>
-                    <span className="font-mono text-xs text-danger">
+                    </Text>
+                    <Text className="font-mono" size="xs" variant="danger">
                         {status ? `HTTP ${status}: ` : ''}
                         {message}
-                    </span>
+                    </Text>
                 </div>
             </div>
 

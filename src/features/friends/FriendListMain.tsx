@@ -14,6 +14,7 @@ import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/primitives/Box';
 import { Heading } from '@/ui/primitives/Heading';
 import { MutedText } from '@/ui/primitives/MutedText';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Skeleton } from '@/ui/primitives/Skeleton';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
@@ -55,12 +56,11 @@ const FriendProfileRow = React.memo(
 
         return (
             <Box className="group flex items-center justify-between gap-4">
-                <button
+                <Pressable
                     className={cn(
                         'flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 text-left transition-colors',
                         'text-muted-foreground hover:bg-bg-subtle',
                     )}
-                    type="button"
                     onClick={handleOpenDm}
                 >
                     <UserProfilePicture
@@ -76,7 +76,7 @@ const FriendProfileRow = React.memo(
                         {customText || customEmoji ? (
                             <Box className="flex min-w-0 items-center gap-1">
                                 {customEmoji ? (
-                                    <span className="flex shrink-0 items-center">
+                                    <Text className="flex shrink-0 items-center">
                                         {isCustomEmojiId(customEmoji) ? (
                                             <ParsedEmoji
                                                 nonInteractive
@@ -89,7 +89,7 @@ const FriendProfileRow = React.memo(
                                                 content={customEmoji}
                                             />
                                         )}
-                                    </span>
+                                    </Text>
                                 ) : null}
                                 {customText ? (
                                     <Text className="truncate text-xs text-muted-foreground">
@@ -99,15 +99,14 @@ const FriendProfileRow = React.memo(
                             </Box>
                         ) : null}
                     </Box>
-                </button>
-                <button
+                </Pressable>
+                <Pressable
                     aria-label="Open direct message"
                     className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-bg-secondary text-muted-foreground transition-colors hover:bg-bg-subtle hover:text-foreground"
-                    type="button"
                     onClick={handleOpenDm}
                 >
                     <MessageSquare size={18} />
-                </button>
+                </Pressable>
             </Box>
         );
     },
@@ -241,6 +240,7 @@ export const FriendListMain = React.memo(() => {
                 </Text>
                 <Box className="flex max-w-[200px] flex-1 items-center gap-2 rounded-md bg-bg-subtle/50 px-2 py-1 focus-within:bg-bg-subtle">
                     <Search className="text-muted-foreground" size={14} />
+                    {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- borderless search field inside the parent's pill; Input's field chrome would add a second border and fixed height */}
                     <input
                         aria-label="Search friends"
                         className="w-full bg-transparent text-xs font-medium outline-none placeholder:text-muted-foreground"

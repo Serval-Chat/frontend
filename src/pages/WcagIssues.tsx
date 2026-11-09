@@ -230,6 +230,7 @@ export const WcagIssues = (): React.ReactNode => {
                                         >
                                             {issue.help}
                                         </Text>
+                                        {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- Link would interpose the unknown-domain confirm modal on this new-tab rule link */}
                                         <a
                                             className="mt-1 inline-block font-mono text-xs text-primary underline"
                                             href={issue.helpUrl}

@@ -6,6 +6,7 @@ import { TopNavBar } from '@/app/layout/TopNavBar';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Link } from '@/ui/primitives/Link';
 import { Text } from '@/ui/primitives/Text';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -35,9 +36,9 @@ export const Downloads = (): ReactNode => (
                     level={1}
                 >
                     Download <br />
-                    <span className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                    <Text className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
                         Serchat
-                    </span>
+                    </Text>
                 </Heading>
 
                 <Text
@@ -68,9 +69,9 @@ export const Downloads = (): ReactNode => (
                         </Text>
 
                         <div className="mt-auto flex w-full flex-col gap-4">
-                            <a
+                            <Link
                                 download
-                                className="w-full"
+                                className="w-full text-[length:inherit] text-[color:inherit] hover:no-underline"
                                 href="/releases/windows_x64/Serchat_v0.7.9.exe"
                             >
                                 <Button
@@ -80,7 +81,7 @@ export const Downloads = (): ReactNode => (
                                     <Download className="mr-2" size={20} />
                                     Download .exe
                                 </Button>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -100,9 +101,9 @@ export const Downloads = (): ReactNode => (
                         </Text>
 
                         <div className="mt-auto flex w-full flex-col gap-4">
-                            <a
+                            <Link
                                 download
-                                className="w-full"
+                                className="w-full text-[length:inherit] text-[color:inherit] hover:no-underline"
                                 href="/releases/linux_x64/Serchat_v0.7.9.AppImage"
                             >
                                 <Button
@@ -112,26 +113,26 @@ export const Downloads = (): ReactNode => (
                                     <Download className="mr-2" size={20} />
                                     Download AppImage
                                 </Button>
-                            </a>
+                            </Link>
                             <div className="flex w-full gap-4">
-                                <a
+                                <Link
                                     download
-                                    className="w-full flex-1"
+                                    className="w-full flex-1 text-[length:inherit] text-[color:inherit] hover:no-underline"
                                     href="/releases/ubuntu/Serchat_v0.7.9.deb"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .deb
                                     </Button>
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                     download
-                                    className="w-full flex-1"
+                                    className="w-full flex-1 text-[length:inherit] text-[color:inherit] hover:no-underline"
                                     href="/releases/rhel/Serchat_v0.7.9.rpm"
                                 >
                                     <Button className="w-full" variant="normal">
                                         .rpm
                                     </Button>
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -152,9 +153,9 @@ export const Downloads = (): ReactNode => (
                         </Text>
 
                         <div className="mt-auto flex w-full flex-col gap-4">
-                            <a
+                            <Link
                                 download
-                                className="w-full"
+                                className="w-full text-[length:inherit] text-[color:inherit] hover:no-underline"
                                 href="/releases/android/Serchat_v0.7.9.apk"
                             >
                                 <Button
@@ -164,7 +165,7 @@ export const Downloads = (): ReactNode => (
                                     <Download className="mr-2" size={20} />
                                     Download APK
                                 </Button>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

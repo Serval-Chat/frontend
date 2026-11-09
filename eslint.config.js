@@ -114,7 +114,7 @@ export default tseslint.config(
       'react/no-multi-comp': ['warn', { ignoreStateless: true }],
 
       'no-ui/no-raw-controls-outside-primitives': [
-        'warn',
+        'error',
         { allowedPaths: ['src/ui/primitives/', 'src/dev/nt/'] },
       ],
     },

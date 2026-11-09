@@ -5,6 +5,7 @@ import type { StaffReport } from '@/api/reports/reports.api';
 import { warningsApi } from '@/api/warnings/warnings.api';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
 import { colors } from '@/ui/theme';
 import { extractApiError } from '@/utils/extractApiError';
@@ -135,12 +136,16 @@ export const ReportPunishmentActions = ({
                     <Text className="mb-2" size="sm" weight="bold">
                         Punishment
                     </Text>
-                    <label className="flex max-w-xs flex-col gap-1 text-xs">
+                    <Text
+                        as="label"
+                        className="flex max-w-xs flex-col gap-1 text-xs"
+                    >
                         Action
-                        <select
+                        <Select
                             aria-label="Punishment for reported user"
-                            className="w-full rounded-lg border border-border-subtle bg-background p-2 text-sm"
+                            size="md"
                             value={punishment}
+                            variant="admin"
                             onChange={(event): void => {
                                 const next = event.target.value as Punishment;
                                 patchForm({
@@ -159,17 +164,18 @@ export const ReportPunishmentActions = ({
                             <option value="warn">Issue warning</option>
                             <option value="mute">Mute user</option>
                             <option value="ban">Ban user</option>
-                        </select>
-                    </label>
+                        </Select>
+                    </Text>
                 </div>
                 {punishment ? (
                     <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1fr)_13rem_auto]">
                         <div className="flex min-w-0 flex-col gap-1 text-xs">
-                            <label
+                            <Text
+                                as="label"
                                 htmlFor={`report-punishment-reason-${report.id}`}
                             >
                                 Reason
-                            </label>
+                            </Text>
                             <Input
                                 id={`report-punishment-reason-${report.id}`}
                                 maxLength={500}
@@ -180,13 +186,14 @@ export const ReportPunishmentActions = ({
                             />
                         </div>
                         <div className="flex flex-col gap-1 text-xs">
-                            <label
+                            <Text
+                                as="label"
                                 htmlFor={`report-punishment-duration-${report.id}`}
                             >
                                 {punishment === 'warn'
                                     ? 'Expiry (minutes)'
                                     : 'Duration (minutes)'}
-                            </label>
+                            </Text>
                             <Input
                                 id={`report-punishment-duration-${report.id}`}
                                 min={punishment === 'warn' ? undefined : 1}

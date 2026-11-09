@@ -5,7 +5,9 @@ import { Check } from 'lucide-react';
 import type { ManualUserStatus } from '@/hooks/useSelfStatus';
 import { Popover } from '@/ui/primitives/Popover';
 import { Box } from '@/ui/primitives/Box';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { UserProfileStatusIndicator } from '@/features/users/UserProfileStatusIndicator';
+import { Text } from '@/ui/primitives/Text';
 
 interface StatusPickerProps {
     isOpen: boolean;
@@ -36,10 +38,9 @@ export const StatusPicker = ({
         onClose={onClose}
     >
         {STATUS_OPTIONS.map((option) => (
-            <button
+            <Pressable
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-foreground transition-colors hover:bg-bg-secondary"
                 key={option.label}
-                type="button"
                 onClick={(): void => {
                     onSelect(option.value);
                     onClose();
@@ -52,11 +53,11 @@ export const StatusPicker = ({
                         status={option.value}
                     />
                 </Box>
-                <span className="flex-1 truncate">{option.label}</span>
+                <Text className="flex-1 truncate">{option.label}</Text>
                 {currentStatus === option.value ? (
                     <Check className="shrink-0 text-primary" size={14} />
                 ) : null}
-            </button>
+            </Pressable>
         ))}
     </Popover>
 );

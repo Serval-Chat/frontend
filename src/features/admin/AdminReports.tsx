@@ -11,8 +11,11 @@ import {
 import { useUsers } from '@/hooks/useUsers';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
+import { TextArea } from '@/ui/primitives/TextArea';
 import { mergeReducer } from '@/utils/mergeReducer';
 
 import { ReportMessagePreview } from './ReportMessagePreview';
@@ -88,11 +91,13 @@ export const AdminReports = () => {
                             });
                         }}
                     >
-                        <input
+                        <Input
                             aria-label="Search reports by ID"
-                            className="min-w-56 rounded-lg border border-border-subtle bg-bg-secondary px-3 py-2"
+                            minWidth="14rem"
                             placeholder="Search report ID"
+                            size="md"
                             value={reportIdInput}
+                            variant="secondary"
                             onChange={(event): void => {
                                 patchQuery({
                                     reportIdInput: event.target.value,
@@ -117,11 +122,13 @@ export const AdminReports = () => {
                             </Button>
                         ) : null}
                     </form>
-                    <select
+                    <Select
                         aria-label="Filter reports by status"
-                        className="rounded-lg border border-border-subtle bg-bg-secondary p-2 disabled:opacity-50"
                         disabled={Boolean(reportId)}
+                        size="md"
                         value={filter}
+                        variant="secondary"
+                        wrapperClassName="w-auto"
                         onChange={(event): void => {
                             patchQuery({
                                 filter: event.target.value as ReportStatus | '',
@@ -135,7 +142,7 @@ export const AdminReports = () => {
                                 {status}
                             </option>
                         ))}
-                    </select>
+                    </Select>
                 </div>
             </div>
             {reportId ? (
@@ -226,15 +233,22 @@ export const AdminReports = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <ReportIdCopy id={report.id} />
-                                    <span className="rounded-full bg-bg-secondary px-2 py-1 text-xs">
+                                    <Text
+                                        className="rounded-full bg-bg-secondary px-2 py-1"
+                                        size="xs"
+                                    >
                                         {report.reportCount ?? 1}{' '}
                                         {(report.reportCount ?? 1) === 1
                                             ? 'report'
                                             : 'reports'}
-                                    </span>
-                                    <span className="rounded-full bg-bg-secondary px-2 py-1 text-xs capitalize">
+                                    </Text>
+                                    <Text
+                                        className="rounded-full bg-bg-secondary px-2 py-1"
+                                        size="xs"
+                                        transform="capitalize"
+                                    >
                                         {report.status}
-                                    </span>
+                                    </Text>
                                 </div>
                             </div>
                             {report.targetType === 'user' ? (
@@ -287,11 +301,15 @@ export const AdminReports = () => {
                                 report={report}
                             />
                             <div className="flex flex-wrap items-end gap-3">
-                                <label className="flex flex-col gap-1 text-xs">
+                                <Text
+                                    as="label"
+                                    className="flex flex-col gap-1 text-xs"
+                                >
                                     Status
-                                    <select
-                                        className="rounded-lg border border-border-subtle bg-background p-2 text-sm"
+                                    <Select
+                                        size="md"
                                         value={draft.status}
+                                        variant="admin"
                                         onChange={(event): void =>
                                             setDrafts((current) => ({
                                                 ...current,
@@ -308,13 +326,18 @@ export const AdminReports = () => {
                                                 {status}
                                             </option>
                                         ))}
-                                    </select>
-                                </label>
-                                <label className="flex min-w-64 flex-1 flex-col gap-1 text-xs">
+                                    </Select>
+                                </Text>
+                                <Text
+                                    as="label"
+                                    className="flex min-w-64 flex-1 flex-col gap-1 text-xs"
+                                >
                                     Internal note
-                                    <textarea
-                                        className="min-h-16 rounded-lg border border-border-subtle bg-background p-2 text-sm"
+                                    <TextArea
+                                        autoResize={false}
+                                        className="rounded-lg bg-background"
                                         maxLength={2000}
+                                        textareaClassName="min-h-16 max-h-none resize-y p-2"
                                         value={draft.note}
                                         onChange={(event): void =>
                                             setDrafts((current) => ({
@@ -326,7 +349,7 @@ export const AdminReports = () => {
                                             }))
                                         }
                                     />
-                                </label>
+                                </Text>
                                 <Button
                                     loading={update.isPending}
                                     variant="primary"

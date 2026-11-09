@@ -77,6 +77,8 @@ import type {
 import { setUserVolume } from '@/store/slices/voiceSlice';
 import { Box } from '@/ui/primitives/Box';
 import { ContextMenu, type ContextMenuItem } from '@/ui/primitives/ContextMenu';
+import { Slider } from '@/ui/primitives/Slider';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { resolveDisplayName } from '@/utils/displayName';
 import { buildUsernameColorResolverReport } from '@/utils/usernameColorResolver';
@@ -665,20 +667,19 @@ const UserItemInner = React.memo(
                                     <Volume2 size={12} />
                                     User Volume
                                 </div>
-                                <span>
+                                <Text>
                                     {Math.round(
                                         (isNaN(volume) ? 1 : volume) * 100,
                                     )}
                                     %
-                                </span>
+                                </Text>
                             </div>
-                            <input
+                            <Slider
                                 aria-label="User volume"
                                 className="w-full cursor-pointer accent-primary"
                                 max="2"
                                 min="0"
                                 step="0.01"
-                                type="range"
                                 value={volume}
                                 onChange={(e): void => {
                                     dispatch(
@@ -804,9 +805,9 @@ const UserItemInner = React.memo(
                                       label: (
                                           <Box className="flex items-center gap-2">
                                               <RoleDot role={r} size={8} />
-                                              <span className="truncate">
+                                              <Text className="truncate">
                                                   {r.name}
-                                              </span>
+                                              </Text>
                                           </Box>
                                       ),
                                       onClick: (): void => {
@@ -1077,7 +1078,7 @@ const UserItemInner = React.memo(
                             {presenceCustomText || presenceCustomEmoji ? (
                                 <div className="flex min-w-0 items-center gap-1">
                                     {presenceCustomEmoji ? (
-                                        <span className="flex shrink-0 items-center">
+                                        <Text className="flex shrink-0 items-center">
                                             {isCustomEmojiId(
                                                 presenceCustomEmoji,
                                             ) ? (
@@ -1096,12 +1097,16 @@ const UserItemInner = React.memo(
                                                     }
                                                 />
                                             )}
-                                        </span>
+                                        </Text>
                                     ) : null}
                                     {presenceCustomText ? (
-                                        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+                                        <Text
+                                            className="min-w-0 flex-1 truncate"
+                                            size="xs"
+                                            variant="muted"
+                                        >
                                             {presenceCustomText}
-                                        </span>
+                                        </Text>
                                     ) : null}
                                 </div>
                             ) : null}

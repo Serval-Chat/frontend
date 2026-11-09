@@ -169,10 +169,20 @@ const ServerInvitesCard = ({
                             key={invite.id}
                         >
                             <div className="flex flex-col">
-                                <span className="font-mono text-xs leading-tight font-bold">
+                                <Text
+                                    className="font-mono"
+                                    leading="tight"
+                                    size="xs"
+                                    weight="bold"
+                                >
                                     {invite.code}
-                                </span>
-                                <span className="text-[9px] font-medium text-muted-foreground uppercase">
+                                </Text>
+                                <Text
+                                    className="text-[9px]"
+                                    transform="uppercase"
+                                    variant="muted"
+                                    weight="medium"
+                                >
                                     {invite.uses} / {invite.maxUses || '∞'} Uses
                                     • Exp:{' '}
                                     {invite.expiresAt
@@ -180,7 +190,7 @@ const ServerInvitesCard = ({
                                               invite.expiresAt,
                                           ).toLocaleDateString(APP_LOCALE)
                                         : 'Never'}
-                                </span>
+                                </Text>
                             </div>
                             <Button
                                 aria-label="Revoke invite"

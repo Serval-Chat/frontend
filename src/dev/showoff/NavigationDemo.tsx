@@ -3,6 +3,7 @@ import type { Server } from '@/api/servers/servers.types';
 import { ServerIcon } from '@/features/servers/ServerIcon';
 import { ServerItem } from '@/features/servers/ServerItem';
 import { UserItem } from '@/features/users/UserItem';
+import { Text } from '@/ui/primitives/Text';
 
 import { DemoItem } from './DemoItem';
 import { DemoSection } from './DemoSection';
@@ -32,15 +33,15 @@ export const NavigationDemo = () => (
             <div className="flex w-fit items-center gap-4 rounded-xl bg-[--color-bg-secondary] p-4">
                 <div className="flex flex-col items-center gap-1">
                     <ServerIcon server={mockServer} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Default
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerIcon isActive server={mockServer} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Active
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerIcon
@@ -49,9 +50,9 @@ export const NavigationDemo = () => (
                             icon: 'https://catfla.re/images/servals/serval-1.jpg',
                         }}
                     />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         With Icon
-                    </span>
+                    </Text>
                 </div>
             </div>
         </DemoItem>
@@ -67,27 +68,27 @@ export const NavigationDemo = () => (
                         isUnread={false}
                         server={mockServer}
                     />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Read
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isActive isUnread={false} server={mockServer} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Read (active)
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isUnread isActive={false} server={mockServer} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Unread
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                     <ServerItem isActive isUnread server={mockServer} />
-                    <span className="text-[10px] text-muted-foreground">
+                    <Text className="text-[10px]" variant="muted">
                         Unread (active)
-                    </span>
+                    </Text>
                 </div>
             </div>
         </DemoItem>

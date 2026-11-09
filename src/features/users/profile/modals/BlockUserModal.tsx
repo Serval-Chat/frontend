@@ -5,7 +5,9 @@ import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
+import { Label } from '@/ui/primitives/Label';
 import { Modal } from '@/ui/primitives/Modal';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
 
 export interface BlockUserModalProps {
@@ -67,16 +69,13 @@ export const BlockUserModal = ({
                 </Box>
 
                 <Box className="space-y-2">
-                    <label
-                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-                        htmlFor="block-profile-select"
-                    >
+                    <Label htmlFor="block-profile-select">
                         Select Blocking Profile
-                    </label>
-                    <select
-                        className="w-full rounded-md border border-white/10 bg-bg-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                    </Label>
+                    <Select
                         id="block-profile-select"
                         value={selectedProfileId}
+                        variant="secondary"
                         onChange={(e): void => {
                             setSelectedProfileId(e.target.value);
                         }}
@@ -86,7 +85,7 @@ export const BlockUserModal = ({
                                 {p.name}
                             </option>
                         ))}
-                    </select>
+                    </Select>
                 </Box>
 
                 <Box className="-mx-6 -mb-6 flex justify-end gap-3 border-t border-border-subtle bg-bg-subtle p-6 pt-4">

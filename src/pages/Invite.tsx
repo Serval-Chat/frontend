@@ -169,13 +169,15 @@ export const Invite = () => {
                         data.server.tags.length > 0 ? (
                             <div className="flex flex-wrap justify-center gap-1.5 pt-0.5">
                                 {data.server.tags.map((tag) => (
-                                    <span
-                                        className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary"
+                                    <Text
+                                        className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[9px]"
                                         key={tag}
+                                        variant="primary"
+                                        weight="bold"
                                     >
                                         <Tag className="opacity-60" size={10} />
                                         {tag}
-                                    </span>
+                                    </Text>
                                 ))}
                             </div>
                         ) : null}
@@ -186,7 +188,7 @@ export const Invite = () => {
                         {!showSkeleton && data ? (
                             <div className="flex flex-wrap justify-center gap-x-lg gap-y-xs text-xs text-muted-foreground">
                                 {data.maxUses == null ? null : (
-                                    <span className="flex items-center gap-1">
+                                    <Text className="flex items-center gap-1">
                                         {data.uses} /{' '}
                                         {data.maxUses === 0 ? (
                                             <InfinityIcon
@@ -197,10 +199,10 @@ export const Invite = () => {
                                             data.maxUses
                                         )}{' '}
                                         uses
-                                    </span>
+                                    </Text>
                                 )}
                                 {data.expiresAt ? (
-                                    <span>
+                                    <Text>
                                         Expires{' '}
                                         {new Date(
                                             data.expiresAt,
@@ -209,7 +211,7 @@ export const Invite = () => {
                                             day: 'numeric',
                                             year: 'numeric',
                                         })}
-                                    </span>
+                                    </Text>
                                 ) : null}
                             </div>
                         ) : null}

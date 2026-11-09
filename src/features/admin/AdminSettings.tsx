@@ -10,8 +10,12 @@ import {
     useUpdateAdminReportOptions,
 } from '@/hooks/admin/useAdminReports';
 import { Button } from '@/ui/primitives/Button';
+import { Checkbox } from '@/ui/primitives/Checkbox';
 import { Heading } from '@/ui/primitives/Heading';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
 
 interface ReportReasonDraft {
@@ -66,11 +70,10 @@ const ReorderableItem = <T,>({
             value={value}
         >
             <div className="flex items-start gap-2">
-                <button
+                <Pressable
                     aria-label={ariaLabel}
                     className="mt-1 shrink-0 touch-none cursor-grab select-none rounded p-1 text-muted-foreground hover:bg-bg-subtle focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
                     title="Drag to reorder, or use the arrow keys."
-                    type="button"
                     onKeyDown={(event): void => {
                         if (event.key === 'ArrowUp') {
                             event.preventDefault();
@@ -83,7 +86,7 @@ const ReorderableItem = <T,>({
                     onPointerDown={(event): void => controls.start(event)}
                 >
                     <GripVertical aria-hidden="true" size={16} />
-                </button>
+                </Pressable>
                 <div className="min-w-0 flex-1">{children}</div>
             </div>
         </Reorder.Item>
@@ -340,21 +343,25 @@ const ReportReasonEditor = ({
                     >
                         <div className="space-y-3">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <input
+                                <Input
                                     aria-label={`Report reason ${index + 1}`}
-                                    className="min-w-0 flex-1 rounded-lg border border-border-subtle bg-bg-primary p-2"
                                     maxLength={80}
+                                    minWidth={0}
+                                    size="md"
                                     value={option.label}
+                                    variant="admin"
                                     onChange={(event): void =>
                                         updateOption(index, {
                                             label: event.target.value,
                                         })
                                     }
                                 />
-                                <select
+                                <Select
                                     aria-label={`Report reason type ${index + 1}`}
-                                    className="rounded-lg border border-border-subtle bg-bg-primary p-2"
+                                    size="md"
                                     value={option.targetType}
+                                    variant="admin"
+                                    wrapperClassName="w-auto"
                                     onChange={(event): void =>
                                         updateOption(index, {
                                             targetType: event.target.value as
@@ -365,11 +372,13 @@ const ReportReasonEditor = ({
                                 >
                                     <option value="message">Message</option>
                                     <option value="user">User profile</option>
-                                </select>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input
+                                </Select>
+                                <Text
+                                    as="label"
+                                    className="flex items-center gap-2 text-sm"
+                                >
+                                    <Checkbox
                                         checked={option.enabled}
-                                        type="checkbox"
                                         onChange={(event): void =>
                                             updateOption(index, {
                                                 enabled: event.target.checked,
@@ -377,7 +386,7 @@ const ReportReasonEditor = ({
                                         }
                                     />
                                     Enabled
-                                </label>
+                                </Text>
                                 <Button
                                     disabled={option.subcategories.length >= 50}
                                     style={{
@@ -447,11 +456,13 @@ const ReportReasonEditor = ({
                                             }
                                         >
                                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                                <input
+                                                <Input
                                                     aria-label={`Subcategory ${index + 1}.${subIndex + 1}`}
-                                                    className="min-w-0 flex-1 rounded-lg border border-border-subtle bg-bg-primary p-2"
                                                     maxLength={80}
+                                                    minWidth={0}
+                                                    size="md"
                                                     value={subcategory.label}
+                                                    variant="admin"
                                                     onChange={(event): void =>
                                                         updateSubcategory(
                                                             index,
@@ -464,12 +475,14 @@ const ReportReasonEditor = ({
                                                         )
                                                     }
                                                 />
-                                                <label className="flex items-center gap-2 text-sm">
-                                                    <input
+                                                <Text
+                                                    as="label"
+                                                    className="flex items-center gap-2 text-sm"
+                                                >
+                                                    <Checkbox
                                                         checked={
                                                             subcategory.enabled
                                                         }
-                                                        type="checkbox"
                                                         onChange={(
                                                             event,
                                                         ): void =>
@@ -486,7 +499,7 @@ const ReportReasonEditor = ({
                                                         }
                                                     />
                                                     Enabled
-                                                </label>
+                                                </Text>
                                                 <IconButton
                                                     aria-label={`Delete subcategory ${index + 1}.${subIndex + 1}`}
                                                     icon={Trash2}

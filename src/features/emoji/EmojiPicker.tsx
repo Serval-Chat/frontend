@@ -16,6 +16,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -846,10 +847,9 @@ export const EmojiPicker = ({
         const height = Math.round(visualViewport.height / 2);
         return createPortal(
             <>
-                <button
+                <Pressable
                     aria-label="Close emoji picker"
                     className="fixed inset-0 z-[var(--z-index-top)] cursor-default border-0 bg-transparent p-0 text-left"
-                    type="button"
                     onClick={onClickAway}
                 />
                 <m.div

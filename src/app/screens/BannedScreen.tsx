@@ -1,3 +1,5 @@
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { removeAuthToken } from '@/utils/authToken';
 
 interface BannedScreenProps {
@@ -34,46 +36,66 @@ export const BannedScreen = ({
     return (
         <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background p-8 text-center">
             <div className="flex max-w-sm flex-col items-center gap-6">
-                <p className="text-2xl font-bold text-danger">
+                <Text as="p" size="2xl" variant="danger" weight="bold">
                     Account Suspended
-                </p>
+                </Text>
 
                 <div className="w-full rounded-lg border border-border-subtle bg-bg-subtle p-4 text-left text-sm">
-                    <p className="mb-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                    <Text
+                        as="p"
+                        className="mb-1"
+                        size="xs"
+                        tracking="widest"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="semibold"
+                    >
                         Reason
-                    </p>
-                    <p className="max-h-[50vh] overflow-y-auto break-words whitespace-pre-wrap text-foreground">
+                    </Text>
+                    <Text
+                        as="p"
+                        className="max-h-[50vh] overflow-y-auto break-words"
+                        variant="default"
+                        wrap="preWrap"
+                    >
                         {reason !== undefined && reason !== ''
                             ? reason
                             : 'No reason provided.'}
-                    </p>
+                    </Text>
 
                     <div className="my-3 h-px bg-divider" />
 
-                    <p className="mb-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                    <Text
+                        as="p"
+                        className="mb-1"
+                        size="xs"
+                        tracking="widest"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="semibold"
+                    >
                         Duration
-                    </p>
-                    <p className="text-foreground">
+                    </Text>
+                    <Text as="p" variant="default">
                         {expiry === null ? (
-                            <span className="text-danger">Permanent</span>
+                            <Text variant="danger">Permanent</Text>
                         ) : (
                             <>Expires {expiry}</>
                         )}
-                    </p>
+                    </Text>
                 </div>
 
-                <p className="text-xs text-muted-foreground">
+                <Text as="p" size="xs" variant="muted">
                     If you believe this is a mistake, contact the instance
                     administrator.
-                </p>
+                </Text>
 
-                <button
+                <Pressable
                     className="rounded border border-border-subtle bg-bg-subtle px-4 py-2 text-sm text-foreground hover:bg-bg-subtle/80"
-                    type="button"
                     onClick={handleLogout}
                 >
                     Log out
-                </button>
+                </Pressable>
             </div>
         </div>
     );

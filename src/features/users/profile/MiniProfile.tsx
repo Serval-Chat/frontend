@@ -11,6 +11,7 @@ import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { Box } from '@/ui/primitives/Box';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { isCustomEmojiId } from '@/utils/validation';
 
@@ -96,7 +97,7 @@ export const MiniProfile = () => {
                         {statusEmoji !== '' || statusText !== '' ? (
                             <>
                                 <StatusEmoji statusEmoji={statusEmoji} />
-                                <span className="truncate">{statusText}</span>
+                                <Text className="truncate">{statusText}</Text>
                             </>
                         ) : (
                             'Set specific status'

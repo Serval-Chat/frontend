@@ -4,7 +4,9 @@ import type { ReportReason, ReportTargetType } from '@/api/reports/reports.api';
 import { useReportOptions, useSubmitReport } from '@/hooks/useReports';
 import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
+import { Select } from '@/ui/primitives/Select';
 import { Text } from '@/ui/primitives/Text';
+import { TextArea } from '@/ui/primitives/TextArea';
 
 import { ReportIdCopy } from './ReportIdCopy';
 
@@ -88,16 +90,16 @@ export const ReportModal = ({
                         Reports are reviewed by platform staff. Please provide
                         enough context to help us review it.
                     </Text>
-                    <label className="flex flex-col gap-2 text-sm">
+                    <Text as="label" className="flex flex-col gap-2 text-sm">
                         Reason
-                        <select
-                            className="rounded-lg border border-border-subtle bg-bg-secondary p-2"
+                        <Select
                             disabled={
                                 isLoadingReasons ||
                                 isReasonLoadError ||
                                 reasons.length === 0
                             }
                             value={reason}
+                            variant="secondary"
                             onChange={(event): void => {
                                 setSelectedReason(
                                     event.target.value as ReportReason,
@@ -115,14 +117,17 @@ export const ReportModal = ({
                                     Loading report reasons…
                                 </option>
                             ) : null}
-                        </select>
-                    </label>
+                        </Select>
+                    </Text>
                     {subcategories.length > 0 ? (
-                        <label className="flex flex-col gap-2 text-sm">
+                        <Text
+                            as="label"
+                            className="flex flex-col gap-2 text-sm"
+                        >
                             Subcategory (optional)
-                            <select
-                                className="rounded-lg border border-border-subtle bg-bg-secondary p-2"
+                            <Select
                                 value={subReason}
+                                variant="secondary"
                                 onChange={(event): void =>
                                     setSelectedSubReason(event.target.value)
                                 }
@@ -133,8 +138,8 @@ export const ReportModal = ({
                                         {option.label}
                                     </option>
                                 ))}
-                            </select>
-                        </label>
+                            </Select>
+                        </Text>
                     ) : null}
                     {isReasonLoadError ? (
                         <Text as="p" size="sm" variant="danger">
@@ -146,17 +151,18 @@ export const ReportModal = ({
                             reasons are configured.
                         </Text>
                     ) : null}
-                    <label className="flex flex-col gap-2 text-sm">
+                    <Text as="label" className="flex flex-col gap-2 text-sm">
                         Details (optional)
-                        <textarea
-                            className="min-h-24 rounded-lg border border-border-subtle bg-bg-secondary p-2"
+                        <TextArea
+                            className="rounded-lg bg-bg-secondary"
                             maxLength={1000}
+                            textareaClassName="min-h-24"
                             value={details}
                             onChange={(event): void =>
                                 setDetails(event.target.value)
                             }
                         />
-                    </label>
+                    </Text>
                     {submit.isError ? (
                         <Text as="p" size="sm" variant="danger">
                             Could not submit this report. Please try again.

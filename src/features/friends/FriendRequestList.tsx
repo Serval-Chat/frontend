@@ -11,6 +11,7 @@ import { setMobileHomeTab } from '@/store/slices/navSlice';
 import { Box } from '@/ui/primitives/Box';
 import { Heading } from '@/ui/primitives/Heading';
 import { MutedText } from '@/ui/primitives/MutedText';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Skeleton } from '@/ui/primitives/Skeleton';
 import { cn } from '@/utils/cn';
 
@@ -83,17 +84,16 @@ export const FriendRequestList = () => {
         <Box className="flex h-full flex-col overflow-hidden">
             <Box className="flex h-12 shrink-0 items-center border-b border-bg-subtle bg-bg-secondary px-4 shadow-sm">
                 <Box className="flex flex-1 items-center gap-4">
-                    <button
+                    <Pressable
                         aria-label="Back to friends list"
                         className="-ml-2 rounded-md p-2 text-muted-foreground transition-colors hover:bg-bg-secondary hover:text-foreground md:hidden"
-                        type="button"
                         onClick={(): {
                             payload: 'friends' | 'requests';
                             type: 'nav/setMobileHomeTab';
                         } => dispatch(setMobileHomeTab('friends'))}
                     >
                         <ArrowLeft className="h-5 w-5" />
-                    </button>
+                    </Pressable>
 
                     <Heading className="text-sm font-bold" level={2}>
                         Friends
@@ -102,28 +102,26 @@ export const FriendRequestList = () => {
                     <Box className="h-6 w-[1px] bg-bg-subtle" />
 
                     <Box className="flex items-center gap-2">
-                        <button
+                        <Pressable
                             className={cn(
                                 'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'all'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
-                            type="button"
                             onClick={(): void => {
                                 setView('all');
                             }}
                         >
                             All
-                        </button>
-                        <button
+                        </Pressable>
+                        <Pressable
                             className={cn(
                                 'relative rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'pending'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
-                            type="button"
                             onClick={(): void => {
                                 setView('pending');
                             }}
@@ -134,15 +132,14 @@ export const FriendRequestList = () => {
                                     {requests.length}
                                 </Box>
                             ) : null}
-                        </button>
-                        <button
+                        </Pressable>
+                        <Pressable
                             className={cn(
                                 'relative rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'sent'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
-                            type="button"
                             onClick={(): void => {
                                 setView('sent');
                             }}
@@ -153,37 +150,35 @@ export const FriendRequestList = () => {
                                     {sentRequests.length}
                                 </Box>
                             ) : null}
-                        </button>
+                        </Pressable>
 
-                        <button
+                        <Pressable
                             className={cn(
                                 'rounded px-3 py-1 text-sm font-semibold transition-all duration-200',
                                 view === 'blocked'
                                     ? 'bg-primary text-foreground-inverse hover:bg-primary-hover'
                                     : 'text-muted-foreground hover:bg-bg-secondary hover:text-foreground',
                             )}
-                            type="button"
                             onClick={(): void => {
                                 setView('blocked');
                             }}
                         >
                             Blocked
-                        </button>
+                        </Pressable>
 
-                        <button
+                        <Pressable
                             className={cn(
                                 'ml-2 rounded px-3 py-1 text-sm font-bold transition-all duration-200',
                                 view === 'add'
                                     ? 'bg-success text-black'
                                     : 'bg-success/20 text-success hover:bg-success hover:text-black',
                             )}
-                            type="button"
                             onClick={(): void => {
                                 setView('add');
                             }}
                         >
                             Add friend
-                        </button>
+                        </Pressable>
                     </Box>
                 </Box>
             </Box>

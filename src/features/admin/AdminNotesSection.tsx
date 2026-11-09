@@ -23,6 +23,7 @@ import {
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { TextArea } from '@/ui/primitives/TextArea';
 import { useToast } from '@/ui/primitives/Toast';
@@ -79,9 +80,8 @@ const AdminNoteItem = ({
                                 </div>
                             ) : null}
                             {note.history.length > 0 && !isDeleted ? (
-                                <button
+                                <Pressable
                                     className="flex items-center gap-1 rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold tracking-tight text-primary uppercase transition-colors hover:bg-primary/20"
-                                    type="button"
                                     onClick={onToggleHistory}
                                 >
                                     <History size={10} />
@@ -93,7 +93,7 @@ const AdminNoteItem = ({
                                         )}
                                         size={10}
                                     />
-                                </button>
+                                </Pressable>
                             ) : null}
                         </div>
                         <Text size="xs" variant="muted">
@@ -201,12 +201,12 @@ const AdminNoteItem = ({
             {isDeleted ? (
                 <div className="mt-4 rounded-xl border border-danger/20 bg-danger/5 p-3">
                     <div className="mb-1 flex items-center justify-between text-[10px] font-bold tracking-widest text-danger uppercase">
-                        <span>Deletion Record</span>
-                        <span>
+                        <Text>Deletion Record</Text>
+                        <Text>
                             {new Date(note.deletedAt!).toLocaleDateString(
                                 APP_LOCALE,
                             )}
-                        </span>
+                        </Text>
                     </div>
                     <Text className="text-danger/80 italic" size="xs">
                         Reason: {note.deleteReason}

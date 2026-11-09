@@ -4,6 +4,7 @@ import { m } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
 import { useSmartPosition } from '@/hooks/useSmartPosition';
+import { Pressable } from '@/ui/primitives/Pressable';
 
 import { getUnicode, getSpriteStyle } from '@/utils/emoji';
 import type { EmojiData } from '@/utils/emoji';
@@ -72,10 +73,9 @@ export const SkinTonePopover = ({
 
     const content = (
         <div>
-            <button
+            <Pressable
                 aria-label="Close skin tone picker"
-                className="fixed inset-0 z-[99998]"
-                type="button"
+                className="fixed inset-0 z-[99998] cursor-default"
                 onClick={onClose}
                 onContextMenu={(e): void => {
                     e.preventDefault();
@@ -100,7 +100,7 @@ export const SkinTonePopover = ({
                 onTouchStart={handlePointerDown}
             >
                 {swatches.map((swatch, i) => (
-                    <button
+                    <Pressable
                         aria-label={`Skin tone ${i === 0 ? 'default' : i}`}
                         className={cn(
                             'relative flex shrink-0 cursor-pointer items-center justify-center rounded-xl transition-all duration-100',
@@ -108,7 +108,6 @@ export const SkinTonePopover = ({
                         )}
                         key={swatch.unicode}
                         style={{ width: SWATCH_SIZE, height: SWATCH_SIZE }}
-                        type="button"
                         onClick={(): void => {
                             onSelect(swatch.unicode);
                             onClose();
@@ -127,7 +126,7 @@ export const SkinTonePopover = ({
                         >
                             <span style={getSpriteStyle(swatch.spriteData)} />
                         </span>
-                    </button>
+                    </Pressable>
                 ))}
             </m.div>
         </div>

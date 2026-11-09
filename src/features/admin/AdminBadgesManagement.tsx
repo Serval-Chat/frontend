@@ -12,6 +12,7 @@ import {
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 
@@ -151,17 +152,16 @@ export const AdminBadgesManagement = ({
                                     ID: {badge.id}
                                 </Text>
                             </div>
-                            <button
+                            <Pressable
                                 className="absolute -top-1.5 -right-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-danger text-white shadow-sm transition-transform group-hover:flex hover:scale-110"
                                 disabled={isRemoving}
                                 title="Remove badge"
-                                type="button"
                                 onClick={(): void => {
                                     handleRemoveBadge(badge.id);
                                 }}
                             >
                                 <XCircle size={12} />
-                            </button>
+                            </Pressable>
                         </div>
                     ))
                 ) : (

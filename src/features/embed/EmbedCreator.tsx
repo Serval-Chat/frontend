@@ -11,6 +11,8 @@ import type {
 import { Button } from '@/ui/primitives/Button';
 import { CopyTextArea } from '@/ui/primitives/CopyInput';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { TextArea } from '@/ui/primitives/TextArea';
 import { Toggle } from '@/ui/primitives/Toggle';
 import { cn } from '@/utils/cn';
@@ -60,27 +62,35 @@ const Section = ({
 
     return (
         <div className="rounded-lg border border-border-subtle">
-            <button
+            <Pressable
                 className="flex w-full items-center justify-between px-4 py-3 text-left"
-                type="button"
                 onClick={(): void => {
                     setOpen((o): boolean => !o);
                 }}
             >
-                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Text
+                    className="flex items-center gap-2"
+                    size="sm"
+                    variant="default"
+                    weight="semibold"
+                >
                     {title}
                     {badge === undefined ? null : (
-                        <span className="rounded-full bg-bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                        <Text
+                            className="rounded-full bg-bg-secondary px-2 py-0.5"
+                            size="xs"
+                            variant="muted"
+                        >
                             {badge}
-                        </span>
+                        </Text>
                     )}
-                </span>
+                </Text>
                 {open ? (
                     <ChevronUp className="text-muted-foreground" size={16} />
                 ) : (
                     <ChevronDown className="text-muted-foreground" size={16} />
                 )}
-            </button>
+            </Pressable>
 
             {open ? (
                 <div className="border-t border-border-subtle px-4 pt-3 pb-4">
@@ -100,13 +110,23 @@ interface FieldProps {
 
 const Field = ({ label, hint, children, className }: FieldProps): ReactNode => (
     <div className={cn('flex flex-col gap-1', className)}>
-        <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        <Text as="label" className="flex flex-col gap-1">
+            <Text
+                size="xs"
+                tracking="wide"
+                transform="uppercase"
+                variant="muted"
+                weight="semibold"
+            >
                 {label}
-            </span>
+            </Text>
             {children}
-        </label>
-        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+        </Text>
+        {hint ? (
+            <Text as="p" size="xs" variant="muted">
+                {hint}
+            </Text>
+        ) : null}
     </div>
 );
 
@@ -144,19 +164,18 @@ const FieldsEditor = ({ fields, onChange }: FieldsEditorProps): ReactNode => {
                     key={`field-${idx}-${field.name?.slice(0, 10)}`}
                 >
                     <div className="mb-2 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-muted-foreground">
+                        <Text size="xs" variant="muted" weight="semibold">
                             Field {idx + 1}
-                        </span>
-                        <button
+                        </Text>
+                        <Pressable
                             aria-label={`Remove field ${idx + 1}`}
                             className="text-muted-foreground transition-colors hover:text-danger"
-                            type="button"
                             onClick={(): void => {
                                 remove(idx);
                             }}
                         >
                             <Trash2 size={14} />
-                        </button>
+                        </Pressable>
                     </div>
                     <div className="flex flex-col gap-2">
                         <Field label="Name">
@@ -265,6 +284,7 @@ const EmbedEditor = ({
                         </Field>
                         <Field label="Color">
                             <div className="flex h-10 items-center gap-2">
+                                {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- native color swatch; Input's wrapper and inline styles would restyle it */}
                                 <input
                                     aria-label="Embed color"
                                     className="h-8 w-10 cursor-pointer rounded border border-border-subtle bg-transparent"
@@ -281,16 +301,15 @@ const EmbedEditor = ({
                                         );
                                     }}
                                 />
-                                <button
+                                <Pressable
                                     className="text-xs text-muted-foreground hover:text-foreground"
                                     title="Remove color"
-                                    type="button"
                                     onClick={(): void => {
                                         set('color', undefined);
                                     }}
                                 >
                                     ✕
-                                </button>
+                                </Pressable>
                             </div>
                         </Field>
                     </div>
@@ -512,16 +531,15 @@ const PollAnswersEditor = ({
                             update(idx, e.target.value);
                         }}
                     />
-                    <button
+                    <Pressable
                         aria-label={`Remove answer ${idx + 1}`}
                         className="shrink-0 text-muted-foreground transition-colors hover:text-danger"
-                        type="button"
                         onClick={(): void => {
                             remove(idx);
                         }}
                     >
                         <Trash2 size={14} />
-                    </button>
+                    </Pressable>
                 </div>
             ))}
             <Button
@@ -650,12 +668,12 @@ export const EmbedCreator = ({
 
             <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-foreground">
+                    <Text as="p" size="sm" variant="default" weight="semibold">
                         Embeds{' '}
-                        <span className="text-muted-foreground">
+                        <Text variant="muted">
                             ({value.embeds?.length ?? 0}/10)
-                        </span>
-                    </p>
+                        </Text>
+                    </Text>
                     <Button
                         disabled={(value.embeds?.length ?? 0) >= 10}
                         size="sm"

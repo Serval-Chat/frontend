@@ -175,16 +175,19 @@ const PermissionEditor = ({
                             key={key}
                         >
                             <div className="flex flex-col">
-                                <span className="text-sm font-medium">
+                                <Text size="sm" weight="medium">
                                     {key
                                         .replaceAll(/([A-Z])/g, ' $1')
                                         .replace(/^./, (str): string =>
                                             str.toUpperCase(),
                                         )}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground opacity-70">
+                                </Text>
+                                <Text
+                                    className="text-[10px] opacity-70"
+                                    variant="muted"
+                                >
                                     {getPermissionDescription(key)}
-                                </span>
+                                </Text>
                             </div>
                             <Toggle
                                 checked={permissions[key]}
@@ -201,9 +204,13 @@ const PermissionEditor = ({
                         Cancel
                     </Button>
                     {canEdit ? null : (
-                        <span className="mr-2 self-center text-xs text-danger">
+                        <Text
+                            className="mr-2 self-center"
+                            size="xs"
+                            variant="danger"
+                        >
                             You do not have permission to edit users.
-                        </span>
+                        </Text>
                     )}
                     <Button
                         className="rounded-xl px-6"
@@ -227,16 +234,20 @@ const PermissionEditor = ({
                         </div>
                         <Text as="p" className="mb-6" variant="muted">
                             Are you sure you want to update permissions for{' '}
-                            <span className="font-bold text-foreground">
+                            <Text variant="default" weight="bold">
                                 {user.username}
-                            </span>
+                            </Text>
                             ?
                             {permissions.adminAccess &&
                             !user.permissions.adminAccess ? (
-                                <span className="mt-2 block font-bold text-danger">
+                                <Text
+                                    className="mt-2 block"
+                                    variant="danger"
+                                    weight="bold"
+                                >
                                     Warning: You are granting Super Admin
                                     access!
-                                </span>
+                                </Text>
                             ) : null}
                         </Text>
                         <div className="flex justify-end gap-3">
@@ -404,9 +415,13 @@ export const AdminIAM = ({
                                             username={user.username}
                                         />
                                         <div className="flex max-w-[150px] min-w-0 flex-col truncate md:max-w-[250px]">
-                                            <span className="truncate font-bold text-foreground">
+                                            <Text
+                                                className="truncate"
+                                                variant="default"
+                                                weight="bold"
+                                            >
                                                 {user.username}
-                                            </span>
+                                            </Text>
                                         </div>
                                         {user.permissions.adminAccess ? (
                                             <ShieldAlert
@@ -415,17 +430,20 @@ export const AdminIAM = ({
                                             />
                                         ) : null}
                                         {user.muteActive ? (
-                                            <span
-                                                className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-caution/10 px-2 py-0.5 text-[10px] font-bold text-caution uppercase"
+                                            <Text
+                                                className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-caution/10 px-2 py-0.5 text-[10px]"
                                                 title={
                                                     user.muteReason
                                                         ? `Muted: ${user.muteReason}`
                                                         : 'Muted'
                                                 }
+                                                transform="uppercase"
+                                                variant="caution"
+                                                weight="bold"
                                             >
                                                 <VolumeX size={12} />
                                                 Muted
-                                            </span>
+                                            </Text>
                                         ) : null}
                                     </div>
                                 </TableCell>
@@ -523,9 +541,9 @@ export const AdminIAM = ({
                         <ChevronLeft size={16} />
                         Previous
                     </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <Text size="sm" variant="muted" weight="medium">
                         Page {page + 1}
-                    </span>
+                    </Text>
                     <Button
                         disabled={users.length < LIMIT}
                         variant="ghost"

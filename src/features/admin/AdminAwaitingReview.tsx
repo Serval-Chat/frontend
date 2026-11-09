@@ -65,12 +65,15 @@ const AwaitingReviewRow = ({
             <div className="flex items-center gap-3 overflow-hidden">
                 <ServerIcon server={server as unknown as Server} size="sm" />
                 <div className="flex min-w-0 flex-col truncate">
-                    <span className="truncate font-bold text-foreground">
+                    <Text className="truncate" variant="default" weight="bold">
                         {server.name}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted-foreground opacity-60">
+                    </Text>
+                    <Text
+                        className="font-mono text-[10px] opacity-60"
+                        variant="muted"
+                    >
                         {server.id}
-                    </span>
+                    </Text>
                 </div>
             </div>
         </TableCell>
@@ -117,10 +120,10 @@ const AwaitingReviewRow = ({
                     -
                 </Text>
             ) : (
-                <span className="line-clamp-2 text-xs text-muted-foreground">
+                <Text className="line-clamp-2" size="xs" variant="muted">
                     {server.verificationFailureReasons?.join(', ') ??
                         'Not computed'}
-                </span>
+                </Text>
             )}
         </TableCell>
 
@@ -133,9 +136,9 @@ const AwaitingReviewRow = ({
                         username={server.owner.username}
                     />
                     <div className="flex min-w-0 flex-col truncate">
-                        <span className="truncate text-sm font-medium">
+                        <Text className="truncate" size="sm" weight="medium">
                             {server.owner.username}
-                        </span>
+                        </Text>
                     </div>
                 </div>
             ) : (
@@ -148,7 +151,7 @@ const AwaitingReviewRow = ({
         <TableCell>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="opacity-40" size={14} />
-                <span className="font-bold">{server.memberCount}</span>
+                <Text weight="bold">{server.memberCount}</Text>
             </div>
         </TableCell>
 
@@ -280,9 +283,9 @@ export const AdminAwaitingReview = ({
                     >
                         P80 threshold
                     </Text>
-                    <span className="font-mono font-bold">
+                    <Text className="font-mono" weight="bold">
                         {formatScore(verificationStats?.p80Threshold)}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -292,9 +295,9 @@ export const AdminAwaitingReview = ({
                     >
                         P65 threshold
                     </Text>
-                    <span className="font-mono font-bold">
+                    <Text className="font-mono" weight="bold">
                         {formatScore(verificationStats?.p65Threshold)}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -304,9 +307,9 @@ export const AdminAwaitingReview = ({
                     >
                         Eligible
                     </Text>
-                    <span className="font-bold">
+                    <Text weight="bold">
                         {verificationStats?.eligibleServerCount ?? 0}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -316,9 +319,9 @@ export const AdminAwaitingReview = ({
                     >
                         Verified
                     </Text>
-                    <span className="font-bold">
+                    <Text weight="bold">
                         {verificationStats?.verifiedServerCount ?? 0}
-                    </span>
+                    </Text>
                 </div>
                 <div>
                     <Text
@@ -328,7 +331,9 @@ export const AdminAwaitingReview = ({
                     >
                         Schedule
                     </Text>
-                    <span className="text-xs font-medium">Daily default</span>
+                    <Text size="xs" weight="medium">
+                        Daily default
+                    </Text>
                 </div>
             </div>
 
@@ -401,9 +406,9 @@ export const AdminAwaitingReview = ({
                     >
                         Previous
                     </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <Text size="sm" variant="muted" weight="medium">
                         Page {page + 1}
-                    </span>
+                    </Text>
                     <Button
                         disabled={data.items.length < LIMIT}
                         variant="ghost"

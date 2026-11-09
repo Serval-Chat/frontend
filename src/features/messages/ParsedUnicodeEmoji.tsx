@@ -1,4 +1,5 @@
 import { useEmojiSheetLoaded } from '@/hooks/useEmojiSheetLoaded';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { emojiMap, getSpriteStyle } from '@/utils/emoji';
 
@@ -20,9 +21,9 @@ export const ParsedUnicodeEmoji = ({
 
     if (!emojiData) {
         return (
-            <span className={className} style={style}>
+            <Text className={className} style={style}>
                 {content}
-            </span>
+            </Text>
         );
     }
 

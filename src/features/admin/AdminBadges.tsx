@@ -537,9 +537,9 @@ export const AdminBadges = (): ReactNode => {
                                     {badgeItem.id}
                                 </TableCell>
                                 <TableCell muted>
-                                    <span className="line-clamp-2">
+                                    <Text className="line-clamp-2">
                                         {badgeItem.description}
-                                    </span>
+                                    </Text>
                                 </TableCell>
                                 <TableCell align="right">
                                     <div className="flex justify-end gap-1">

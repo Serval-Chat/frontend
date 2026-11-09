@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 
 import { BouncingDots } from '@/ui/animations/BouncingDots';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 interface LoadingScreenProps {
@@ -87,7 +88,7 @@ export const LoadingScreen = ({
                                 initial={{ opacity: 0, y: 5 }}
                                 transition={{ delay: 0.1 }}
                             >
-                                <span
+                                <Text
                                     className={cn(
                                         'text-lg font-bold tracking-tight',
                                         type === 'offline'
@@ -102,7 +103,7 @@ export const LoadingScreen = ({
                                         : type === 'reconnecting'
                                           ? 'Reconnecting'
                                           : 'Offline'}
-                                </span>
+                                </Text>
                             </m.div>
 
                             <m.div
@@ -110,9 +111,15 @@ export const LoadingScreen = ({
                                 initial={{ opacity: 0 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                <p className="text-sm font-medium text-muted-foreground opacity-80">
+                                <Text
+                                    as="p"
+                                    className="opacity-80"
+                                    size="sm"
+                                    variant="muted"
+                                    weight="medium"
+                                >
                                     {displayMessage}
-                                </p>
+                                </Text>
                             </m.div>
                         </div>
                     </div>

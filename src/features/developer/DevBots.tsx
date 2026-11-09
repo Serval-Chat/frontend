@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { useBots } from '@/hooks/developer/useBots';
 import type { Bot } from '@/types/bot';
 import { Button } from '@/ui/primitives/Button';
+import { Text } from '@/ui/primitives/Text';
 
 interface DevBotsProps {
     onCreateBot: () => void;
@@ -32,16 +33,23 @@ const BotCard = ({
                         src={avatar}
                     />
                 ) : (
-                    <span className="text-lg font-bold text-foreground">
+                    <Text size="lg" variant="default" weight="bold">
                         {name[0]?.toUpperCase()}
-                    </span>
+                    </Text>
                 )}
             </div>
             <div className="flex-1 overflow-hidden">
-                <p className="truncate font-semibold text-foreground">{name}</p>
-                <p className="truncate text-xs text-muted-foreground">
+                <Text
+                    as="p"
+                    className="truncate"
+                    variant="default"
+                    weight="semibold"
+                >
+                    {name}
+                </Text>
+                <Text as="p" className="truncate" size="xs" variant="muted">
                     Client ID: {bot.clientId}
-                </p>
+                </Text>
             </div>
             <Button size="sm" variant="normal" onClick={onView}>
                 Manage
@@ -60,12 +68,12 @@ export const DevBots = ({
         <div className="flex flex-col gap-4">
             {isError ? (
                 <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-border-subtle text-center">
-                    <p className="font-medium text-foreground">
+                    <Text as="p" variant="default" weight="medium">
                         Couldn&apos;t load your bots
-                    </p>
-                    <p className="text-sm text-muted-foreground">
+                    </Text>
+                    <Text as="p" size="sm" variant="muted">
                         Refresh the page to try again.
-                    </p>
+                    </Text>
                 </div>
             ) : isLoading ? (
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -90,10 +98,12 @@ export const DevBots = ({
                 </div>
             ) : (
                 <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-border-subtle text-center">
-                    <p className="font-medium text-foreground">No bots yet</p>
-                    <p className="text-sm text-muted-foreground">
+                    <Text as="p" variant="default" weight="medium">
+                        No bots yet
+                    </Text>
+                    <Text as="p" size="sm" variant="muted">
                         Create your first bot to get started.
-                    </p>
+                    </Text>
                     <Button
                         className="mt-3"
                         icon={Plus}
@@ -107,10 +117,10 @@ export const DevBots = ({
             )}
 
             {!isLoading && !isError ? (
-                <p className="text-sm text-muted-foreground">
+                <Text as="p" size="sm" variant="muted">
                     {bots?.length ?? 0} bot{bots?.length === 1 ? '' : 's'}{' '}
                     registered
-                </p>
+                </Text>
             ) : null}
         </div>
     );

@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setMobileHomeTab } from '@/store/slices/navSlice';
 import { Box } from '@/ui/primitives/Box';
 import { Divider } from '@/ui/primitives/Divider';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -33,14 +34,13 @@ const FriendRequestNavItem = (): React.ReactNode => {
     const isActive = !selectedFriendId && !selectedChannelId;
 
     return (
-        <button
+        <Pressable
             className={cn(
                 'group mb-4 flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-200',
                 isActive
                     ? 'bg-bg-secondary text-foreground'
                     : 'text-muted-foreground hover:bg-bg-subtle hover:text-foreground',
             )}
-            type="button"
             onClick={(): void => {
                 dispatch(setMobileHomeTab('requests'));
                 void navigate('/chat/@me');
@@ -55,7 +55,7 @@ const FriendRequestNavItem = (): React.ReactNode => {
                     {requests.length}
                 </Box>
             ) : null}
-        </button>
+        </Pressable>
     );
 };
 

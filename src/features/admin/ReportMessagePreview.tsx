@@ -5,6 +5,7 @@ import type {
 import type { User } from '@/api/users/users.types';
 import { Message } from '@/features/chat/Message';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
+import { Text } from '@/ui/primitives/Text';
 import { reconstructMessageEditHistory } from '@/utils/reconstructMessageEditHistory';
 
 type MessageSnapshot = NonNullable<StaffReport['messageContent']>;
@@ -43,25 +44,38 @@ function renderContextMessage(message: ReportMessageContextEntry) {
             {editHistory.map((revision) => {
                 const editedAt = formatTimestamp(revision.editedAt);
                 return (
-                    <p
-                        className="text-sm break-words whitespace-pre-wrap text-text-muted"
+                    <Text
+                        as="p"
+                        className="break-words text-text-muted"
                         key={`${message.id}-revision-${revision.editedAt}-${revision.text}`}
+                        size="sm"
+                        wrap="preWrap"
                     >
                         {revision.text}
-                        <span className="ml-1 text-xs italic">
+                        <Text className="ml-1" fontStyle="italic" size="xs">
                             (edited{editedAt ? ` ${editedAt}` : ''})
-                        </span>
-                    </p>
+                        </Text>
+                    </Text>
                 );
             })}
-            <p className="text-sm break-words whitespace-pre-wrap text-foreground">
+            <Text
+                as="p"
+                className="break-words"
+                size="sm"
+                variant="default"
+                wrap="preWrap"
+            >
                 {message.text}
                 {message.isEdited ? (
-                    <span className="ml-1 text-xs text-text-muted italic">
+                    <Text
+                        className="ml-1 text-text-muted"
+                        fontStyle="italic"
+                        size="xs"
+                    >
                         (edited{editedAt ? ` ${editedAt}` : ''})
-                    </span>
+                    </Text>
                 ) : null}
-            </p>
+            </Text>
         </div>
     );
 }
@@ -165,16 +179,23 @@ export const ReportMessagePreview = ({
                                     revision.editedAt,
                                 );
                                 return (
-                                    <p
-                                        className="text-sm break-words whitespace-pre-wrap text-text-muted"
+                                    <Text
+                                        as="p"
+                                        className="break-words text-text-muted"
                                         key={`target-revision-${revision.editedAt}-${revision.text}`}
+                                        size="sm"
+                                        wrap="preWrap"
                                     >
                                         {revision.text}
-                                        <span className="ml-1 text-xs italic">
+                                        <Text
+                                            className="ml-1"
+                                            fontStyle="italic"
+                                            size="xs"
+                                        >
                                             (edited
                                             {editedAt ? ` ${editedAt}` : ''})
-                                        </span>
-                                    </p>
+                                        </Text>
+                                    </Text>
                                 );
                             })}
                         </div>

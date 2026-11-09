@@ -15,6 +15,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 
 import { Heading } from '@/ui/primitives/Heading';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 interface SidebarItemProps {
@@ -41,14 +42,14 @@ const SidebarItem = ({ icon, label, to }: SidebarItemProps): ReactNode => {
             )}
             to={to}
         >
-            <span
+            <Text
                 className={cn(
                     'transition-transform duration-200',
                     active && 'scale-110',
                 )}
             >
                 {icon}
-            </span>
+            </Text>
             {label}
         </Link>
     );
@@ -63,7 +64,7 @@ export const AdminSidebar = (): ReactNode => {
         <aside className="fixed top-0 left-0 flex h-full w-64 flex-col border-r border-border-subtle bg-background/50 backdrop-blur-xl">
             <div className="flex h-16 items-center border-b border-border-subtle px-6">
                 <Heading level={2} variant="admin-section">
-                    SER<span className="text-primary">ADMIN</span>
+                    SER<Text variant="primary">ADMIN</Text>
                 </Heading>
             </div>
 

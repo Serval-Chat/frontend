@@ -29,12 +29,14 @@ export interface TextAreaProps
         VariantProps<typeof textAreaWrapperVariants> {
     ref?: React.Ref<HTMLTextAreaElement>;
     autoResize?: boolean;
+    textareaClassName?: string;
 }
 
 const TextArea = ({
     className,
     disabled,
     autoResize = true,
+    textareaClassName,
     ref,
     ...props
 }: TextAreaProps) => {
@@ -54,12 +56,10 @@ const TextArea = ({
     }, [props.value, autoResize]);
 
     return (
-        <Box
-            className={cn(textAreaWrapperVariants({ disabled, className }))}
-        >
+        <Box className={cn(textAreaWrapperVariants({ disabled, className }))}>
             <Box
                 as="textarea"
-                className={textAreaVariants}
+                className={cn(textAreaVariants, textareaClassName)}
                 disabled={disabled || undefined}
                 ref={internalRef}
                 rows={1}

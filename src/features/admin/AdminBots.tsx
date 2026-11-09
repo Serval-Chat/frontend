@@ -65,13 +65,20 @@ const AdminBotRow = ({
                                 strokeWidth={2.5}
                             />
                         ) : null}
-                        <span className="truncate font-bold text-foreground">
+                        <Text
+                            className="truncate"
+                            variant="default"
+                            weight="bold"
+                        >
                             {bot.displayName || bot.username}
-                        </span>
+                        </Text>
                     </div>
-                    <span className="font-mono text-[10px] text-muted-foreground opacity-60">
+                    <Text
+                        className="font-mono text-[10px] opacity-60"
+                        variant="muted"
+                    >
                         {bot.clientId}
-                    </span>
+                    </Text>
                 </div>
             </div>
         </TableCell>
@@ -110,9 +117,9 @@ const AdminBotRow = ({
                         username={bot.owner.username}
                     />
                     <div className="flex min-w-0 flex-col truncate">
-                        <span className="truncate text-sm font-medium">
+                        <Text className="truncate" size="sm" weight="medium">
                             {bot.owner.username}
-                        </span>
+                        </Text>
                     </div>
                 </div>
             ) : (
@@ -125,7 +132,7 @@ const AdminBotRow = ({
         <TableCell>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users className="opacity-40" size={14} />
-                <span className="font-bold">{bot.serverCount}</span>
+                <Text weight="bold">{bot.serverCount}</Text>
             </div>
         </TableCell>
 
@@ -317,9 +324,9 @@ export const AdminBots = (): ReactNode => {
                     >
                         Previous
                     </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
+                    <Text size="sm" variant="muted" weight="medium">
                         Page {page + 1}
-                    </span>
+                    </Text>
                     <Button
                         disabled={bots.length < LIMIT}
                         variant="ghost"

@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { TopNavBar } from '@/app/layout/TopNavBar';
 import { ParsedText } from '@/features/messages/ParsedText';
 import { Box } from '@/ui/primitives/Box';
+import { Heading } from '@/ui/primitives/Heading';
+import { Text } from '@/ui/primitives/Text';
 import { APP_LOCALE } from '@/utils/locale';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
@@ -52,20 +54,24 @@ export const Tos = (): ReactNode => {
 
             <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-16">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+                    <Heading
+                        className="text-3xl font-extrabold tracking-tight text-foreground"
+                        level={1}
+                        variant="page"
+                    >
                         Terms of Service
-                    </h1>
+                    </Heading>
                     {lastUpdated ? (
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <Text as="p" className="mt-1" size="sm" variant="muted">
                             Last updated: {lastUpdated}
-                        </p>
+                        </Text>
                     ) : null}
                 </div>
 
                 {error ? (
-                    <p className="text-danger">
+                    <Text as="p" variant="danger">
                         Failed to load Terms of Service.
-                    </p>
+                    </Text>
                 ) : raw === undefined ? (
                     <div className="space-y-3">
                         {/* eslint-disable react/no-array-index-key */}
@@ -86,9 +92,9 @@ export const Tos = (): ReactNode => {
             </main>
 
             <footer className="mx-8 border-t border-border-subtle py-8 text-center text-sm text-muted-foreground">
-                <p>
+                <Text as="p">
                     &copy; {CURRENT_YEAR} Serchat. Made with love for everyone.
-                </p>
+                </Text>
             </footer>
         </Box>
     );
