@@ -72,7 +72,7 @@ const ReorderableItem = <T,>({
             <div className="flex items-start gap-2">
                 <Pressable
                     aria-label={ariaLabel}
-                    className="mt-1 shrink-0 touch-none cursor-grab select-none rounded p-1 text-muted-foreground hover:bg-bg-subtle focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
+                    className="mt-1 shrink-0 cursor-grab touch-none rounded p-1 text-muted-foreground select-none hover:bg-bg-subtle focus-visible:ring-2 focus-visible:ring-primary active:cursor-grabbing"
                     title="Drag to reorder, or use the arrow keys."
                     onKeyDown={(event): void => {
                         if (event.key === 'ArrowUp') {
@@ -405,6 +405,7 @@ const ReportReasonEditor = ({
                                     Add subcategory
                                 </Button>
                                 <IconButton
+                                    square
                                     aria-label={`Delete report reason ${index + 1}: ${option.label || 'untitled'}`}
                                     className="h-8 w-8 p-0 text-muted-foreground hover:text-danger"
                                     disabled={
@@ -419,7 +420,6 @@ const ReportReasonEditor = ({
                                     icon={Trash2}
                                     iconSize={16}
                                     size="sm"
-                                    square
                                     style={{
                                         border: '1px solid var(--border-subtle)',
                                     }}
@@ -501,12 +501,12 @@ const ReportReasonEditor = ({
                                                     Enabled
                                                 </Text>
                                                 <IconButton
+                                                    square
                                                     aria-label={`Delete subcategory ${index + 1}.${subIndex + 1}`}
+                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-danger"
                                                     icon={Trash2}
                                                     iconSize={16}
-                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-danger"
                                                     size="sm"
-                                                    square
                                                     style={{
                                                         border: '1px solid var(--border-subtle)',
                                                     }}

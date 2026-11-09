@@ -402,16 +402,19 @@ const CodeEmbed = ({
                     <LoadingSpinner size="sm" />
                 </div>
                 <div className="bg-bg-secondary/50 p-0">
-                    {Array.from({ length: skeletonLines }).map((_, i) => (
+                    {Array.from(
+                        { length: skeletonLines },
+                        (_, line) => line,
+                    ).map((line) => (
                         <div
                             className="flex h-6 items-center px-3"
                             data-testid="code-embed-skeleton-line"
-                            key={`skeleton-line-${i}`}
+                            key={line}
                         >
                             <div
                                 className="h-3 animate-pulse rounded bg-bg-subtle"
                                 style={{
-                                    width: `${35 + ((i * 17) % 50)}%`,
+                                    width: `${35 + ((line * 17) % 50)}%`,
                                 }}
                             />
                         </div>

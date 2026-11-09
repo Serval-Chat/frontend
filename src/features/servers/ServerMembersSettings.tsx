@@ -5,7 +5,10 @@ import { Search, Users } from 'lucide-react';
 import { useServerMembersAdmin } from '@/api/serverMembersAdmin/serverMembersAdmin.queries';
 import { useRoles } from '@/api/servers/servers.queries';
 import type { Role } from '@/api/servers/servers.types';
+import { RoleDot } from '@/features/servers/RoleDot';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';
@@ -13,7 +16,6 @@ import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Popover } from '@/ui/primitives/Popover';
 import { Pressable } from '@/ui/primitives/Pressable';
-import { RoleDot } from '@/features/servers/RoleDot';
 import {
     Table,
     TableBody,
@@ -23,8 +25,6 @@ import {
     TableRow,
 } from '@/ui/primitives/Table';
 import { Text } from '@/ui/primitives/Text';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
-import { Box } from '@/ui/primitives/Box';
 import { colors } from '@/ui/theme';
 import { resolveDisplayName } from '@/utils/displayName';
 import { APP_LOCALE } from '@/utils/locale';
@@ -66,7 +66,10 @@ const MemberRolesCell = ({ roles }: { roles: Role[] }) => {
     return (
         <div className="flex items-center gap-2 overflow-hidden">
             {visibleRoles.map((role) => (
-                <div className="flex shrink-0 items-center gap-1.5" key={role.id}>
+                <div
+                    className="flex shrink-0 items-center gap-1.5"
+                    key={role.id}
+                >
                     <RoleDot role={role} />
                     <Text className="truncate" size="xs">
                         {role.name}
@@ -164,8 +167,8 @@ export const ServerMembersSettings = ({
                         Members
                     </Heading>
                     <Text variant="muted">
-                        View and search everyone in this server, including
-                        their roles, join date, and how they joined.
+                        View and search everyone in this server, including their
+                        roles, join date, and how they joined.
                     </Text>
                 </div>
             </div>
@@ -196,8 +199,8 @@ export const ServerMembersSettings = ({
                     />
                 </div>
                 <Button
-                    className="h-10"
                     retainSize
+                    className="h-10"
                     style={{
                         backgroundColor: colors.bgSubtle,
                         borderColor: colors.borderSubtle,
@@ -275,10 +278,7 @@ export const ServerMembersSettings = ({
                                                 >
                                                     {resolvedName}
                                                 </Text>
-                                                <Text
-                                                    size="xs"
-                                                    variant="muted"
-                                                >
+                                                <Text size="xs" variant="muted">
                                                     @
                                                     {member.user?.username ||
                                                         'unknown'}
@@ -326,8 +326,7 @@ export const ServerMembersSettings = ({
                         Previous
                     </Button>
                     <Text size="sm" variant="muted">
-                        Page {page + 1} of {totalPages} &middot; {total}{' '}
-                        members
+                        Page {page + 1} of {totalPages} &middot; {total} members
                     </Text>
                     <Button
                         disabled={page + 1 >= totalPages || isFetching}
