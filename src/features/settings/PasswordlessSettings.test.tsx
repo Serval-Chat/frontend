@@ -2,12 +2,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/api/users/users.types';
-import { usePasswordless } from '@/hooks/settings/usePasswordless';
+import { usePasswordless } from '@/features/settings/hooks/usePasswordless';
 import { canUsePasskeys } from '@/utils/webauthn';
 
 import { PasswordlessSettings } from './PasswordlessSettings';
 
-vi.mock('@/hooks/settings/usePasswordless', () => ({
+vi.mock('@/features/settings/hooks/usePasswordless', () => ({
     usePasswordless: vi.fn(),
 }));
 

@@ -8,9 +8,9 @@ import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import { EmojiInfoBox } from '@/features/emoji/EmojiInfoBox';
 import { SkinTonePopover } from '@/features/emoji/SkinTonePopover';
+import { useEmojiInfoBox } from '@/features/emoji/hooks/useEmojiInfoBox';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
 import { ServerIcon } from '@/features/servers/ServerIcon';
-import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
 import { FREQUENTLY_USED_CATEGORY_ID } from '@/hooks/useFrequentlyUsedEmojis';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Box } from '@/ui/primitives/Box';

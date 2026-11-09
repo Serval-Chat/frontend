@@ -7,7 +7,7 @@ import { SettingsModal } from './SettingsModal';
 vi.mock('@/api/users/users.queries', () => ({
     useMe: () => ({ data: null }),
 }));
-vi.mock('@/hooks/useSelfStatus', () => ({
+vi.mock('@/features/users/hooks/useSelfStatus', () => ({
     useSelfStatus: () => ({ status: 'offline' }),
 }));
 vi.mock('@/store/hooks', () => ({

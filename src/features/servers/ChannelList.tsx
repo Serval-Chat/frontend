@@ -9,9 +9,9 @@ import {
     useVoiceStates,
 } from '@/api/servers/servers.queries';
 import type { Category, Channel } from '@/api/servers/servers.types';
-import { useChannelClick } from '@/hooks/useChannelClick';
-import { useChannelListMenus } from '@/hooks/useChannelListMenus';
-import { useChannelListReorder } from '@/hooks/useChannelListReorder';
+import { useChannelClick } from '@/features/servers/hooks/useChannelClick';
+import { useChannelListMenus } from '@/features/servers/hooks/useChannelListMenus';
+import { useChannelListReorder } from '@/features/servers/hooks/useChannelListReorder';
 import { useChannelAccessMap } from '@/hooks/usePermissions';
 import { useAppSelector } from '@/store/hooks';
 import { ContextMenu } from '@/ui/primitives/ContextMenu';

@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { emojiKeys, useEmoji } from '@/api/emojis/emojis.queries';
 import type { Emoji } from '@/api/emojis/emojis.types';
 import { EmojiInfoBox } from '@/features/emoji/EmojiInfoBox';
-import { useEmojiInfoBox } from '@/hooks/useEmojiInfoBox';
+import { useEmojiInfoBox } from '@/features/emoji/hooks/useEmojiInfoBox';
 import { Box } from '@/ui/primitives/Box';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { resolveApiUrl } from '@/utils/apiUrl';

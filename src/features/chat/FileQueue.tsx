@@ -3,7 +3,7 @@ import React, { useMemo, useRef } from 'react';
 import { Check, Eye, EyeOff, X } from 'lucide-react';
 import { getIcon } from 'material-file-icons';
 
-import type { QueuedFile } from '@/hooks/chat/useFileQueue';
+import type { QueuedFile } from '@/features/chat/hooks/useFileQueue';
 import { formatFileSize } from '@/lib/autosizer';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';

@@ -3,7 +3,7 @@
  */
 import { useState } from 'react';
 
-import { useAutoHighlight } from '@/hooks/useAutoHighlight';
+import { useAutoHighlight } from '@/dev/showoff/hooks/useAutoHighlight';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Link } from '@/ui/primitives/Link';

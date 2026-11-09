@@ -7,7 +7,7 @@ const { saveReportReasons } = vi.hoisted(() => ({
     saveReportReasons: vi.fn(),
 }));
 
-vi.mock('@/hooks/admin/useAdminReports', () => ({
+vi.mock('@/features/admin/hooks/useAdminReports', () => ({
     useAdminReportOptions: () => ({
         data: [
             {

@@ -13,13 +13,13 @@ import {
     XCircle,
 } from 'lucide-react';
 
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminNotes,
     useCreateAdminNote,
     useDeleteAdminNote,
     useUpdateAdminNote,
-} from '@/hooks/admin/useAdminNotes';
+} from '@/features/admin/hooks/useAdminNotes';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Modal } from '@/ui/primitives/Modal';

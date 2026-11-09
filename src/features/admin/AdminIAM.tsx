@@ -16,11 +16,11 @@ import {
 
 import { useMe } from '@/api/users/users.queries';
 import { ADMIN_CONSTANTS, ROLE_PRESETS } from '@/constants/admin';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminUsers,
     useUpdateUserPermissions,
-} from '@/hooks/admin/useAdminUsers';
+} from '@/features/admin/hooks/useAdminUsers';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import type { AdminPermissions, AdminUser } from '@/types/admin';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';

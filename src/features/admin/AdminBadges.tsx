@@ -5,17 +5,17 @@ import { Check, Edit2, Plus, Search, Trash2, UserPlus } from 'lucide-react';
 
 import type { Badge, User } from '@/api/users/users.types';
 import { ADMIN_CONSTANTS } from '@/constants/admin';
-import { StyledUserName } from '@/features/users/StyledUserName';
-import { UserBadge } from '@/features/users/UserBadge';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminBadges,
     useAssignBadgeToUser,
     useCreateAdminBadge,
     useDeleteAdminBadge,
     useUpdateAdminBadge,
-} from '@/hooks/admin/useAdminBadges';
-import { useAdminUsers } from '@/hooks/admin/useAdminUsers';
+} from '@/features/admin/hooks/useAdminBadges';
+import { useAdminUsers } from '@/features/admin/hooks/useAdminUsers';
+import { StyledUserName } from '@/features/users/StyledUserName';
+import { UserBadge } from '@/features/users/UserBadge';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';

@@ -3,7 +3,7 @@ import { StrictMode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { QueuedFile } from '@/hooks/chat/useFileQueue';
+import type { QueuedFile } from '@/features/chat/hooks/useFileQueue';
 
 import { FileQueue } from './FileQueue';
 

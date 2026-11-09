@@ -20,12 +20,12 @@ import {
     type MessagesListHandle,
 } from '@/features/chat/MessagesList';
 import { TypingIndicator } from '@/features/chat/TypingIndicator';
-import { useChatConversationActions } from '@/hooks/chat/useChatConversationActions';
-import { useChatDebugKeybinds } from '@/hooks/chat/useChatDebugKeybinds';
-import { useChatNavigationKeybinds } from '@/hooks/chat/useChatNavigationKeybinds';
-import { useFileQueue } from '@/hooks/chat/useFileQueue';
-import { useMainChatData } from '@/hooks/chat/useMainChatData';
-import { useServalBackground } from '@/hooks/chat/useServalBackground';
+import { useChatConversationActions } from '@/features/chat/hooks/useChatConversationActions';
+import { useChatDebugKeybinds } from '@/features/chat/hooks/useChatDebugKeybinds';
+import { useChatNavigationKeybinds } from '@/features/chat/hooks/useChatNavigationKeybinds';
+import { useFileQueue } from '@/features/chat/hooks/useFileQueue';
+import { useMainChatData } from '@/features/chat/hooks/useMainChatData';
+import { useServalBackground } from '@/features/chat/hooks/useServalBackground';
 import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';

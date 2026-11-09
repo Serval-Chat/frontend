@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { useFlashGroup } from '@/hooks/useFlashText';
+import { useFlashGroup } from '@/dev/showoff/hooks/useFlashText';
 import { Button } from '@/ui/primitives/Button';
 import { Stack } from '@/ui/primitives/Stack';
 

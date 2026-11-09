@@ -9,8 +9,6 @@ import {
 } from 'lucide-react';
 
 import type { User } from '@/api/users/users.types';
-import { ImageCropModal } from '@/features/settings/ImageCropModal';
-import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
 import {
     useBot,
     useBotServers,
@@ -21,7 +19,9 @@ import {
     useUpdateBotPermissions,
     useUploadBotBanner,
     useUploadBotPicture,
-} from '@/hooks/developer/useBots';
+} from '@/features/developer/hooks/useBots';
+import { ImageCropModal } from '@/features/settings/ImageCropModal';
+import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
 import type { BotPermissionKey, BotPermissions } from '@/types/bot';
 import { Button } from '@/ui/primitives/Button';
 import { Checkbox } from '@/ui/primitives/Checkbox';

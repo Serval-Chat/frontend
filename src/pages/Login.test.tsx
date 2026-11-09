@@ -4,8 +4,8 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { authApi } from '@/api/auth/auth.api';
-import { useLoginWithPasskey } from '@/hooks/useLoginWithPasskey';
-import { useLoginWithRecoveryKey } from '@/hooks/useLoginWithRecoveryKey';
+import { useLoginWithPasskey } from '@/features/auth/hooks/useLoginWithPasskey';
+import { useLoginWithRecoveryKey } from '@/features/auth/hooks/useLoginWithRecoveryKey';
 import * as authTokenModule from '@/utils/authToken';
 import { canUsePasskeys } from '@/utils/webauthn';
 
@@ -28,11 +28,11 @@ vi.mock('@/utils/webauthn', () => ({
     canUsePasskeys: vi.fn(),
 }));
 
-vi.mock('@/hooks/useLoginWithPasskey', () => ({
+vi.mock('@/features/auth/hooks/useLoginWithPasskey', () => ({
     useLoginWithPasskey: vi.fn(),
 }));
 
-vi.mock('@/hooks/useLoginWithRecoveryKey', () => ({
+vi.mock('@/features/auth/hooks/useLoginWithRecoveryKey', () => ({
     useLoginWithRecoveryKey: vi.fn(),
 }));
 

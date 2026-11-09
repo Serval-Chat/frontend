@@ -15,7 +15,7 @@ import {
     useAdminMuteUser,
     useAdminUnbanUser,
     useAdminUnmuteUser,
-} from '@/hooks/admin/useAdminBans';
+} from '@/features/admin/hooks/useAdminBans';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';

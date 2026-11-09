@@ -21,7 +21,7 @@ vi.mock('@/api/servers/servers.queries', () => ({
     useServerDetails: () => ({ data: undefined }),
 }));
 
-vi.mock('@/hooks/chat/useMemberMaps', () => ({
+vi.mock('@/features/chat/hooks/useMemberMaps', () => ({
     useMemberMaps: () => ({
         fullMemberMap: undefined,
         highestRoleMap: undefined,

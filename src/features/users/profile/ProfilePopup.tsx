@@ -11,8 +11,8 @@ import {
 import type { Role } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useAdminUserDetail } from '@/features/admin/hooks/useAdminUsers';
 import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
-import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/primitives/Box';

@@ -8,7 +8,7 @@ import { ParsedEmoji } from '@/features/messages/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
 import { StyledUserName } from '@/features/users/StyledUserName';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
-import { useSelfStatus } from '@/hooks/useSelfStatus';
+import { useSelfStatus } from '@/features/users/hooks/useSelfStatus';
 import { Box } from '@/ui/primitives/Box';
 import { IconButton } from '@/ui/primitives/IconButton';
 import { Text } from '@/ui/primitives/Text';

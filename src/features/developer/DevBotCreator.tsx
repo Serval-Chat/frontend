@@ -3,7 +3,7 @@ import { type ReactNode, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useCreateBot } from '@/hooks/developer/useBots';
+import { useCreateBot } from '@/features/developer/hooks/useBots';
 import { Button } from '@/ui/primitives/Button';
 import { CopyInput } from '@/ui/primitives/CopyInput';
 import { Input } from '@/ui/primitives/Input';

@@ -11,11 +11,11 @@ import {
 } from 'lucide-react';
 
 import { ADMIN_CONSTANTS } from '@/constants/admin';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminBots,
     useSetBotVerificationOverride,
-} from '@/hooks/admin/useAdminBots';
+} from '@/features/admin/hooks/useAdminBots';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';

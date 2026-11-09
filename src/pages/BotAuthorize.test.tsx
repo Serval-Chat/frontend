@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as serversQueries from '@/api/servers/servers.queries';
 import * as usersQueries from '@/api/users/users.queries';
-import * as botsHooks from '@/hooks/developer/useBots';
+import * as botsHooks from '@/features/developer/hooks/useBots';
 
 import { BotAuthorize } from './BotAuthorize';
 
@@ -26,7 +26,7 @@ vi.mock('@/ui/primitives/Toast', () => ({
     useToast: () => ({ showToast: mockShowToast }),
 }));
 
-vi.mock('@/hooks/developer/useBots', () => ({
+vi.mock('@/features/developer/hooks/useBots', () => ({
     usePublicBotInfo: vi.fn(),
     useAuthorizeBot: vi.fn(),
 }));

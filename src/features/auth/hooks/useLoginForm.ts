@@ -1,0 +1,182 @@
+import { useState } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
+import type { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+import { authApi } from '@/api/auth/auth.api';
+import { completeLogin } from '@/features/auth/hooks/completeLogin';
+import type { StatusState } from '@/ui/types';
+
+interface BanInfo {
+    reason?: string;
+    expirationTimestamp?: string;
+}
+
+interface LoginFormResult {
+    loginInput: string;
+    setLoginInput: React.Dispatch<React.SetStateAction<string>>;
+    password: string;
+    setPassword: React.Dispatch<React.SetStateAction<string>>;
+    rememberMe: boolean;
+    setRememberMe: React.Dispatch<React.SetStateAction<boolean>>;
+    status: StatusState;
+    setStatus: React.Dispatch<React.SetStateAction<StatusState>>;
+    requiresTwoFactor: boolean;
+    twoFactorCode: string;
+    setTwoFactorCode: React.Dispatch<React.SetStateAction<string>>;
+    useBackupCode: boolean;
+    setUseBackupCode: React.Dispatch<React.SetStateAction<boolean>>;
+    resetTwoFactorState: () => void;
+    handleSubmit: (e: React.FormEvent) => Promise<void>;
+    isLoading: boolean;
+    isFormValid: boolean;
+    banInfo: BanInfo | null;
+    resetBan: () => void;
+    turnstileToken: string;
+    setTurnstileToken: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export const useLoginForm = (): LoginFormResult => {
+    const [loginInput, setLoginInput] = useState('');
+    const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
+    const [status, setStatus] = useState<StatusState>({
+        message: '',
+        type: '',
+    });
+    const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+    const [tempToken, setTempToken] = useState('');
+    const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [useBackupCode, setUseBackupCode] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [banInfo, setBanInfo] = useState<BanInfo | null>(null);
+    const [turnstileToken, setTurnstileToken] = useState('');
+    const resetBan = (): void => {
+        setBanInfo(null);
+    };
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const resetTwoFactorState = (): void => {
+        setRequiresTwoFactor(false);
+        setTempToken('');
+        setTwoFactorCode('');
+        setUseBackupCode(false);
+    };
+
+    const isFormValid = requiresTwoFactor
+        ? twoFactorCode.trim().length > 0
+        : !!loginInput && !!password && !!turnstileToken;
+
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+        e.preventDefault();
+        setStatus({ message: '', type: '' });
+
+        if (!requiresTwoFactor && (!loginInput || !password)) {
+            setStatus({ message: 'Please fill in all fields.', type: 'error' });
+            return;
+        }
+        if (requiresTwoFactor && !twoFactorCode.trim()) {
+            setStatus({
+                message: useBackupCode
+                    ? 'Please enter your backup code.'
+                    : 'Please enter your 2FA code.',
+                type: 'error',
+            });
+            return;
+        }
+        setIsLoading(true);
+
+        try {
+            let data;
+            if (requiresTwoFactor) {
+                data = await authApi.verifyTwoFactor({
+                    tempToken,
+                    ...(useBackupCode
+                        ? { backupCode: twoFactorCode }
+                        : { code: twoFactorCode }),
+                });
+            } else {
+                data = await authApi.login({
+                    login: loginInput,
+                    password,
+                    cfTurnstileResponse: turnstileToken,
+                });
+                if (data.two_factor_required && data.temp_token) {
+                    setRequiresTwoFactor(true);
+                    setTempToken(data.temp_token);
+                    setStatus({
+                        message:
+                            'Two-factor authentication is enabled. Enter your code to continue.',
+                        type: 'success',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            if (!data?.token) {
+                setStatus({
+                    message: 'Login failed',
+                    type: 'error',
+                });
+                setIsLoading(false);
+                return;
+            }
+            resetTwoFactorState();
+            await completeLogin(data.token, rememberMe, navigate, queryClient);
+        } catch (error: unknown) {
+            let errorMessage = 'Login failed';
+            if (isAxiosError(error)) {
+                const axiosErr = error as AxiosError<{
+                    error?: string;
+                    message?: string;
+                    ban?: { reason?: string; expirationTimestamp?: string };
+                }>;
+                if (
+                    axiosErr.response?.status === 403 &&
+                    axiosErr.response.data?.ban
+                ) {
+                    setBanInfo(axiosErr.response.data.ban);
+                    return;
+                }
+                errorMessage =
+                    axiosErr.response?.data?.message ??
+                    axiosErr.response?.data?.error ??
+                    errorMessage;
+            }
+            setStatus({
+                message: errorMessage,
+                type: 'error',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return {
+        loginInput,
+        setLoginInput,
+        password,
+        setPassword,
+        rememberMe,
+        setRememberMe,
+        status,
+        setStatus,
+        requiresTwoFactor,
+        twoFactorCode,
+        setTwoFactorCode,
+        useBackupCode,
+        setUseBackupCode,
+        resetTwoFactorState,
+        handleSubmit,
+        isLoading,
+        isFormValid,
+        banInfo,
+        resetBan,
+        turnstileToken,
+        setTurnstileToken,
+    };
+};

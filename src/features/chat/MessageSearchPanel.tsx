@@ -21,10 +21,10 @@ import {
 import type { Role, ServerMember } from '@/api/servers/servers.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
 import { MessageHeader } from '@/features/chat/MessageHeader';
+import { useMemberMaps } from '@/features/chat/hooks/useMemberMaps';
 import { EmbedRenderer } from '@/features/embed/EmbedRenderer';
 import { ParsedText } from '@/features/messages/ParsedText';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
-import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';

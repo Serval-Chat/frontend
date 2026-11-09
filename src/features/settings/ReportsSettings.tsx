@@ -1,6 +1,6 @@
 import type { ReportStatus } from '@/api/reports/reports.api';
 import { ReportIdCopy } from '@/features/moderation/ReportIdCopy';
-import { useMyReports } from '@/hooks/useReports';
+import { useMyReports } from '@/features/moderation/hooks/useReports';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Text } from '@/ui/primitives/Text';

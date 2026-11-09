@@ -19,8 +19,8 @@ import type {
 } from '@/api/servers/servers.types';
 import { EmbedRenderer } from '@/features/embed/EmbedRenderer';
 import { StickerInfoBox } from '@/features/emoji/StickerInfoBox';
+import { useStickerInfoBox } from '@/features/emoji/hooks/useStickerInfoBox';
 import { ParsedText } from '@/features/messages/ParsedText';
-import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import { Box } from '@/ui/primitives/Box';

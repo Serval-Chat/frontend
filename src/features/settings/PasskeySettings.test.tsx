@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { usePasskeys } from '@/hooks/settings/usePasskeys';
+import { usePasskeys } from '@/features/settings/hooks/usePasskeys';
 import { canUsePasskeys } from '@/utils/webauthn';
 
 import { PasskeySettings } from './PasskeySettings';
 
-vi.mock('@/hooks/settings/usePasskeys', () => ({
+vi.mock('@/features/settings/hooks/usePasskeys', () => ({
     usePasskeys: vi.fn(),
 }));
 

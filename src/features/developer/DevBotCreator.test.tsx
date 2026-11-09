@@ -8,13 +8,13 @@ import {
 import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useCreateBot } from '@/hooks/developer/useBots';
+import { useCreateBot } from '@/features/developer/hooks/useBots';
 import type { CreateBotResponse } from '@/types/bot';
 import { colors } from '@/ui/theme';
 
 import { DevBotCreator } from './DevBotCreator';
 
-vi.mock('@/hooks/developer/useBots', () => ({
+vi.mock('@/features/developer/hooks/useBots', () => ({
     useCreateBot: vi.fn(),
 }));
 

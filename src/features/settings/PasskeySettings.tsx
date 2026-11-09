@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { KeyRound, Pencil, Trash2 } from 'lucide-react';
 
-import { usePasskeys } from '@/hooks/settings/usePasskeys';
+import { usePasskeys } from '@/features/settings/hooks/usePasskeys';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';

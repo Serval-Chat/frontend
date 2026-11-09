@@ -2,7 +2,7 @@ import { type ReactNode, useState } from 'react';
 
 import { KeyRound } from 'lucide-react';
 
-import { useAdminResetPasswordless } from '@/hooks/admin/useAdminPasswordless';
+import { useAdminResetPasswordless } from '@/features/admin/hooks/useAdminPasswordless';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Modal } from '@/ui/primitives/Modal';

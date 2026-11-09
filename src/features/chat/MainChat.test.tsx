@@ -9,7 +9,7 @@ import {
     usePings,
 } from '@/api/pings/pings.queries';
 import { useMe, useUserById } from '@/api/users/users.queries';
-import { useFileQueue } from '@/hooks/chat/useFileQueue';
+import { useFileQueue } from '@/features/chat/hooks/useFileQueue';
 import * as Permissions from '@/hooks/usePermissions';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
@@ -36,26 +36,26 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
-vi.mock('@/hooks/chat/useFileQueue', () => ({
+vi.mock('@/features/chat/hooks/useFileQueue', () => ({
     useFileQueue: vi.fn().mockReturnValue({}),
 }));
 
-vi.mock('@/hooks/chat/useMemberMaps', () => ({
+vi.mock('@/features/chat/hooks/useMemberMaps', () => ({
     useMemberMaps: vi.fn().mockReturnValue({}),
 }));
 
-vi.mock('@/hooks/chat/usePaginatedMessages', () => ({
+vi.mock('@/features/chat/hooks/usePaginatedMessages', () => ({
     usePaginatedMessages: vi.fn().mockReturnValue({
         rawMessagesData: undefined,
         isLoading: false,
     }),
 }));
 
-vi.mock('@/hooks/chat/useProcessedMessages', () => ({
+vi.mock('@/features/chat/hooks/useProcessedMessages', () => ({
     useProcessedMessages: vi.fn().mockReturnValue([]),
 }));
 
-vi.mock('@/hooks/ws/useChatWS', () => ({
+vi.mock('@/features/chat/hooks/useChatWS', () => ({
     useChatWS: vi.fn().mockReturnValue({ typingUsers: [] }),
 }));
 

@@ -5,7 +5,7 @@ import { ReportModal } from './ReportModal';
 
 const { mutate } = vi.hoisted(() => ({ mutate: vi.fn() }));
 
-vi.mock('@/hooks/useReports', () => ({
+vi.mock('@/features/moderation/hooks/useReports', () => ({
     useReportOptions: (targetType: string) => ({
         data:
             targetType === 'user'

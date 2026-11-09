@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { invitesApi } from '@/api/invites/invites.api';
 import { useServers } from '@/api/servers/servers.queries';
-import { useInviteActionStates } from '@/hooks/useInviteActionStates';
+import { useInviteActionStates } from '@/features/servers/hooks/useInviteActionStates';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Text } from '@/ui/primitives/Text';

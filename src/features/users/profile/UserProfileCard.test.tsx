@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FriendRequest } from '@/api/friends/friends.types';
 import type { User } from '@/api/users/users.types';
-import type { ManualUserStatus } from '@/hooks/useSelfStatus';
+import type { ManualUserStatus } from '@/features/users/hooks/useSelfStatus';
 
 import { UserProfileCard } from './UserProfileCard';
 
@@ -24,7 +24,7 @@ const useSelfStatusMock = vi.fn(
     }),
 );
 
-import type * as SelfStatusModule from '@/hooks/useSelfStatus';
+import type * as SelfStatusModule from '@/features/users/hooks/useSelfStatus';
 
 beforeEach((): void => {
     vi.stubGlobal(
@@ -41,10 +41,10 @@ afterEach((): void => {
     vi.unstubAllGlobals();
 });
 
-vi.mock('@/hooks/useSelfStatus', async () => {
+vi.mock('@/features/users/hooks/useSelfStatus', async () => {
     const actual =
         await vi.importActual<typeof SelfStatusModule>(
-            '@/hooks/useSelfStatus',
+            '@/features/users/hooks/useSelfStatus',
         );
     return {
         ...actual,

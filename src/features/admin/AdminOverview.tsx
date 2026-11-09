@@ -8,7 +8,10 @@ import {
     Users,
 } from 'lucide-react';
 
-import { type StatsRange, useAdminStats } from '@/hooks/admin/useAdminStats';
+import {
+    type StatsRange,
+    useAdminStats,
+} from '@/features/admin/hooks/useAdminStats';
 import { Box } from '@/ui/primitives/Box';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Pressable } from '@/ui/primitives/Pressable';

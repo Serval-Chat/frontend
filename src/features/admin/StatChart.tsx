@@ -1,6 +1,6 @@
 import React, { type ReactNode, Suspense } from 'react';
 
-import type { StatsRange } from '@/hooks/admin/useAdminStats';
+import type { StatsRange } from '@/features/admin/hooks/useAdminStats';
 import { Box } from '@/ui/primitives/Box';
 import { Text } from '@/ui/primitives/Text';
 

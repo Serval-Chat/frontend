@@ -11,13 +11,13 @@ import {
     useUpdateBotPermissions,
     useUploadBotBanner,
     useUploadBotPicture,
-} from '@/hooks/developer/useBots';
+} from '@/features/developer/hooks/useBots';
 import type { Bot, BotUser } from '@/types/bot';
 import { permissionsToBitmask } from '@/utils/botPermissions';
 
 import { DevBotDetail } from './DevBotDetail';
 
-vi.mock('@/hooks/developer/useBots', () => ({
+vi.mock('@/features/developer/hooks/useBots', () => ({
     useBot: vi.fn(),
     useBotServers: vi.fn(),
     useDeleteBot: vi.fn(),

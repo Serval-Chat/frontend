@@ -20,7 +20,7 @@ import {
 import { useMe } from '@/api/users/users.queries';
 import { StyledUserName } from '@/features/users/StyledUserName';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
-import { useSelfStatus } from '@/hooks/useSelfStatus';
+import { useSelfStatus } from '@/features/users/hooks/useSelfStatus';
 import { useAppSelector } from '@/store/hooks';
 import { Pressable } from '@/ui/primitives/Pressable';
 

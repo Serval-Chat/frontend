@@ -1,7 +1,10 @@
 import { type CSSProperties, type ReactNode, useState } from 'react';
 
 import type { ReportReason, ReportTargetType } from '@/api/reports/reports.api';
-import { useReportOptions, useSubmitReport } from '@/hooks/useReports';
+import {
+    useReportOptions,
+    useSubmitReport,
+} from '@/features/moderation/hooks/useReports';
 import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
 import { Select } from '@/ui/primitives/Select';

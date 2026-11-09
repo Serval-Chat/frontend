@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 
 import { ADMIN_CONSTANTS } from '@/constants/admin';
-import { useAdminAuditLogs } from '@/hooks/admin/useAdminAuditLogs';
-import { useAdminList } from '@/hooks/admin/useAdminList';
+import { useAdminAuditLogs } from '@/features/admin/hooks/useAdminAuditLogs';
+import { useAdminList } from '@/features/admin/hooks/useAdminList';
 import type { AuditLog } from '@/types/admin';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';

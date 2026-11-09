@@ -9,8 +9,8 @@ import {
     useOnboarding,
     useServerDetails,
 } from '@/api/servers/servers.queries';
+import { useServerWS } from '@/features/servers/hooks/useServerWS';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useServerWS } from '@/hooks/ws/useServerWS';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
     clearLastOpenedChannelForServer,

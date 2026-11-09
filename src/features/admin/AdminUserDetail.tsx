@@ -4,8 +4,8 @@ import { ArrowLeft, Shield, Users } from 'lucide-react';
 
 import type { User } from '@/api/users/users.types';
 import { useAdminUserWarnings } from '@/api/warnings/warnings.queries';
+import { useAdminUserDetail } from '@/features/admin/hooks/useAdminUsers';
 import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
-import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { Button } from '@/ui/primitives/Button';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Text } from '@/ui/primitives/Text';

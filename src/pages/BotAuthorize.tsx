@@ -14,9 +14,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useServers } from '@/api/servers/servers.queries';
 import { useMe } from '@/api/users/users.queries';
 import { DefaultBackground } from '@/app/layout/DefaultBackground';
+import {
+    useAuthorizeBot,
+    usePublicBotInfo,
+} from '@/features/developer/hooks/useBots';
 import { UserProfilePictureIcon } from '@/features/users/UserProfilePictureIcon';
 import { ProfileBanner } from '@/features/users/profile/ProfileBanner';
-import { useAuthorizeBot, usePublicBotInfo } from '@/hooks/developer/useBots';
 import { BOT_PERMISSION_KEYS } from '@/types/bot';
 import type { BotPermissionKey } from '@/types/bot';
 import { Box } from '@/ui/primitives/Box';

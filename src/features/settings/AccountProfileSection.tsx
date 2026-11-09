@@ -7,8 +7,8 @@ import {
     useUpdateUsername,
 } from '@/api/users/users.queries';
 import type { User } from '@/api/users/users.types';
+import { useSelfStatus } from '@/features/users/hooks/useSelfStatus';
 import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
-import { useSelfStatus } from '@/hooks/useSelfStatus';
 import { Heading } from '@/ui/primitives/Heading';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { mergeReducer } from '@/utils/mergeReducer';

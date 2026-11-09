@@ -7,7 +7,7 @@ import {
     useAdminAwaitingReviewBots,
     useDeclineBotVerification,
     useVerifyBot,
-} from '@/hooks/admin/useAdminBots';
+} from '@/features/admin/hooks/useAdminBots';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';

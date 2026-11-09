@@ -32,7 +32,7 @@ vi.mock('@/store/slices/navSlice', () => ({
     setTargetMessageId: vi.fn().mockReturnValue('mockSetTargetMessageId'),
 }));
 
-vi.mock('@/hooks/ws/useServerWS', () => ({
+vi.mock('@/features/servers/hooks/useServerWS', () => ({
     useServerWS: vi.fn(),
 }));
 

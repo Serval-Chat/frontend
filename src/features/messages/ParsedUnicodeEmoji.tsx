@@ -1,4 +1,4 @@
-import { useEmojiSheetLoaded } from '@/hooks/useEmojiSheetLoaded';
+import { useEmojiSheetLoaded } from '@/features/emoji/hooks/useEmojiSheetLoaded';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { emojiMap, getSpriteStyle } from '@/utils/emoji';

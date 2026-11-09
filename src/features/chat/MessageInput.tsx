@@ -11,11 +11,11 @@ import { Plus } from 'lucide-react';
 
 import type { MessageAttachment, OutgoingPoll } from '@/api/chat/chat.types';
 import { useMe, useUserById } from '@/api/users/users.queries';
-import { useComposerRestrictions } from '@/hooks/chat/useComposerRestrictions';
-import type { QueuedFile } from '@/hooks/chat/useFileQueue';
-import { useMessageInputData } from '@/hooks/chat/useMessageInputData';
-import { useMessageInputEffects } from '@/hooks/chat/useMessageInputEffects';
-import { useMessageSend } from '@/hooks/chat/useMessageSend';
+import { useComposerRestrictions } from '@/features/chat/hooks/useComposerRestrictions';
+import type { QueuedFile } from '@/features/chat/hooks/useFileQueue';
+import { useMessageInputData } from '@/features/chat/hooks/useMessageInputData';
+import { useMessageInputEffects } from '@/features/chat/hooks/useMessageInputEffects';
+import { useMessageSend } from '@/features/chat/hooks/useMessageSend';
 import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import { type TokenType, detectTokensInText } from '@/lib/tokenDetector';
 import { useAppSelector } from '@/store/hooks';

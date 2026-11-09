@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useAdminResetPasswordless } from '@/hooks/admin/useAdminPasswordless';
+import { useAdminResetPasswordless } from '@/features/admin/hooks/useAdminPasswordless';
 
 import { AdminPasswordlessReset } from './AdminPasswordlessReset';
 
-vi.mock('@/hooks/admin/useAdminPasswordless', () => ({
+vi.mock('@/features/admin/hooks/useAdminPasswordless', () => ({
     useAdminResetPasswordless: vi.fn(),
 }));
 

@@ -9,7 +9,7 @@ import {
     useServerEmojis,
     useUploadEmoji,
 } from '@/api/servers/servers.queries';
-import { useBulkAssetUpload } from '@/hooks/useBulkAssetUpload';
+import { useBulkAssetUpload } from '@/features/servers/hooks/useBulkAssetUpload';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { BulkUploadModal } from '@/features/servers/BulkUploadModal';
 import { Button } from '@/ui/primitives/Button';

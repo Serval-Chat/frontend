@@ -7,7 +7,7 @@ import {
     useAdminInvites,
     useCreateAdminInvite,
     useCreateBatchAdminInvites,
-} from '@/hooks/admin/useAdminInvites';
+} from '@/features/admin/hooks/useAdminInvites';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { IconButton } from '@/ui/primitives/IconButton';

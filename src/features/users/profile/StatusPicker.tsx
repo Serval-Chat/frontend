@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Check } from 'lucide-react';
 
-import type { ManualUserStatus } from '@/hooks/useSelfStatus';
+import type { ManualUserStatus } from '@/features/users/hooks/useSelfStatus';
 import { Popover } from '@/ui/primitives/Popover';
 import { Box } from '@/ui/primitives/Box';
 import { Pressable } from '@/ui/primitives/Pressable';

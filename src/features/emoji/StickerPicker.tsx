@@ -6,7 +6,7 @@ import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import type { Sticker } from '@/api/servers/servers.api';
-import { useStickerInfoBox } from '@/hooks/useStickerInfoBox';
+import { useStickerInfoBox } from '@/features/emoji/hooks/useStickerInfoBox';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Text } from '@/ui/primitives/Text';

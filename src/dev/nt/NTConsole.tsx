@@ -16,7 +16,7 @@ import { parseAnsi } from '@/console/utils/ansiParser';
 import { CopyDialog } from '@/dev/nt/CopyDialog';
 import { NTScrollArea } from '@/dev/nt/NTScrollArea';
 import { Window } from '@/dev/nt/Window';
-import { useCopyDialog } from '@/hooks/nt/useCopyDialog';
+import { useCopyDialog } from '@/dev/nt/hooks/useCopyDialog';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleConsole } from '@/store/slices/debugOptionsSlice';
 import { mergeReducer } from '@/utils/mergeReducer';

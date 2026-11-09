@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { CopyDialog } from '@/dev/nt/CopyDialog';
-import { useCopyDialog } from '@/hooks/nt/useCopyDialog';
+import { useCopyDialog } from '@/dev/nt/hooks/useCopyDialog';
 import { Button } from '@/ui/primitives/Button';
 
 import { DemoItem } from './DemoItem';

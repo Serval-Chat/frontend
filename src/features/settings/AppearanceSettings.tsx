@@ -1,8 +1,8 @@
 import { useMe } from '@/api/users/users.queries';
 import type { User, UsernameFont } from '@/api/users/users.types';
+import { useAppearanceForm } from '@/features/settings/hooks/useAppearanceForm';
 import { StyledUserName } from '@/features/users/StyledUserName';
 import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
-import { useAppearanceForm } from '@/hooks/settings/useAppearanceForm';
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';

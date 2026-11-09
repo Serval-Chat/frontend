@@ -15,7 +15,7 @@ vi.mock('@tanstack/react-query', () => ({
     }),
 }));
 
-vi.mock('@/hooks/useEmojiInfoBox', () => ({
+vi.mock('@/features/emoji/hooks/useEmojiInfoBox', () => ({
     useEmojiInfoBox: (): Record<string, unknown> => ({
         selectedEmoji: null,
         infoBoxPosition: null,

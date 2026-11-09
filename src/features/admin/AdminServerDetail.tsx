@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 
 import type { Server } from '@/api/servers/servers.types';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminServerDetail,
     useAdminServerInvites,
@@ -26,7 +25,8 @@ import {
     useRestoreServer,
     useUnverifyServer,
     useVerifyServer,
-} from '@/hooks/admin/useAdminServers';
+} from '@/features/admin/hooks/useAdminServers';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';

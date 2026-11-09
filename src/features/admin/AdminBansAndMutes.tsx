@@ -9,7 +9,7 @@ import {
     useAdminMutesList,
     useAdminUnbanUser,
     useAdminUnmuteUser,
-} from '@/hooks/admin/useAdminBans';
+} from '@/features/admin/hooks/useAdminBans';
 import { Button } from '@/ui/primitives/Button';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Text } from '@/ui/primitives/Text';

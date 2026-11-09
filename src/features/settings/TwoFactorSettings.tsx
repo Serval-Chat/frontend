@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import type { User } from '@/api/users/users.types';
-import { useTwoFactor } from '@/hooks/settings/useTwoFactor';
+import { useTwoFactor } from '@/features/settings/hooks/useTwoFactor';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import type { User } from '@/api/users/users.types';
-import { usePasswordless } from '@/hooks/settings/usePasswordless';
+import { usePasswordless } from '@/features/settings/hooks/usePasswordless';
 import { Button } from '@/ui/primitives/Button';
 import { Modal } from '@/ui/primitives/Modal';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';

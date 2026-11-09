@@ -1,7 +1,7 @@
 import { NTButton } from '@/dev/nt/NTButton';
 import { NTProgressBar } from '@/dev/nt/NTProgressBar';
 import { Window } from '@/dev/nt/Window';
-import type { CopyJob } from '@/hooks/nt/useCopyDialog';
+import type { CopyJob } from '@/dev/nt/hooks/useCopyDialog';
 
 interface CopyDialogProps {
     job: CopyJob;

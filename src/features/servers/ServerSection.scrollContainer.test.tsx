@@ -25,7 +25,9 @@ vi.mock('@/store/hooks', () => ({
     useAppSelector: vi.fn(),
 }));
 
-vi.mock('@/hooks/ws/useServerWS', () => ({ useServerWS: vi.fn() }));
+vi.mock('@/features/servers/hooks/useServerWS', () => ({
+    useServerWS: vi.fn(),
+}));
 
 vi.mock('@/hooks/usePermissions', () => ({ usePermissions: vi.fn() }));
 

@@ -3,7 +3,7 @@ import { AnimatePresence, m } from 'framer-motion';
 
 import { DefaultBackground } from '@/app/layout/DefaultBackground';
 import { FormContent } from '@/features/auth/FormContent';
-import { useRegisterForm } from '@/hooks/useRegisterForm';
+import { useRegisterForm } from '@/features/auth/hooks/useRegisterForm';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';

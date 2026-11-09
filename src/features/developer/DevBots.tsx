@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Plus } from 'lucide-react';
 
-import { useBots } from '@/hooks/developer/useBots';
+import { useBots } from '@/features/developer/hooks/useBots';
 import type { Bot } from '@/types/bot';
 import { Button } from '@/ui/primitives/Button';
 import { Text } from '@/ui/primitives/Text';

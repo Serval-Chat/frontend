@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react';
 import { Plus, XCircle } from 'lucide-react';
 
 import type { Badge } from '@/api/users/users.types';
-import { UserBadge } from '@/features/users/UserBadge';
 import {
     useAdminBadges,
     useAssignBadgeToUser,
     useRemoveBadgeFromUser,
-} from '@/hooks/admin/useAdminBadges';
+} from '@/features/admin/hooks/useAdminBadges';
+import { UserBadge } from '@/features/users/UserBadge';
 import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';

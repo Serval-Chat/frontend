@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useBots } from '@/hooks/developer/useBots';
+import { useBots } from '@/features/developer/hooks/useBots';
 import type { Bot } from '@/types/bot';
 
 import { DevBots } from './DevBots';
 
-vi.mock('@/hooks/developer/useBots', () => ({
+vi.mock('@/features/developer/hooks/useBots', () => ({
     useBots: vi.fn(),
 }));
 

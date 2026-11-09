@@ -12,14 +12,14 @@ import {
 
 import type { Server } from '@/api/servers/servers.types';
 import { ADMIN_CONSTANTS } from '@/constants/admin';
-import { ServerIcon } from '@/features/servers/ServerIcon';
-import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import {
     useAdminAwaitingReviewServers,
     useAdminServerVerificationStats,
     useRunServerVerificationNow,
     useSetServerVerificationOverride,
-} from '@/hooks/admin/useAdminServers';
+} from '@/features/admin/hooks/useAdminServers';
+import { ServerIcon } from '@/features/servers/ServerIcon';
+import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';

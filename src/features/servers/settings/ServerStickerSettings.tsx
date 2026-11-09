@@ -15,8 +15,8 @@ import {
     STICKER_NAME_MAX_LENGTH,
 } from '@/constants/stickers';
 import { BulkUploadModal } from '@/features/servers/BulkUploadModal';
+import { useBulkAssetUpload } from '@/features/servers/hooks/useBulkAssetUpload';
 import { ImageCropModal } from '@/features/settings/ImageCropModal';
-import { useBulkAssetUpload } from '@/hooks/useBulkAssetUpload';
 import { useWebSocket } from '@/hooks/ws/useWebSocket';
 import { Button } from '@/ui/primitives/Button';
 import { FileInput } from '@/ui/primitives/FileInput';

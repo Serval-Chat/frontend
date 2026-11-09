@@ -3,11 +3,11 @@ import { useReducer, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import type { ReportStatus } from '@/api/reports/reports.api';
-import { ReportIdCopy } from '@/features/moderation/ReportIdCopy';
 import {
     useAdminReports,
     useUpdateAdminReport,
-} from '@/hooks/admin/useAdminReports';
+} from '@/features/admin/hooks/useAdminReports';
+import { ReportIdCopy } from '@/features/moderation/ReportIdCopy';
 import { useUsers } from '@/hooks/useUsers';
 import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';

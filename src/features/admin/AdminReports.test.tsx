@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { AdminReports } from './AdminReports';
 
-vi.mock('@/hooks/admin/useAdminReports', () => ({
+vi.mock('@/features/admin/hooks/useAdminReports', () => ({
     useAdminReports: () => ({
         data: [
             {

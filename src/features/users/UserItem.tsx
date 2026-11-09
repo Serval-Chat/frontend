@@ -43,10 +43,10 @@ import { InviteToServerModal } from '@/features/servers/InviteToServerModal';
 import { BanUserModal } from '@/features/servers/modals/BanUserModal';
 import { KickUserModal } from '@/features/servers/modals/KickUserModal';
 import { TimeoutUserModal } from '@/features/servers/modals/TimeoutUserModal';
+import { useSelfStatus } from '@/features/users/hooks/useSelfStatus';
 import { ProfilePopup } from '@/features/users/profile/ProfilePopup';
 import { BlockUserModal } from '@/features/users/profile/modals/BlockUserModal';
 import { NicknameModal } from '@/features/users/profile/modals/NicknameModal';
-import { useSelfStatus } from '@/hooks/useSelfStatus';
 import type { RootState } from '@/store';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type {
@@ -69,7 +69,7 @@ import {
 } from './UserItemServerDataProvider';
 import { UserProfilePicture } from './UserProfilePicture';
 import type { UserStatus } from './UserProfileStatusIndicator';
-import { useMemberModeration } from './useMemberModeration';
+import { useMemberModeration } from './hooks/useMemberModeration';
 import type { ServerData } from './userItemContext';
 import { ServerDataContext, UserItemViewportContext } from './userItemContext';
 import {

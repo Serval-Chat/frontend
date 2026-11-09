@@ -4,11 +4,11 @@ import { Reorder, useDragControls } from 'framer-motion';
 import { GripVertical, Trash2 } from 'lucide-react';
 
 import type { AdminReportReasonOption } from '@/api/reports/reports.api';
-import { ThemeSwitcher } from '@/features/settings/ThemeSwitcher';
 import {
     useAdminReportOptions,
     useUpdateAdminReportOptions,
-} from '@/hooks/admin/useAdminReports';
+} from '@/features/admin/hooks/useAdminReports';
+import { ThemeSwitcher } from '@/features/settings/ThemeSwitcher';
 import { Button } from '@/ui/primitives/Button';
 import { Checkbox } from '@/ui/primitives/Checkbox';
 import { Heading } from '@/ui/primitives/Heading';

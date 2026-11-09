@@ -4,10 +4,10 @@ import { AnimatePresence, m } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 
 import type { Role } from '@/api/servers/servers.types';
+import { useTertiarySidebarData } from '@/app/shell/hooks/useTertiarySidebarData';
 import { DMSidebarSection } from '@/app/shell/sidebar/DMSidebarSection';
 import { ServerSidebarSection } from '@/app/shell/sidebar/ServerSidebarSection';
 import { useResizable } from '@/hooks/useResizable';
-import { useTertiarySidebarData } from '@/hooks/useTertiarySidebarData';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobileMemberList } from '@/store/slices/navSlice';
 import { Box } from '@/ui/primitives/Box';
