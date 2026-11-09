@@ -1,6 +1,6 @@
 import React, { useReducer, useState } from 'react';
 
-import { Clock, Download, Loader2, Trash2 } from 'lucide-react';
+import { Clock, Download, Trash2 } from 'lucide-react';
 
 import {
     useDeleteChannel,
@@ -19,6 +19,7 @@ import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
 import { Label } from '@/ui/primitives/Label';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Popover } from '@/ui/primitives/Popover';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
@@ -692,7 +693,10 @@ export const ChannelOverviewSettings = ({
 
                                 {exportState?.state === 'in_progress' ? (
                                     <div className="mt-2 flex items-center gap-2 rounded-md bg-primary/10 p-2 text-primary">
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        <LoadingSpinner
+                                            size="xs"
+                                            tone="current"
+                                        />
                                         <Text size="xs" weight="medium">
                                             An export is currently in
                                             progress...
@@ -716,7 +720,11 @@ export const ChannelOverviewSettings = ({
                             >
                                 {exportState?.state === 'in_progress' ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <LoadingSpinner
+                                            className="mr-2"
+                                            size="sm"
+                                            tone="current"
+                                        />
                                         Exporting...
                                     </>
                                 ) : exportState?.state === 'cooling_down' ? (

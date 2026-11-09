@@ -1,13 +1,12 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 import { m } from 'framer-motion';
-import { createPortal } from 'react-dom';
 
 import type { Server } from '@/api/servers/servers.types';
 import { ServerIcon } from '@/features/servers/ServerIcon';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { Box } from '@/ui/primitives/Box';
-import { Pressable } from '@/ui/primitives/Pressable';
+import { DismissableLayer } from '@/ui/primitives/DismissableLayer';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -22,7 +21,7 @@ interface StickerInfoBoxProps {
     server?: Server | null;
     className?: string;
     position?: { x: number; y: number };
-    onClose?: () => void;
+    onClose: () => void;
 }
 
 export const StickerInfoBox = ({
@@ -31,7 +30,7 @@ export const StickerInfoBox = ({
     className,
     position,
     onClose,
-}: StickerInfoBoxProps): React.ReactPortal => {
+}: StickerInfoBoxProps) => {
     const isUnknownServer = !server;
     const infoBoxRef = useRef<HTMLDivElement>(null);
 
@@ -42,29 +41,12 @@ export const StickerInfoBox = ({
         padding: 16,
     });
 
-    const content = (
-        <>
-            {onClose ? (
-                <Pressable
-                    aria-label="Close sticker info"
-                    className="fixed inset-0 z-[1060] cursor-default"
-                    onClick={onClose}
-                    onContextMenu={onClose}
-                    onKeyDown={(e): void => {
-                        if (
-                            e.key === 'Escape' ||
-                            e.key === 'Enter' ||
-                            e.key === ' '
-                        ) {
-                            onClose();
-                        }
-                    }}
-                />
-            ) : null}
+    return (
+        <DismissableLayer label="Close sticker info" onDismiss={onClose}>
             <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 className={cn(
-                    'z-[99999999] flex w-64 flex-col gap-3 rounded-lg border border-divider bg-background p-3 shadow-xl',
+                    'flex w-64 flex-col gap-3 rounded-lg border border-divider bg-background p-3 shadow-xl',
                     className,
                 )}
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -125,8 +107,6 @@ export const StickerInfoBox = ({
                     )}
                 </Box>
             </m.div>
-        </>
+        </DismissableLayer>
     );
-
-    return createPortal(content, document.body);
 };

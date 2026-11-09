@@ -55,6 +55,7 @@
     --z-index-profile: var(--z-index-top);
     --z-index-profile-menu: calc(var(--z-index-tooltip) + 1);
     --z-index-modal-top: calc(var(--z-index-profile-menu) + 1);
+    --z-index-popout: calc(var(--z-index-modal-top) + 1);
 
     --color-primary: var(--primary);
     --color-primary-hover: var(--primary-hover);

@@ -7,6 +7,7 @@ import { useAdminUserWarnings } from '@/api/warnings/warnings.queries';
 import { UserProfileCard } from '@/features/users/profile/UserProfileCard';
 import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { Button } from '@/ui/primitives/Button';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Text } from '@/ui/primitives/Text';
 import { APP_LOCALE } from '@/utils/locale';
 
@@ -39,7 +40,7 @@ export const AdminUserDetail = ({
         return (
             <div className="flex h-[60vh] items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+                    <LoadingSpinner size="xl" />
                     <Text as="p" size="sm" variant="muted">
                         Loading user intelligence...
                     </Text>

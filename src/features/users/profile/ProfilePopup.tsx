@@ -16,6 +16,7 @@ import { useAdminUserDetail } from '@/hooks/admin/useAdminUsers';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { useAppSelector } from '@/store/hooks';
 import { Box } from '@/ui/primitives/Box';
+import { useEscapeToClose } from '@/ui/primitives/useEscapeToClose';
 import {
     getHighestColorRoleForMember,
     getHighestRoleWithIconForMember,
@@ -215,16 +216,7 @@ const ProfilePopupContent = ({
         };
     }, [onClose]);
 
-    // Close on escape
-    useEffect((): (() => void) => {
-        const handleKeyDown = (event: KeyboardEvent): void => {
-            if (event.key === 'Escape') onClose();
-        };
-        globalThis.addEventListener('keydown', handleKeyDown);
-        return (): void => {
-            globalThis.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [onClose]);
+    useEscapeToClose(true, onClose);
 
     if (!user && userId === '') return null;
 

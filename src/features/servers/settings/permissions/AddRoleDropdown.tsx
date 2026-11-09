@@ -6,6 +6,7 @@ import type { Role } from '@/api/servers/servers.types';
 import { IconButton } from '@/ui/primitives/IconButton';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
+import { useEscapeToClose } from '@/ui/primitives/useEscapeToClose';
 
 import { RoleColorDot } from './RoleColorDot';
 
@@ -19,6 +20,9 @@ export const AddRoleDropdown = ({
     onAdd,
 }: AddRoleDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    useEscapeToClose(isOpen, (): void => {
+        setIsOpen(false);
+    });
 
     return (
         <div className="relative">
@@ -39,10 +43,6 @@ export const AddRoleDropdown = ({
                         tabIndex={-1}
                         onClick={(): void => {
                             setIsOpen(false);
-                        }}
-                        onKeyDown={(e): void => {
-                            if (e.key === 'Escape' || e.key === 'Enter')
-                                setIsOpen(false);
                         }}
                     />
                     <div className="absolute top-full right-0 z-50 mt-1 max-h-60 w-48 overflow-hidden rounded-md border border-border-subtle bg-background shadow-xl backdrop-blur-md">

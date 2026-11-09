@@ -6,6 +6,8 @@ import { createPortal } from 'react-dom';
 import { useSmartPosition } from '@/hooks/useSmartPosition';
 import { cn } from '@/utils/cn';
 
+import { useEscapeToClose } from './useEscapeToClose';
+
 interface PopoverProps {
     isOpen: boolean;
     onClose: () => void;
@@ -33,6 +35,8 @@ export const Popover = ({
         onCloseRef.current = onClose;
     });
 
+    useEscapeToClose(isOpen, onClose);
+
     const coords = useSmartPosition({
         isOpen,
         elementRef: popoverRef,
@@ -55,20 +59,12 @@ export const Popover = ({
             }
         };
 
-        const handleKeyDown = (event: KeyboardEvent): void => {
-            if (event.key === 'Escape') {
-                onCloseRef.current();
-            }
-        };
-
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
-            document.addEventListener('keydown', handleKeyDown);
         }
 
         return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen, triggerRef, disableClickOutside]);
 

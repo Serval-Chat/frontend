@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { Turnstile } from '@marsidev/react-turnstile';
-import { Loader2 } from 'lucide-react';
 import { Link, Navigate } from 'react-router-dom';
 
 import { DefaultBackground } from '@/app/layout/DefaultBackground';
@@ -18,6 +17,7 @@ import { Checkbox } from '@/ui/primitives/Checkbox';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
 import { InputWrapper } from '@/ui/primitives/InputWrapper';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { MutedText } from '@/ui/primitives/MutedText';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';
 import { Pressable } from '@/ui/primitives/Pressable';
@@ -170,7 +170,7 @@ export const Login = () => {
                             variant="normal"
                         >
                             {isRecoveryLoading ? (
-                                <Loader2 className="animate-spin" size={20} />
+                                <LoadingSpinner tone="current" />
                             ) : (
                                 'Use recovery key'
                             )}
@@ -293,7 +293,7 @@ export const Login = () => {
                             variant="normal"
                         >
                             {isLoading ? (
-                                <Loader2 className="animate-spin" size={20} />
+                                <LoadingSpinner tone="current" />
                             ) : requiresTwoFactor ? (
                                 'Verify 2FA'
                             ) : (
@@ -320,7 +320,7 @@ export const Login = () => {
                             onClick={(): undefined => void loginWithPasskey()}
                         >
                             {isPasskeyLoading ? (
-                                <Loader2 className="animate-spin" size={20} />
+                                <LoadingSpinner tone="current" />
                             ) : (
                                 'Sign in with a passkey'
                             )}

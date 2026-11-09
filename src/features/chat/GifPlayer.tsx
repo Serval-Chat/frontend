@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
 
 import { klipyApi } from '@/api/klipy/klipy.api';
 import type { KlipyFavorite } from '@/api/klipy/klipy.types';
@@ -9,6 +8,7 @@ import { GifStarButton } from '@/features/chat/GifStarButton';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Box } from '@/ui/primitives/Box';
 import { Link } from '@/ui/primitives/Link';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
@@ -137,7 +137,7 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
     if (isLoading) {
         return (
             <Box className="my-2 flex h-48 w-full max-w-[400px] items-center justify-center rounded-lg bg-bg-secondary">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <LoadingSpinner size="lg" tone="muted" />
             </Box>
         );
     }

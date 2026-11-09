@@ -8,6 +8,7 @@ import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Text } from '@/ui/primitives/Text';
+import { Tooltip } from '@/ui/primitives/Tooltip';
 import { ParserPresets, parseText } from '@/utils/textParser/parser';
 
 const MAX_REPLY_PREVIEW_CHARS = 120;
@@ -81,14 +82,20 @@ export const ReplyBanner = ({
                 />
             </Box>
         </Box>
-        <Button
-            className="h-7 w-7 shrink-0 p-0"
-            size="sm"
-            title="Cancel reply"
-            variant="ghost"
-            onClick={onCancelReply}
+        <Tooltip
+            content="Cancel reply"
+            position="top"
+            triggerClassName="inline-flex items-center"
         >
-            <X size={16} />
-        </Button>
+            <Button
+                aria-label="Cancel reply"
+                className="h-7 w-7 shrink-0 p-0"
+                size="sm"
+                variant="ghost"
+                onClick={onCancelReply}
+            >
+                <X size={16} />
+            </Button>
+        </Tooltip>
     </Box>
 );

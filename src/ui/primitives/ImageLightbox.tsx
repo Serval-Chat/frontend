@@ -7,6 +7,8 @@ import { createPortal } from 'react-dom';
 import { downloadImage } from '@/utils/downloadImage';
 import { isTauri } from '@/utils/tauri';
 
+import { useEscapeToClose } from './useEscapeToClose';
+
 interface ImageLightboxProps {
     src: string;
     alt?: string;
@@ -21,22 +23,18 @@ export const ImageLightbox = ({
     onClose,
 }: ImageLightboxProps): React.ReactPortal | null => {
     const [scale, setScale] = React.useState(1);
-    const onCloseEvent = React.useEffectEvent(onClose);
 
     if (!isOpen && scale !== 1) {
         setScale(1);
     }
 
+    useEscapeToClose(isOpen, onClose);
+
     React.useEffect((): (() => void) | undefined => {
         if (!isOpen) return;
 
-        const handleKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') onCloseEvent();
-        };
-        globalThis.addEventListener('keydown', handleKey);
         document.body.style.overflow = 'hidden';
         return (): void => {
-            globalThis.removeEventListener('keydown', handleKey);
             document.body.style.overflow = '';
         };
     }, [isOpen]);

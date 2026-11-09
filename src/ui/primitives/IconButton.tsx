@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { Badge } from '@/ui/primitives/Badge';
 import { Button, type ButtonProps } from '@/ui/primitives/Button';
+import { Tooltip } from '@/ui/primitives/Tooltip';
 import { colors } from '@/ui/theme';
 
 export interface IconButtonProps extends Omit<ButtonProps, 'children'> {
@@ -18,12 +19,15 @@ export const IconButton = ({
     badgeCount,
     variant,
     style,
+    title,
+    'aria-label': ariaLabel,
     ...props
 }: IconButtonProps) => {
     const [hovered, setHovered] = useState(false);
 
-    return (
+    const button = (
         <Button
+            aria-label={ariaLabel ?? title}
             style={{
                 ...(isActive
                     ? {
@@ -53,5 +57,17 @@ export const IconButton = ({
                 <Badge count={badgeCount} />
             ) : null}
         </Button>
+    );
+
+    return title ? (
+        <Tooltip
+            content={title}
+            position="top"
+            triggerClassName="inline-flex items-center"
+        >
+            {button}
+        </Tooltip>
+    ) : (
+        button
     );
 };

@@ -21,6 +21,7 @@ import { Button } from '@/ui/primitives/Button';
 import { DropdownWithSearch } from '@/ui/primitives/DropdownWithSearch';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Stack } from '@/ui/primitives/Stack';
 import {
@@ -112,7 +113,7 @@ const AssignBadgeModal = ({
                     <Stack gap="sm">
                         {isLoading ? (
                             <Box className="flex h-40 flex-col items-center justify-center gap-3 text-muted-foreground">
-                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                                <LoadingSpinner />
                                 <Text size="xs">Scanning user database...</Text>
                             </Box>
                         ) : users && users.length > 0 ? (

@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 import {
     SERVERS_QUERY_KEYS,
@@ -22,6 +22,7 @@ import { resolveApiUrl } from '@/utils/apiUrl';
 import { WsEvents } from '@/ws';
 import { Label } from '@/ui/primitives/Label';
 import { FileInput } from '@/ui/primitives/FileInput';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 
 interface ServerEmojiSettingsProps {
     serverId: string;
@@ -216,7 +217,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
 
                 {isLoading ? (
                     <div className="flex justify-center p-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <LoadingSpinner size="lg" tone="muted" />
                     </div>
                 ) : (
                     <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
@@ -229,7 +230,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                             onClick={handleUploadClick}
                         >
                             {isUploading ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                <LoadingSpinner tone="muted" />
                             ) : (
                                 <>
                                     <Plus className="h-6 w-6 text-muted-foreground" />
@@ -254,7 +255,7 @@ export const ServerEmojiSettings = ({ serverId }: ServerEmojiSettingsProps) => {
                             }
                         >
                             {isBulkUploading ? (
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                <LoadingSpinner tone="muted" />
                             ) : (
                                 <>
                                     <Plus className="h-6 w-6 text-muted-foreground" />

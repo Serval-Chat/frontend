@@ -9,7 +9,6 @@ import React, {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     GripHorizontal,
-    Loader2,
     Plus,
     Search,
     Star,
@@ -39,6 +38,7 @@ import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { ContextMenu } from '@/ui/primitives/ContextMenu';
 import { Input } from '@/ui/primitives/Input';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
@@ -721,7 +721,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 <Box className="scrollbar-thin flex-1 overflow-y-auto p-3 pt-1">
                     {loading ? (
                         <Box className="flex h-full items-center justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <LoadingSpinner size="lg" />
                         </Box>
                     ) : gifs.length > 0 ? (
                         <Box

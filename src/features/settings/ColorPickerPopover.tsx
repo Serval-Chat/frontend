@@ -1,7 +1,6 @@
 import { HexColorPicker } from 'react-colorful';
-import { createPortal } from 'react-dom';
 
-import { Pressable } from '@/ui/primitives/Pressable';
+import { DismissableLayer } from '@/ui/primitives/DismissableLayer';
 import { Text } from '@/ui/primitives/Text';
 
 interface ColorPickerPopoverProps {
@@ -27,22 +26,12 @@ export const ColorPickerPopover = ({
     onChange,
     onHexDraftChange,
     onClose,
-}: ColorPickerPopoverProps): React.ReactNode =>
-    createPortal(
+}: ColorPickerPopoverProps) => (
+    <DismissableLayer label="Close color picker" onDismiss={onClose}>
         <div
-            className="z-top"
             ref={pickerRef}
             style={{ position: 'fixed', left: coords.x, top: coords.y }}
         >
-            <Pressable
-                aria-label="Close color picker"
-                className="fixed inset-0"
-                tabIndex={-1}
-                onClick={onClose}
-                onKeyDown={(e): void => {
-                    if (e.key === 'Escape') onClose();
-                }}
-            />
             <div className="relative overflow-hidden rounded-lg border border-white/10 bg-background shadow-xl">
                 <HexColorPicker
                     color={color}
@@ -80,6 +69,6 @@ export const ColorPickerPopover = ({
                     />
                 </div>
             </div>
-        </div>,
-        document.body,
-    );
+        </div>
+    </DismissableLayer>
+);

@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 
 import { m } from 'framer-motion';
-import { createPortal } from 'react-dom';
 
 import { useSmartPosition } from '@/hooks/useSmartPosition';
+import { DismissableLayer } from '@/ui/primitives/DismissableLayer';
 import { Pressable } from '@/ui/primitives/Pressable';
 
 import { getUnicode, getSpriteStyle } from '@/utils/emoji';
@@ -36,7 +36,7 @@ export const SkinTonePopover = ({
     target,
     onSelect,
     onClose,
-}: SkinTonePopoverProps): React.ReactPortal => {
+}: SkinTonePopoverProps) => {
     const popoverRef = useRef<HTMLDivElement>(null);
 
     const smartPosition = useSmartPosition({
@@ -71,23 +71,14 @@ export const SkinTonePopover = ({
         e.nativeEvent.stopImmediatePropagation();
     };
 
-    const content = (
-        <div>
-            <Pressable
-                aria-label="Close skin tone picker"
-                className="fixed inset-0 z-[99998] cursor-default"
-                onClick={onClose}
-                onContextMenu={(e): void => {
-                    e.preventDefault();
-                    onClose();
-                }}
-                onMouseDown={handlePointerDown}
-                onTouchStart={handlePointerDown}
-            />
-
+    return (
+        <DismissableLayer
+            label="Close skin tone picker"
+            onDismiss={onClose}
+        >
             <m.div
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="z-[99999] flex items-center gap-1 rounded-2xl border border-divider bg-background p-1.5 shadow-2xl"
+                className="flex items-center gap-1 rounded-2xl border border-divider bg-background p-1.5 shadow-2xl"
                 initial={{ opacity: 0, scale: 0.85, y: 6 }}
                 ref={popoverRef}
                 style={{
@@ -96,8 +87,6 @@ export const SkinTonePopover = ({
                     top: `${smartPosition.y}px`,
                 }}
                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                onMouseDown={handlePointerDown}
-                onTouchStart={handlePointerDown}
             >
                 {swatches.map((swatch, i) => (
                     <Pressable
@@ -129,8 +118,6 @@ export const SkinTonePopover = ({
                     </Pressable>
                 ))}
             </m.div>
-        </div>
+        </DismissableLayer>
     );
-
-    return createPortal(content, document.body);
 };

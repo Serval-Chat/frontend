@@ -1,6 +1,5 @@
 import { Turnstile } from '@marsidev/react-turnstile';
 import { AnimatePresence, m } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
 
 import { DefaultBackground } from '@/app/layout/DefaultBackground';
 import { FormContent } from '@/features/auth/FormContent';
@@ -10,6 +9,7 @@ import { Button } from '@/ui/primitives/Button';
 import { Heading } from '@/ui/primitives/Heading';
 import { Input } from '@/ui/primitives/Input';
 import { InputWrapper } from '@/ui/primitives/InputWrapper';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { PasswordInput } from '@/ui/primitives/PasswordInput';
 import { StatusMessage } from '@/ui/primitives/StatusMessage';
 import { Text } from '@/ui/primitives/Text';
@@ -195,7 +195,7 @@ export const Register = () => {
                         variant="normal"
                     >
                         {isLoading ? (
-                            <Loader2 className="animate-spin" size={20} />
+                            <LoadingSpinner tone="current" />
                         ) : (
                             'Register'
                         )}

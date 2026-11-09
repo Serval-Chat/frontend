@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
 
-import { BadgeCheck, Loader2, Search, Tag, Users, X } from 'lucide-react';
+import { BadgeCheck, Search, Tag, Users, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -14,6 +14,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
@@ -250,7 +251,7 @@ export const ServerDiscoveryModal = ({
                     <div className="mx-auto max-w-6xl">
                         {items.length === 0 && isFetching ? (
                             <div className="flex h-[40vh] items-center justify-center">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <LoadingSpinner size="lg" />
                             </div>
                         ) : items.length === 0 ? (
                             <div className="flex h-[40vh] flex-col items-center justify-center text-center">

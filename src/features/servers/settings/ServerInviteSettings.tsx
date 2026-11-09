@@ -30,6 +30,7 @@ import {
 } from '@/ui/primitives/Table';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
+import { Tooltip } from '@/ui/primitives/Tooltip';
 import { APP_LOCALE } from '@/utils/locale';
 
 interface ServerInviteSettingsProps {
@@ -108,16 +109,22 @@ const VanityLinkSection = ({ serverId }: { serverId: string }) => {
                         value={buildInviteUrl(currentCode)}
                     />
                     {isOwner ? (
-                        <Button
-                            disabled={isDeleting}
-                            loading={isDeleting}
-                            size="sm"
-                            title="Remove"
-                            variant="ghost"
-                            onClick={handleDelete}
+                        <Tooltip
+                            content="Remove"
+                            position="top"
+                            triggerClassName="inline-flex items-center"
                         >
-                            <Trash2 className="h-4 w-4 text-danger" />
-                        </Button>
+                            <Button
+                                aria-label="Remove"
+                                disabled={isDeleting}
+                                loading={isDeleting}
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleDelete}
+                            >
+                                <Trash2 className="h-4 w-4 text-danger" />
+                            </Button>
+                        </Tooltip>
                     ) : null}
                 </div>
             ) : !isOwner ? (

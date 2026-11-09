@@ -38,6 +38,7 @@ import { useKeybindManager } from '@/keybinds/useKeybindManager';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { useToast } from '@/ui/primitives/Toast';
+import { Tooltip } from '@/ui/primitives/Tooltip';
 import { cn } from '@/utils/cn';
 
 import { LexicalAutocompletePlugin } from './lexical/LexicalAutocompletePlugin';
@@ -79,50 +80,68 @@ const MessageEditActions = ({
     onSave: () => void;
 }) => (
     <Box className="absolute right-2 bottom-2 flex gap-1">
-        <Button
-            className={cn(
-                'h-6 w-6 rounded p-0 transition-colors',
-                'text-muted-foreground hover:bg-white/5 hover:text-foreground',
-                showEmojiPicker && 'bg-white/10 text-foreground',
-            )}
-            disabled={isPending}
-            size="sm"
-            title="Add Emoji"
-            variant="ghost"
-            onClick={onToggleEmoji}
+        <Tooltip
+            content="Add Emoji"
+            position="top"
+            triggerClassName="inline-flex items-center"
         >
-            <Smile size={14} />
-        </Button>
+            <Button
+                aria-label="Add Emoji"
+                className={cn(
+                    'h-6 w-6 rounded p-0 transition-colors',
+                    'text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                    showEmojiPicker && 'bg-white/10 text-foreground',
+                )}
+                disabled={isPending}
+                size="sm"
+                variant="ghost"
+                onClick={onToggleEmoji}
+            >
+                <Smile size={14} />
+            </Button>
+        </Tooltip>
 
-        <Button
-            className={cn(
-                'h-6 w-6 rounded p-0 transition-colors',
-                'text-muted-foreground hover:bg-danger/20 hover:text-danger',
-            )}
-            disabled={isPending}
-            size="sm"
-            title="Cancel (Escape)"
-            variant="ghost"
-            onClick={onCancel}
+        <Tooltip
+            content="Cancel (Escape)"
+            position="top"
+            triggerClassName="inline-flex items-center"
         >
-            <X size={14} />
-        </Button>
+            <Button
+                aria-label="Cancel (Escape)"
+                className={cn(
+                    'h-6 w-6 rounded p-0 transition-colors',
+                    'text-muted-foreground hover:bg-danger/20 hover:text-danger',
+                )}
+                disabled={isPending}
+                size="sm"
+                variant="ghost"
+                onClick={onCancel}
+            >
+                <X size={14} />
+            </Button>
+        </Tooltip>
 
-        <Button
-            className={cn(
-                'h-6 w-6 rounded p-0 transition-colors',
-                hasChanged
-                    ? 'text-muted-foreground hover:bg-success/20 hover:text-success'
-                    : 'cursor-not-allowed opacity-50',
-            )}
-            disabled={isPending || !hasChanged}
-            size="sm"
-            title="Save (Enter)"
-            variant="ghost"
-            onClick={onSave}
+        <Tooltip
+            content="Save (Enter)"
+            position="top"
+            triggerClassName="inline-flex items-center"
         >
-            <Check size={14} />
-        </Button>
+            <Button
+                aria-label="Save (Enter)"
+                className={cn(
+                    'h-6 w-6 rounded p-0 transition-colors',
+                    hasChanged
+                        ? 'text-muted-foreground hover:bg-success/20 hover:text-success'
+                        : 'cursor-not-allowed opacity-50',
+                )}
+                disabled={isPending || !hasChanged}
+                size="sm"
+                variant="ghost"
+                onClick={onSave}
+            >
+                <Check size={14} />
+            </Button>
+        </Tooltip>
     </Box>
 );
 

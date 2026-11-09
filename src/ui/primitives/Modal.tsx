@@ -7,10 +7,9 @@ import { createPortal } from 'react-dom';
 import { cn } from '@/utils/cn';
 
 import { Button } from './Button';
+import { useEscapeToClose } from './useEscapeToClose';
 
-// Tracks open Modal instances in mount order so that Escape only closes the
-// topmost one, instead of every open modal reacting to the same keypress.
-let openModalStack: symbol[] = [];
+let openModalCount = 0;
 
 interface ModalProps {
     isOpen: boolean;
@@ -42,36 +41,17 @@ export const Modal = ({
     wrapperClassName,
     zIndex,
 }: ModalProps): React.ReactPortal | null => {
-    const onCloseRef = React.useRef(onClose);
-    React.useLayoutEffect(() => {
-        onCloseRef.current = onClose;
-    });
-
-    const idRef = React.useRef(Symbol('modal'));
+    useEscapeToClose(isOpen, onClose);
 
     React.useEffect((): (() => void) | undefined => {
         if (!isOpen) return undefined;
 
-        const id = idRef.current;
-        openModalStack.push(id);
+        openModalCount += 1;
         document.body.style.overflow = 'hidden';
 
-        const handleKeyDown = (e: KeyboardEvent): void => {
-            if (
-                e.key === 'Escape' &&
-                openModalStack[openModalStack.length - 1] === id
-            ) {
-                onCloseRef.current();
-            }
-        };
-        globalThis.addEventListener('keydown', handleKeyDown);
-
         return (): void => {
-            openModalStack = openModalStack.filter(
-                (stackId): boolean => stackId !== id,
-            );
-            globalThis.removeEventListener('keydown', handleKeyDown);
-            if (openModalStack.length === 0) {
+            openModalCount -= 1;
+            if (openModalCount === 0) {
                 document.body.style.overflow = '';
             }
         };

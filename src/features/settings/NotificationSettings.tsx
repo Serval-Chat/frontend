@@ -3,7 +3,6 @@ import React, { useRef, useState } from 'react';
 import type { AxiosError } from 'axios';
 import {
     Bell,
-    Loader2,
     Music,
     Play,
     Plus,
@@ -25,6 +24,7 @@ import { Button } from '@/ui/primitives/Button';
 import { FileInput } from '@/ui/primitives/FileInput';
 import { Heading } from '@/ui/primitives/Heading';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { SettingsFloatingBar } from '@/ui/primitives/SettingsFloatingBar';
 import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
@@ -433,9 +433,10 @@ export const NotificationSettings = () => {
                             }
                         >
                             {isUploading ? (
-                                <Loader2
-                                    className="mr-2 animate-spin"
-                                    size={16}
+                                <LoadingSpinner
+                                    className="mr-2"
+                                    size="sm"
+                                    tone="current"
                                 />
                             ) : (
                                 <Plus className="mr-2" size={16} />

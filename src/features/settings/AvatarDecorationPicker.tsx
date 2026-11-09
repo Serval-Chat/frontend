@@ -19,6 +19,7 @@ import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
 import { Input } from '@/ui/primitives/Input';
 import { Pressable } from '@/ui/primitives/Pressable';
+import { useEscapeToClose } from '@/ui/primitives/useEscapeToClose';
 
 interface AvatarDecorationPickerProps {
     className?: string;
@@ -113,17 +114,15 @@ export const AvatarDecorationPicker = ({
                 setIsOpen(false);
             }
         };
-        const handleKeyDown = (event: KeyboardEvent): void => {
-            if (event.key === 'Escape') setIsOpen(false);
-        };
-
         document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleKeyDown);
         return (): void => {
             document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen]);
+
+    useEscapeToClose(isOpen, (): void => {
+        setIsOpen(false);
+    });
 
     if (!user) return null;
 

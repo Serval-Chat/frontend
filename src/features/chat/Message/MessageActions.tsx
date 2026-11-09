@@ -70,15 +70,21 @@ export const MessageActions = React.memo(
                 <Box className="flex items-center gap-1 rounded border border-white/5 bg-background px-1 py-1 shadow-xl">
                     {onRetry ? (
                         <Tooltip content="Try again" position="top">
-                            <Button
-                                className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                                size="sm"
-                                title="Try again"
-                                variant="ghost"
-                                onClick={onRetry}
+                            <Tooltip
+                                content="Try again"
+                                position="top"
+                                triggerClassName="inline-flex items-center"
                             >
-                                <RefreshCw size={18} />
-                            </Button>
+                                <Button
+                                    aria-label="Try again"
+                                    className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={onRetry}
+                                >
+                                    <RefreshCw size={18} />
+                                </Button>
+                            </Tooltip>
                         </Tooltip>
                     ) : null}
                     {onDiscard || onDelete ? (
@@ -150,92 +156,130 @@ export const MessageActions = React.memo(
                     </Button>
                 ) : null}
                 {canReact ? (
-                    <Button
-                        className={cn(
-                            'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                            showPicker && 'bg-white/10 text-foreground',
-                        )}
-                        ref={reactRef}
-                        size="sm"
-                        title="Add Reaction"
-                        variant="ghost"
-                        onClick={onTogglePicker}
+                    <Tooltip
+                        content="Add Reaction"
+                        position="top"
+                        triggerClassName="inline-flex items-center"
                     >
-                        <SmilePlus size={18} />
-                    </Button>
+                        <Button
+                            aria-label="Add Reaction"
+                            className={cn(
+                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                showPicker && 'bg-white/10 text-foreground',
+                            )}
+                            ref={reactRef}
+                            size="sm"
+                            variant="ghost"
+                            onClick={onTogglePicker}
+                        >
+                            <SmilePlus size={18} />
+                        </Button>
+                    </Tooltip>
                 ) : null}
 
                 {canEdit ? (
-                    <Button
-                        className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                        size="sm"
-                        title="Edit Message"
-                        variant="ghost"
-                        onClick={onEdit}
+                    <Tooltip
+                        content="Edit Message"
+                        position="top"
+                        triggerClassName="inline-flex items-center"
                     >
-                        <Edit size={18} />
-                    </Button>
+                        <Button
+                            aria-label="Edit Message"
+                            className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            size="sm"
+                            variant="ghost"
+                            onClick={onEdit}
+                        >
+                            <Edit size={18} />
+                        </Button>
+                    </Tooltip>
                 ) : null}
 
                 {canPin && message.serverId && message.channelId ? (
                     <>
-                        <Button
-                            className={cn(
-                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                                message.isPinned && 'text-primary',
-                            )}
-                            size="sm"
-                            title={
+                        <Tooltip
+                            content={
                                 message.isPinned
                                     ? 'Unpin Message'
                                     : 'Pin Message'
                             }
-                            variant="ghost"
-                            onClick={onTogglePin}
+                            position="top"
+                            triggerClassName="inline-flex items-center"
                         >
-                            <Pin
+                            <Button
+                                aria-label={
+                                    message.isPinned
+                                        ? 'Unpin Message'
+                                        : 'Pin Message'
+                                }
                                 className={cn(
-                                    'h-4 w-4',
-                                    message.isPinned && 'fill-primary',
+                                    'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                    message.isPinned && 'text-primary',
                                 )}
-                                size={18}
-                            />
-                        </Button>
-                        <Button
-                            className={cn(
-                                'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
-                                message.isSticky && 'text-primary',
-                            )}
-                            size="sm"
-                            title={
+                                size="sm"
+                                variant="ghost"
+                                onClick={onTogglePin}
+                            >
+                                <Pin
+                                    className={cn(
+                                        'h-4 w-4',
+                                        message.isPinned && 'fill-primary',
+                                    )}
+                                    size={18}
+                                />
+                            </Button>
+                        </Tooltip>
+                        <Tooltip
+                            content={
                                 message.isSticky
                                     ? 'Unsticky Message'
                                     : 'Sticky Message'
                             }
-                            variant="ghost"
-                            onClick={onToggleSticky}
+                            position="top"
+                            triggerClassName="inline-flex items-center"
                         >
-                            <StickyNote
+                            <Button
+                                aria-label={
+                                    message.isSticky
+                                        ? 'Unsticky Message'
+                                        : 'Sticky Message'
+                                }
                                 className={cn(
-                                    'h-4 w-4',
-                                    message.isSticky && 'fill-primary',
+                                    'h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground',
+                                    message.isSticky && 'text-primary',
                                 )}
-                                size={18}
-                            />
-                        </Button>
+                                size="sm"
+                                variant="ghost"
+                                onClick={onToggleSticky}
+                            >
+                                <StickyNote
+                                    className={cn(
+                                        'h-4 w-4',
+                                        message.isSticky && 'fill-primary',
+                                    )}
+                                    size={18}
+                                />
+                            </Button>
+                        </Tooltip>
                     </>
                 ) : null}
 
                 {canDelete ? (
-                    <Button
-                        className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
-                        size="sm"
-                        title="Delete Message"
-                        variant="ghost"
-                        onClick={onDelete}
+                    <Tooltip
+                        content="Delete Message"
+                        position="top"
+                        triggerClassName="inline-flex items-center"
                     >
-                        <Trash2 size={18} />
-                    </Button>
+                        <Button
+                            aria-label="Delete Message"
+                            className="h-8 w-8 rounded p-1.5 text-muted-foreground transition-colors hover:bg-danger/20 hover:text-danger"
+                            size="sm"
+                            variant="ghost"
+                            onClick={onDelete}
+                        >
+                            <Trash2 size={18} />
+                        </Button>
+                    </Tooltip>
                 ) : null}
             </Box>
         );

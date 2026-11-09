@@ -127,7 +127,7 @@ describe('BlockingSettings', (): void => {
 
             renderComponent();
 
-            const unblockBtn = screen.getByTitle('Unblock');
+            const unblockBtn = screen.getByRole('button', { name: 'Unblock' });
             fireEvent.click(unblockBtn);
 
             expect(mockRemoveBlock).toHaveBeenCalledWith('user-1');
@@ -198,7 +198,9 @@ describe('BlockingSettings', (): void => {
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));
 
-            const renameBtn = screen.getByTitle('Rename Profile');
+            const renameBtn = screen.getByRole('button', {
+                name: 'Rename Profile',
+            });
             fireEvent.click(renameBtn);
 
             const input = screen.getByTitle('Rename Profile') as HTMLInputElement;
@@ -225,7 +227,9 @@ describe('BlockingSettings', (): void => {
             renderComponent();
             fireEvent.click(screen.getByText('Block Profiles'));
 
-            const deleteBtns = screen.getAllByTitle('Delete Profile');
+            const deleteBtns = screen.getAllByRole('button', {
+                name: 'Delete Profile',
+            });
             expect(deleteBtns).toHaveLength(2);
 
             fireEvent.click(deleteBtns[0]!);

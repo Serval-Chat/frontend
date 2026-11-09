@@ -1,6 +1,5 @@
-import { Loader2 } from 'lucide-react';
-
 import { Button } from '@/ui/primitives/Button';
+import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
 import { Text } from '@/ui/primitives/Text';
 
@@ -113,7 +112,7 @@ export const BulkUploadModal = ({
                     ) : null}
                     {isCancelling ? (
                         <div className="flex items-center gap-2 pr-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <LoadingSpinner size="sm" tone="current" />
                             Cleaning up...
                         </div>
                     ) : null}
