@@ -37,11 +37,14 @@ interface UseFrequentlyUsedEmojisResult {
 const PERSIST_DEBOUNCE_MS = 1500;
 export const FREQUENTLY_USED_CATEGORY_ID = '__frequently_used__';
 
-export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
+const quickReactionSignature = (list: QuickReactionEmoji[]): string =>
+    list.map((q) => `${q.key}|${q.name ?? ''}|${q.imageUrl ?? ''}`).join(',');
+
+// Records usage without subscribing to the frequently-used list, so callers
+// rendered once per message don't all re-render on every pick.
+export const useRecordEmojiUsage = (): ((used: EmojiUsageInput) => void) => {
     const { data: me } = useMe();
     const queryClient = useQueryClient();
-    const { data: entries } = useFrequentlyUsedEmojisQuery();
-    const { data: allEmojis } = useAllServerEmojis({ enabled: !!me });
     const { mutate: persist } = useUpdateFrequentlyUsedEmojis();
 
     const persistTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
@@ -55,7 +58,7 @@ export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
         [],
     );
 
-    const recordUsage = React.useCallback(
+    return React.useCallback(
         (used: EmojiUsageInput): void => {
             if (!me) return;
 
@@ -77,6 +80,13 @@ export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
         },
         [me, queryClient, persist],
     );
+};
+
+export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
+    const { data: me } = useMe();
+    const { data: entries } = useFrequentlyUsedEmojisQuery();
+    const { data: allEmojis } = useAllServerEmojis({ enabled: !!me });
+    const recordUsage = useRecordEmojiUsage();
 
     const customEmojiById = React.useMemo(() => {
         const map = new Map<string, { name: string; url: string }>();
@@ -115,10 +125,16 @@ export const useFrequentlyUsedEmojis = (): UseFrequentlyUsedEmojisResult => {
         return out;
     }, [entries, customEmojiById]);
 
-    const quickReactions = React.useMemo(
-        () => resolved.slice(0, QUICK_REACTION_COUNT),
-        [resolved],
-    );
+    // Every pick re-sorts the counts; keep the same array while the shown
+    // emojis are unchanged, since it is passed down to every message.
+    const topReactions = resolved.slice(0, QUICK_REACTION_COUNT);
+    const [quickReactions, setQuickReactions] = React.useState(topReactions);
+    if (
+        quickReactionSignature(topReactions) !==
+        quickReactionSignature(quickReactions)
+    ) {
+        setQuickReactions(topReactions);
+    }
 
     const frequentlyUsedCategory =
         React.useMemo((): CustomEmojiCategory | null => {

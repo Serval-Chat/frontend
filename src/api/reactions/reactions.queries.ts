@@ -7,7 +7,7 @@ import {
 
 import { CHAT_QUERY_KEYS } from '@/api/chat/chat.queries';
 import type { ChatMessage } from '@/api/chat/chat.types';
-import { useFrequentlyUsedEmojis } from '@/hooks/useFrequentlyUsedEmojis';
+import { useRecordEmojiUsage } from '@/hooks/useFrequentlyUsedEmojis';
 
 import { reactionsApi } from './reactions.api';
 import type {
@@ -27,7 +27,7 @@ export const useAddReaction = (): UseMutationResult<
     }
 > => {
     const queryClient = useQueryClient();
-    const { recordUsage } = useFrequentlyUsedEmojis();
+    const recordUsage = useRecordEmojiUsage();
 
     return useMutation({
         mutationFn: async ({

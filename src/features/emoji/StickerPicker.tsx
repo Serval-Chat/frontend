@@ -6,14 +6,14 @@ import { List } from 'react-window';
 import type { ListImperativeAPI, RowComponentProps } from 'react-window';
 
 import type { Sticker } from '@/api/servers/servers.api';
+import { StickerInfoBox } from '@/features/emoji/StickerInfoBox';
 import { useStickerInfoBox } from '@/features/emoji/hooks/useStickerInfoBox';
+import { ServerIcon } from '@/features/servers/ServerIcon';
+import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
-import { StickerInfoBox } from '@/features/emoji/StickerInfoBox';
-import { Box } from '@/ui/primitives/Box';
-import { ServerIcon } from '@/features/servers/ServerIcon';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
 
@@ -188,6 +188,31 @@ const StickerPickerRow = ({
     );
 };
 
+type StickerListRowProps = Omit<
+    React.ComponentProps<typeof StickerPickerRow>,
+    'row' | 'style'
+> & { rows: RowItem[] };
+
+const StickerListRow = ({
+    index,
+    style,
+    rows,
+    onShowInfo,
+    onStickerSelect,
+}: RowComponentProps<StickerListRowProps>) => {
+    const row = rows[index];
+    if (!row) return null;
+
+    return (
+        <StickerPickerRow
+            row={row}
+            style={style}
+            onShowInfo={onShowInfo}
+            onStickerSelect={onStickerSelect}
+        />
+    );
+};
+
 const StickerPickerContent = ({
     width,
     height,
@@ -320,20 +345,12 @@ const StickerPickerContent = ({
         activeCategoryId ||
         (width > 0 && height > 0 ? (categories[0]?.id ?? null) : null);
 
-    const Row = useCallback(
-        ({ index, style }: RowComponentProps) => {
-            const row = flatRows[index];
-            if (!row) return null;
-
-            return (
-                <StickerPickerRow
-                    row={row}
-                    style={style}
-                    onShowInfo={showStickerInfo}
-                    onStickerSelect={onStickerSelect}
-                />
-            );
-        },
+    const rowProps = useMemo(
+        (): StickerListRowProps => ({
+            rows: flatRows,
+            onShowInfo: showStickerInfo,
+            onStickerSelect,
+        }),
         [flatRows, onStickerSelect, showStickerInfo],
     );
 
@@ -425,10 +442,10 @@ const StickerPickerContent = ({
                     <List
                         className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overscroll-contain pr-1"
                         listRef={listRef}
-                        rowComponent={Row}
+                        rowComponent={StickerListRow}
                         rowCount={flatRows.length}
                         rowHeight={getRowHeight}
-                        rowProps={{}}
+                        rowProps={rowProps}
                         style={{ height: height - 44, width: listAreaWidth }}
                         onRowsRendered={onRowsRendered}
                         onScroll={(e: React.UIEvent<HTMLDivElement>): void => {
@@ -458,11 +475,7 @@ const StickerPickerContent = ({
 
                 {!hasExternalEmojiPermission ? (
                     <Box className="pointer-events-none absolute right-0 bottom-0 left-0 border-t border-divider/50 bg-background/95 px-3 py-1.5 backdrop-blur-sm">
-                        <Text
-                            className="text-center"
-                            size="xs"
-                            variant="muted"
-                        >
+                        <Text className="text-center" size="xs" variant="muted">
                             Only this server's stickers are available. Ask an
                             admin for the &quot;Use External Emojis &amp;
                             Stickers&quot; permission to use others.

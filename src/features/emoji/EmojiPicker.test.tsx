@@ -101,3 +101,27 @@ describe('EmojiPicker frequently used category', (): void => {
         expect(starIn()).toBe(false);
     });
 });
+
+describe('EmojiPicker rows', (): void => {
+    it('keeps emoji cells mounted when its props change after a pick', (): void => {
+        setMatchMedia(false);
+        const queryClient = new QueryClient();
+        const renderWith = (onEmojiSelect: () => void): React.ReactElement => (
+            <QueryClientProvider client={queryClient}>
+                <EmojiPicker
+                    customCategories={[]}
+                    onEmojiSelect={onEmojiSelect}
+                />
+            </QueryClientProvider>
+        );
+        const { container, rerender } = render(renderWith(vi.fn()));
+        const firstCell = container.querySelector('button.rounded-md.p-0');
+        expect(firstCell).not.toBeNull();
+
+        rerender(renderWith(vi.fn()));
+
+        expect(container.querySelector('button.rounded-md.p-0')).toBe(
+            firstCell,
+        );
+    });
+});

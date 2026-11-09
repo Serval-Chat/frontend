@@ -130,6 +130,14 @@ type RowItem =
           id: string;
       };
 
+// Unfiltered rows are cached per category so a category whose emojis did not
+// change keeps the same row objects, letting memoized rows skip re-rendering.
+const customRowCache = new WeakMap<
+    CustomEmojiCategory,
+    Map<number, RowItem[]>
+>();
+const standardRowCache = new Map<string, RowItem[]>();
+
 const buildEmojiRows = ({
     customCategories,
     columnCount,
@@ -149,6 +157,14 @@ const buildEmojiRows = ({
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     for (const cat of [...customCategories].reverse()) {
+        const cached = normalizedQuery
+            ? undefined
+            : customRowCache.get(cat)?.get(columnCount);
+        if (cached) {
+            rows.push(...cached);
+            continue;
+        }
+        const start = rows.length;
         const emojis = normalizedQuery
             ? cat.emojis.filter((e): boolean =>
                   e.name.toLowerCase().includes(normalizedQuery),
@@ -173,9 +189,23 @@ const buildEmojiRows = ({
                 id: cat.id,
             });
         }
+        if (!normalizedQuery) {
+            const byColumns = customRowCache.get(cat) ?? new Map();
+            byColumns.set(columnCount, rows.slice(start));
+            customRowCache.set(cat, byColumns);
+        }
     }
 
     for (const catId of categories) {
+        const cacheKey = `${catId}|${columnCount}`;
+        const cached = normalizedQuery
+            ? undefined
+            : standardRowCache.get(cacheKey);
+        if (cached) {
+            rows.push(...cached);
+            continue;
+        }
+        const start = rows.length;
         const emojis = groupedEmojis[catId] || [];
         const filteredEmojis = normalizedQuery
             ? emojis.filter((e): boolean => {
@@ -210,6 +240,7 @@ const buildEmojiRows = ({
                 id: catId,
             });
         }
+        if (!normalizedQuery) standardRowCache.set(cacheKey, rows.slice(start));
     }
     return rows;
 };
@@ -368,6 +399,56 @@ const EmojiPickerRow = ({
                 return null;
             })}
         </Box>
+    );
+};
+
+const sameStyle = (a: React.CSSProperties, b: React.CSSProperties): boolean => {
+    const keys = Object.keys(a) as (keyof React.CSSProperties)[];
+    return (
+        keys.length === Object.keys(b).length &&
+        keys.every((k): boolean => a[k] === b[k])
+    );
+};
+
+const MemoEmojiPickerRow = React.memo(
+    EmojiPickerRow,
+    (prev, next): boolean =>
+        prev.row === next.row &&
+        prev.onEmojiSelect === next.onEmojiSelect &&
+        prev.onCustomEmojiSelect === next.onCustomEmojiSelect &&
+        prev.onShowInfo === next.onShowInfo &&
+        prev.onSkinToneRequest === next.onSkinToneRequest &&
+        sameStyle(prev.style, next.style),
+);
+
+type EmojiListRowProps = Omit<
+    React.ComponentProps<typeof EmojiPickerRow>,
+    'row' | 'style'
+> & { rows: RowItem[] };
+
+// Must stay a stable module-level component: an inline one changes identity
+// whenever its data does, which remounts every row and reloads every emoji.
+const EmojiListRow = ({
+    index,
+    style,
+    rows,
+    onEmojiSelect,
+    onCustomEmojiSelect,
+    onShowInfo,
+    onSkinToneRequest,
+}: RowComponentProps<EmojiListRowProps>) => {
+    const row = rows[index];
+    if (!row) return null;
+
+    return (
+        <MemoEmojiPickerRow
+            row={row}
+            style={style}
+            onCustomEmojiSelect={onCustomEmojiSelect}
+            onEmojiSelect={onEmojiSelect}
+            onShowInfo={onShowInfo}
+            onSkinToneRequest={onSkinToneRequest}
+        />
     );
 };
 
@@ -552,22 +633,14 @@ const EmojiPickerContent = ({
         [],
     );
 
-    const Row = useCallback(
-        ({ index, style }: RowComponentProps) => {
-            const row = flatRows[index];
-            if (!row) return null;
-
-            return (
-                <EmojiPickerRow
-                    row={row}
-                    style={style}
-                    onCustomEmojiSelect={onCustomEmojiSelect}
-                    onEmojiSelect={onEmojiSelect}
-                    onShowInfo={showEmojiInfo}
-                    onSkinToneRequest={handleSkinToneRequest}
-                />
-            );
-        },
+    const rowProps = useMemo(
+        (): EmojiListRowProps => ({
+            rows: flatRows,
+            onEmojiSelect,
+            onCustomEmojiSelect,
+            onShowInfo: showEmojiInfo,
+            onSkinToneRequest: handleSkinToneRequest,
+        }),
         [
             flatRows,
             onEmojiSelect,
@@ -748,10 +821,10 @@ const EmojiPickerContent = ({
                 <List
                     className="scrollbar-thin scrollbar-thumb-divider hover:scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent overscroll-contain pr-1"
                     listRef={listRef}
-                    rowComponent={Row}
+                    rowComponent={EmojiListRow}
                     rowCount={flatRows.length}
                     rowHeight={getRowHeight}
-                    rowProps={{}}
+                    rowProps={rowProps}
                     style={{ height: height - 44, width: listAreaWidth }}
                     onRowsRendered={onRowsRendered}
                     onScroll={(e: React.UIEvent<HTMLDivElement>): void => {
