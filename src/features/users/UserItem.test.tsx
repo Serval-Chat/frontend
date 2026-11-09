@@ -337,4 +337,18 @@ describe('UserItem', (): void => {
             ]);
         });
     });
+
+    it('leaves a plain row uncolored so the name keeps the default text color', (): void => {
+        friendsMock.mockReturnValue({ data: [] });
+        const { container } = render(
+            <UserItem
+                noFetch
+                user={{ id: 'user-2', username: 'alice' } as User}
+                userId="user-2"
+            />,
+        );
+        const row = container.querySelector('.h-11');
+        expect(row).not.toBeNull();
+        expect(row).not.toHaveClass('text-muted-foreground');
+    });
 });

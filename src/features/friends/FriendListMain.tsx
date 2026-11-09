@@ -17,7 +17,6 @@ import { MutedText } from '@/ui/primitives/MutedText';
 import { Pressable } from '@/ui/primitives/Pressable';
 import { Skeleton } from '@/ui/primitives/Skeleton';
 import { Text } from '@/ui/primitives/Text';
-import { cn } from '@/utils/cn';
 import { resolveDisplayName } from '@/utils/displayName';
 import { isCustomEmojiId } from '@/utils/validation';
 
@@ -57,10 +56,7 @@ const FriendProfileRow = React.memo(
         return (
             <Box className="group flex items-center justify-between gap-4">
                 <Pressable
-                    className={cn(
-                        'flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 text-left transition-colors',
-                        'text-muted-foreground hover:bg-bg-subtle',
-                    )}
+                    className="flex h-11 min-w-0 flex-1 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 text-left transition-colors hover:bg-bg-subtle"
                     onClick={handleOpenDm}
                 >
                     <UserProfilePicture

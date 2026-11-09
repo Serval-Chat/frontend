@@ -619,11 +619,10 @@ const UserItemInner = React.memo(
                         className={cn(
                             'flex h-11 w-full shrink-0 cursor-pointer items-center gap-3 overflow-hidden rounded-md px-3 transition-colors',
                             'hover:bg-bg-subtle',
-                            isActive
-                                ? 'bg-bg-subtle text-foreground'
-                                : hasUnread
-                                  ? 'bg-bg-subtle/40 font-medium text-foreground'
-                                  : 'text-muted-foreground',
+                            isActive && 'bg-bg-subtle text-foreground',
+                            !isActive &&
+                                hasUnread &&
+                                'bg-bg-subtle/40 font-medium text-foreground',
                             className,
                         )}
                         ref={itemRef}
