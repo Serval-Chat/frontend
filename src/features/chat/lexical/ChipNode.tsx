@@ -12,6 +12,7 @@ import { Mention } from '@/features/messages/Mention';
 import { ParsedEmoji } from '@/features/messages/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
 import { RoleMention } from '@/features/messages/RoleMention';
+import { Text } from '@/ui/primitives/Text';
 
 export type ChipType =
     | 'user'
@@ -141,12 +142,13 @@ export class ChipNode extends DecoratorNode<React.ReactNode> {
 
             case 'everyone': {
                 return (
-                    <span
-                        className="mx-0.5 inline-flex items-baseline rounded bg-[var(--everyone-mention-bg,var(--primary))] px-1.5 py-[4px] text-[0.9em] font-medium text-[var(--everyone-mention-text,#ffffff)] shadow-sm"
+                    <Text
+                        className="mx-0.5 inline-flex items-baseline rounded bg-[var(--everyone-mention-bg,var(--primary))] px-1.5 py-[4px] text-[0.9em] text-[var(--everyone-mention-text,#ffffff)] shadow-sm"
                         style={{ verticalAlign: 'baseline' }}
+                        weight="medium"
                     >
                         @everyone
-                    </span>
+                    </Text>
                 );
             }
 

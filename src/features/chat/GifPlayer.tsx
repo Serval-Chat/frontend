@@ -8,7 +8,9 @@ import type { KlipyFavorite } from '@/api/klipy/klipy.types';
 import { GifStarButton } from '@/features/chat/GifStarButton';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Box } from '@/ui/primitives/Box';
+import { Link } from '@/ui/primitives/Link';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 interface GifPlayerProps {
@@ -125,14 +127,9 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
     if (isError) {
         return (
             <Box className="my-2 max-w-[400px]">
-                <a
-                    className="text-primary hover:underline"
-                    href={url}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                >
+                <Link className="text-[length:inherit]" href={url}>
                     {url}
-                </a>
+                </Link>
             </Box>
         );
     }
@@ -184,12 +181,21 @@ export const GifPlayer = ({ klipyId, url, onResize }: GifPlayerProps) => {
             </Box>
 
             <Box className="pointer-events-none absolute right-2 bottom-1 flex items-center gap-1 opacity-50">
-                <span className="text-[9px] font-bold tracking-tighter text-white/80 uppercase">
+                <Text
+                    className="text-[9px] text-white/80"
+                    tracking="tighter"
+                    transform="uppercase"
+                    weight="bold"
+                >
                     Powered by
-                </span>
-                <span className="text-[11px] font-black text-white uppercase">
+                </Text>
+                <Text
+                    className="text-[11px] text-white"
+                    transform="uppercase"
+                    weight="black"
+                >
                     Klipy
-                </span>
+                </Text>
             </Box>
         </Box>
     );

@@ -8,6 +8,7 @@ import { useMe } from '@/api/users/users.queries';
 import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import { Button } from '@/ui/primitives/Button';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 
 interface DecorationEmbedProps {
@@ -82,9 +83,14 @@ export const DecorationEmbed = ({ decorationId }: DecorationEmbedProps) => {
                                 src={user.profilePicture}
                             />
                         ) : (
-                            <span className="text-xl font-bold text-muted-foreground opacity-50">
+                            <Text
+                                className="opacity-50"
+                                size="xl"
+                                variant="muted"
+                                weight="bold"
+                            >
                                 {user?.username?.[0]?.toUpperCase() ?? '?'}
-                            </span>
+                            </Text>
                         )}
                     </div>
                     <PausedAnimatedImage
@@ -95,15 +101,25 @@ export const DecorationEmbed = ({ decorationId }: DecorationEmbedProps) => {
                     />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="mb-1 flex items-center gap-1 text-xs font-bold tracking-wider text-primary uppercase">
+                    <Text
+                        className="mb-1 flex items-center gap-1"
+                        size="xs"
+                        tracking="wider"
+                        transform="uppercase"
+                        variant="primary"
+                        weight="bold"
+                    >
                         <Sparkles size={12} /> Decoration
-                    </span>
-                    <span
-                        className="truncate text-sm font-semibold text-foreground"
+                    </Text>
+                    <Text
+                        className="truncate"
+                        size="sm"
                         title={decoration.name}
+                        variant="default"
+                        weight="semibold"
                     >
                         {decoration.name}
-                    </span>
+                    </Text>
                 </div>
             </div>
             <Button

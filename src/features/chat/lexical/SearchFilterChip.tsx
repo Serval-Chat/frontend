@@ -10,6 +10,8 @@ import {
 } from 'lexical';
 import { X } from 'lucide-react';
 
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { colors, radius } from '@/ui/theme';
 
 import type { SearchFilterData } from './SearchFilterNode';
@@ -116,25 +118,23 @@ export function SearchFilterChip({
                 color,
             }}
         >
-            <button
+            <Pressable
                 contentEditable={false}
                 style={chipEditButtonStyle}
                 tabIndex={-1}
-                type="button"
                 onClick={handleEdit}
             >
-                <span style={{ opacity: 0.6, fontWeight: 400 }}>
+                <Text style={{ opacity: 0.6, fontWeight: 400 }}>
                     {data.negated ? '-' : ''}
                     {data.label}:
-                </span>{' '}
+                </Text>{' '}
                 {data.display}
-            </button>
-            <button
+            </Pressable>
+            <Pressable
                 aria-label={`Remove ${data.label} filter`}
                 contentEditable={false}
                 style={chipRemoveButtonStyle}
                 tabIndex={-1}
-                type="button"
                 onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -144,7 +144,7 @@ export function SearchFilterChip({
                 }}
             >
                 <X size={10} />
-            </button>
+            </Pressable>
         </span>
     );
 }

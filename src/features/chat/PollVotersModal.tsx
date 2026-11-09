@@ -13,6 +13,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { Box } from '@/ui/primitives/Box';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
@@ -76,7 +77,7 @@ export const PollVotersModal = ({
             <Box className="flex h-[500px]">
                 <Box className="flex w-1/3 flex-col overflow-y-auto border-r border-border-subtle bg-bg-subtle">
                     {poll.options?.map((option) => (
-                        <button
+                        <Pressable
                             className={cn(
                                 'flex items-center justify-between px-4 py-3 text-left transition-colors',
                                 selectedOptionId === option.id
@@ -84,7 +85,6 @@ export const PollVotersModal = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={option.id}
-                            type="button"
                             onClick={(): void => {
                                 setSelectedOptionId(option.id);
                             }}
@@ -106,7 +106,7 @@ export const PollVotersModal = ({
                                         )}
                                     </Box>
                                 ) : null}
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-medium',
                                         selectedOptionId === option.id
@@ -115,12 +115,12 @@ export const PollVotersModal = ({
                                     )}
                                 >
                                     {option.text || 'Untitled Option'}
-                                </span>
+                                </Text>
                             </Box>
                             <Text className="ml-2 rounded bg-muted-foreground/10 px-1.5 py-0.5 text-[10px] font-bold opacity-60">
                                 {option.votes?.length || 0}
                             </Text>
-                        </button>
+                        </Pressable>
                     ))}
                 </Box>
 

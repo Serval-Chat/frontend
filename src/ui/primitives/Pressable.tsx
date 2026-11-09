@@ -15,9 +15,8 @@ export const Pressable = ({
 }: PressableProps) => (
     <button
         className={cn(
-            'cursor-pointer appearance-none border-0 bg-transparent p-0 font-[inherit] text-inherit',
+            'appearance-none border-0 bg-transparent p-0 font-[inherit] text-inherit enabled:cursor-pointer',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-            'disabled:cursor-not-allowed disabled:opacity-50',
             className,
         )}
         ref={ref}

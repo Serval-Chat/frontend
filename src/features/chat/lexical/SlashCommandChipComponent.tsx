@@ -2,6 +2,9 @@ import React from 'react';
 
 import type { LexicalEditor } from 'lexical';
 
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
+
 import { CANCEL_SLASH_COMMAND } from './slashChipHelpers';
 
 export interface SlashCommandChipProps {
@@ -25,11 +28,10 @@ export const SlashCommandChipComponent = ({
             contentEditable={false}
             style={{ userSelect: 'none', verticalAlign: 'middle' }}
         >
-            <span>/{commandName}</span>
-            <button
+            <Text>/{commandName}</Text>
+            <Pressable
                 aria-label="Cancel slash command"
                 className="flex h-3.5 w-3.5 items-center justify-center rounded-sm text-primary/70 transition-colors hover:bg-primary/30 hover:text-primary"
-                type="button"
                 onClick={handleCancel}
             >
                 <svg
@@ -43,7 +45,7 @@ export const SlashCommandChipComponent = ({
                 >
                     <path d="M1 1l6 6M7 1L1 7" />
                 </svg>
-            </button>
+            </Pressable>
         </span>
     );
 };

@@ -15,6 +15,7 @@ import { useUsers } from '@/hooks/useUsers';
 import { Box } from '@/ui/primitives/Box';
 import { LoadingSpinner } from '@/ui/primitives/LoadingSpinner';
 import { Modal } from '@/ui/primitives/Modal';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -117,7 +118,7 @@ export const ReactionVotersModal = ({
             <Box className="flex h-[500px]">
                 <Box className="flex w-1/3 flex-col overflow-y-auto border-r border-border-subtle bg-bg-subtle">
                     {reactions.map((reaction) => (
-                        <button
+                        <Pressable
                             className={cn(
                                 'flex items-center justify-between px-4 py-3 text-left transition-colors',
                                 selectedEmoji === reaction.emoji
@@ -125,7 +126,6 @@ export const ReactionVotersModal = ({
                                     : 'hover:bg-white/5',
                             )}
                             key={reaction.emoji}
-                            type="button"
                             onClick={(): void => {
                                 setSelectedEmoji(reaction.emoji);
                             }}
@@ -160,7 +160,7 @@ export const ReactionVotersModal = ({
                                         />
                                     )}
                                 </Box>
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-medium',
                                         selectedEmoji === reaction.emoji
@@ -174,12 +174,12 @@ export const ReactionVotersModal = ({
                                               .get(reaction.emoji)
                                               ?.name.toLowerCase() ||
                                           reaction.emoji}
-                                </span>
+                                </Text>
                             </Box>
                             <Text className="ml-2 rounded bg-muted-foreground/10 px-1.5 py-0.5 text-[10px] font-bold opacity-60">
                                 {reaction.count}
                             </Text>
-                        </button>
+                        </Pressable>
                     ))}
                 </Box>
 

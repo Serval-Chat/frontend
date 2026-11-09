@@ -19,6 +19,7 @@ import {
     toggleMobileMemberList,
 } from '@/store/slices/navSlice';
 import { Box } from '@/ui/primitives/Box';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { cn } from '@/utils/cn';
@@ -428,7 +429,7 @@ export const ChatHeader = ({
                                     expanded: { height: 'auto' },
                                 }}
                             >
-                                <span
+                                <Text
                                     className={`block text-xs break-words text-muted-foreground ${
                                         descExpanded
                                             ? 'pb-0.5 whitespace-pre-wrap'
@@ -437,7 +438,7 @@ export const ChatHeader = ({
                                     ref={descriptionRef}
                                 >
                                     {selectedChannel.description}
-                                </span>
+                                </Text>
                             </m.div>
                         </m.button>
                     </Box>
@@ -474,7 +475,7 @@ export const ChatHeader = ({
             >
                 {actions}
                 {(selectedChannel || selectedFriendId) && onToggleSearch ? (
-                    <button
+                    <Pressable
                         aria-label={
                             isSearchOpen ? 'Close search' : 'Search messages'
                         }
@@ -484,15 +485,14 @@ export const ChatHeader = ({
                                 ? 'text-primary'
                                 : 'text-muted-foreground hover:text-foreground',
                         )}
-                        type="button"
                         onClick={onToggleSearch}
                     >
                         <Search className="h-5 w-5" />
-                    </button>
+                    </Pressable>
                 ) : null}
                 {selectedChannel && !selectedFriendId ? (
                     <>
-                        <button
+                        <Pressable
                             aria-label="Pinned Messages"
                             className={cn(
                                 'relative p-2 transition-colors',
@@ -501,14 +501,13 @@ export const ChatHeader = ({
                                     : 'text-muted-foreground hover:text-foreground',
                             )}
                             ref={pinButtonRef}
-                            type="button"
                             onClick={onTogglePins}
                         >
                             <Pin className="h-5 w-5" />
                             {hasUnreadPins ? (
                                 <Box className="absolute right-1.5 bottom-1.5 h-2 w-2 rounded-full border border-[var(--bg-chat-header)] bg-red-500" />
                             ) : null}
-                        </button>
+                        </Pressable>
 
                         <AnimatePresence>
                             {showPins &&
@@ -527,7 +526,7 @@ export const ChatHeader = ({
                 ) : null}
                 {!memberList?.hideButton &&
                 (selectedChannel || selectedFriendId) ? (
-                    <button
+                    <Pressable
                         aria-label="Toggle member list"
                         className={cn(
                             'p-2 transition-colors',
@@ -535,7 +534,6 @@ export const ChatHeader = ({
                                 ? 'text-foreground'
                                 : 'text-muted-foreground hover:text-foreground',
                         )}
-                        type="button"
                         onClick={
                             memberList?.onToggle ??
                             ((): void => {
@@ -548,16 +546,15 @@ export const ChatHeader = ({
                         }
                     >
                         <Users className="h-5 w-5" />
-                    </button>
+                    </Pressable>
                 ) : null}
-                <button
+                <Pressable
                     aria-label="Back to contacts"
                     className="p-2 text-muted-foreground transition-colors hover:text-foreground md:hidden"
-                    type="button"
                     onClick={handleBackClick}
                 >
                     <X className="h-6 w-6" />
-                </button>
+                </Pressable>
             </Box>
             {headerContour ? (
                 <svg

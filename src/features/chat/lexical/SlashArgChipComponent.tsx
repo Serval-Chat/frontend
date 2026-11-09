@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { $getNodeByKey, KEY_ENTER_COMMAND, type LexicalEditor } from 'lexical';
 
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 import {
@@ -110,19 +111,27 @@ export const SlashArgChipComponent = ({
                 className="flex items-center gap-0.5"
                 style={{ gridArea: '1/1' }}
             >
-                <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                <Text
+                    className="shrink-0"
+                    size="xs"
+                    variant="muted"
+                    weight="medium"
+                >
                     {argName}
-                    {required ? <span className="text-danger">*</span> : null}
+                    {required ? <Text variant="danger">*</Text> : null}
                     :&nbsp;
-                </span>
+                </Text>
                 <span className="relative inline-grid">
-                    <span
+                    <Text
                         aria-hidden
-                        className="invisible max-w-[200px] min-w-[4ch] overflow-hidden text-sm whitespace-pre"
+                        className="invisible max-w-[200px] min-w-[4ch] overflow-hidden"
+                        size="sm"
                         style={{ gridArea: '1/1/2/2' }}
+                        wrap="pre"
                     >
                         {value || placeholder}
-                    </span>
+                    </Text>
+                    {/* eslint-disable-next-line no-ui/no-raw-controls-outside-primitives -- borderless auto-sizing input mirrored by the hidden Text sizer; Input's field chrome would break the chip */}
                     <input
                         ref={inputRef}
                         {...{ [SLASH_ARG_INPUT_ATTR]: argIndex }}

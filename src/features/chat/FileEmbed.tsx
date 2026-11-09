@@ -300,9 +300,15 @@ export const FileEmbed = ({ url, attachment, onResize }: FileEmbedProps) => {
                     <FileIcon size={20} />
                 )}
                 {archiveExtension ? (
-                    <span className="absolute -right-1.5 -bottom-1.5 rounded border border-border-subtle bg-background px-1.5 py-0.5 text-[10px] leading-none font-bold whitespace-nowrap text-muted-foreground">
+                    <Text
+                        className="absolute -right-1.5 -bottom-1.5 rounded border border-border-subtle bg-background px-1.5 py-0.5 text-[10px]"
+                        leading="none"
+                        variant="muted"
+                        weight="bold"
+                        wrap="nowrap"
+                    >
                         {archiveExtension}
-                    </span>
+                    </Text>
                 ) : null}
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
@@ -386,9 +392,13 @@ const CodeEmbed = ({
                 data-testid="code-embed-skeleton"
             >
                 <div className="flex items-center justify-between border-b border-border-subtle bg-bg-subtle px-3 py-2">
-                    <span className="truncate text-xs font-bold text-foreground/80">
+                    <Text
+                        className="truncate text-foreground/80"
+                        size="xs"
+                        weight="bold"
+                    >
                         {filename}
-                    </span>
+                    </Text>
                     <LoadingSpinner size="sm" />
                 </div>
                 <div className="bg-bg-secondary/50 p-0">

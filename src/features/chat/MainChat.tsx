@@ -32,6 +32,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { colors } from '@/ui/theme';
 import { mergeReducer } from '@/utils/mergeReducer';
@@ -187,14 +188,13 @@ const ChatMainColumn = ({
                 <Text className="text-caution" size="sm">
                     You are viewing older messages
                 </Text>
-                <button
+                <Pressable
                     className="flex items-center gap-2 text-caution transition-colors hover:text-caution/80"
-                    type="button"
                     onClick={onJumpToLatest}
                 >
                     <X size={16} />
-                    <span className="text-sm">Jump to latest</span>
-                </button>
+                    <Text size="sm">Jump to latest</Text>
+                </Pressable>
             </Box>
         ) : null}
 

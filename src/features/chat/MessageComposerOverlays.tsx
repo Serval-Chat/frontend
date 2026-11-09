@@ -4,6 +4,7 @@ import type { OutgoingPoll } from '@/api/chat/chat.types';
 import type { CustomEmojiCategory } from '@/features/emoji/EmojiPicker';
 import type { StickerCategory } from '@/features/emoji/StickerPicker';
 import { Box } from '@/ui/primitives/Box';
+import { Text } from '@/ui/primitives/Text';
 
 import { CreatePollModal } from './CreatePollModal';
 import { MessageComposerPickers } from './MessageComposerPickers';
@@ -53,14 +54,14 @@ export const MessageComposerOverlays = ({
 
         {slashPreview ? (
             <Box className="border-t border-border-subtle px-3 py-1.5 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">
+                <Text variant="default" weight="semibold">
                     /{slashPreview.commandName}
-                </span>
-                <span className="ml-2">{slashPreview.status}</span>
+                </Text>
+                <Text className="ml-2">{slashPreview.status}</Text>
                 {slashPreview.usage ? (
-                    <span className="ml-2 opacity-80">
+                    <Text className="ml-2 opacity-80">
                         Usage: {slashPreview.usage}
-                    </span>
+                    </Text>
                 ) : null}
             </Box>
         ) : null}

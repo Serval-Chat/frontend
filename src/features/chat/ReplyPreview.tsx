@@ -239,13 +239,12 @@ export const ReplyPreview = React.memo(
                         className="block h-5 min-w-0 flex-1 truncate text-xs leading-5 font-medium text-text-muted"
                     >
                         {command && !text ? (
-                            <span className="mr-1 opacity-70">
-                                used{' '}
-                                <span className="text-primary">/{command}</span>
-                            </span>
+                            <Text className="mr-1 opacity-70">
+                                used <Text variant="primary">/{command}</Text>
+                            </Text>
                         ) : null}
                         {!command && !text && hasAttachments ? (
-                            <span className="opacity-70">Attachment(-s)</span>
+                            <Text className="opacity-70">Attachment(-s)</Text>
                         ) : null}
                         {text ? (
                             <MeasuredReplyText key={text} text={text} />

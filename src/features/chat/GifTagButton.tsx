@@ -13,6 +13,8 @@ import {
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Popover } from '@/ui/primitives/Popover';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
 import { cn } from '@/utils/cn';
 
@@ -138,14 +140,13 @@ export const GifTagButton = ({
                                     className="group flex items-center justify-between rounded-md px-1.5 py-1 hover:bg-bg-secondary"
                                     key={tag.id}
                                 >
-                                    <button
+                                    <Pressable
                                         className="flex flex-1 items-center gap-2 truncate text-left text-xs"
-                                        type="button"
                                         onClick={(): void => {
                                             handleToggle(tag.id, applied);
                                         }}
                                     >
-                                        <span
+                                        <Text
                                             className={cn(
                                                 'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border',
                                                 applied
@@ -156,21 +157,20 @@ export const GifTagButton = ({
                                             {applied ? (
                                                 <Check className="h-2.5 w-2.5" />
                                             ) : null}
-                                        </span>
-                                        <span className="truncate">
+                                        </Text>
+                                        <Text className="truncate">
                                             {tag.name}
-                                        </span>
-                                    </button>
-                                    <button
+                                        </Text>
+                                    </Pressable>
+                                    <Pressable
                                         aria-label={`Delete tag ${tag.name}`}
                                         className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400"
-                                        type="button"
                                         onClick={(e): void => {
                                             handleDelete(e, tag.id);
                                         }}
                                     >
                                         <Trash2 className="h-3 w-3" />
-                                    </button>
+                                    </Pressable>
                                 </div>
                             );
                         })

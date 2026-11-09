@@ -22,6 +22,7 @@ import { useAppSelector } from '@/store/hooks';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { FileInput } from '@/ui/primitives/FileInput';
 import { cn } from '@/utils/cn';
 import { mergeReducer } from '@/utils/mergeReducer';
 
@@ -356,12 +357,10 @@ export const MessageInput = ({
             ) : null}
 
             <Box className="relative flex items-center gap-2 p-2">
-                <input
+                <FileInput
                     multiple
                     aria-label="Attach files"
                     ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    type="file"
                     onChange={handleFileChange}
                 />
                 <Button

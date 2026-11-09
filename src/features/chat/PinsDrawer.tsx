@@ -20,6 +20,7 @@ import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { resolveWebhookUser } from '@/ui/utils/chat';
 
@@ -250,14 +251,13 @@ export const PinsDrawer = ({
                             Pinned Messages
                         </Text>
                     </Box>
-                    <button
+                    <Pressable
                         aria-label="Close pinned messages"
                         className="p-1 text-muted-foreground transition-colors hover:text-foreground"
-                        type="button"
                         onClick={onClose}
                     >
                         <X size={20} />
-                    </button>
+                    </Pressable>
                 </Box>
 
                 <Box className="custom-scrollbar pride-glass flex-1 space-y-4 overflow-y-auto bg-[var(--tertiary-bg)] p-4">

@@ -16,6 +16,7 @@ import { setTargetMessageId } from '@/store/slices/navSlice';
 import type { ProcessedChatMessage } from '@/types/chat.ui';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { resolveWebhookUser } from '@/ui/utils/chat';
 import { cn } from '@/utils/cn';
 
@@ -215,24 +216,22 @@ export const StickyMessageBar = ({
             >
                 <Box className="flex items-center justify-center overflow-hidden rounded-b-sm border-x border-b border-[var(--divider)] bg-[var(--bg-chat-header)]">
                     {viewState === 'compact' || viewState === 'hidden' ? (
-                        <button
+                        <Pressable
                             aria-label="Show previous message"
                             className="flex h-3 w-5 items-center justify-center bg-[var(--background)] text-foreground transition-colors hover:bg-white/5"
-                            type="button"
                             onClick={handlePrev}
                         >
                             <ChevronDown size={10} />
-                        </button>
+                        </Pressable>
                     ) : null}
                     {viewState === 'compact' || viewState === 'expanded' ? (
-                        <button
+                        <Pressable
                             aria-label="Show next message"
                             className="flex h-3 w-5 items-center justify-center bg-[var(--background)] text-foreground transition-colors hover:bg-white/5"
-                            type="button"
                             onClick={handleNext}
                         >
                             <ChevronUp size={10} />
-                        </button>
+                        </Pressable>
                     ) : null}
                 </Box>
             </Box>

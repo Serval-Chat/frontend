@@ -8,6 +8,7 @@ import type { User } from '@/api/users/users.types';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import type { UserStatus } from '@/features/users/UserProfileStatusIndicator';
 import { Box } from '@/ui/primitives/Box';
+import { Text } from '@/ui/primitives/Text';
 import { ICON_MAP } from '@/ui/utils/iconMap';
 import { resolveApiUrl } from '@/utils/apiUrl';
 import { cn } from '@/utils/cn';
@@ -165,7 +166,7 @@ export const AutocompleteSuggestion = ({
                                     username={suggestion.user.username}
                                 />
                                 <Box className="flex min-w-0 flex-col">
-                                    <span
+                                    <Text
                                         className={cn(
                                             'truncate text-sm font-bold',
                                             index === selectedIndex
@@ -179,17 +180,21 @@ export const AutocompleteSuggestion = ({
                                             suggestion.user.displayName,
                                             suggestion.user.username,
                                         )}
-                                    </span>
+                                    </Text>
                                     {suggestion.localNickname ||
                                     suggestion.nickname ||
                                     suggestion.user.displayName ? (
-                                        <span className="truncate text-xs text-muted-foreground">
+                                        <Text
+                                            className="truncate"
+                                            size="xs"
+                                            variant="muted"
+                                        >
                                             {suggestion.user.username.startsWith(
                                                 '@',
                                             )
                                                 ? suggestion.user.username
                                                 : `@${suggestion.user.username}`}
-                                        </span>
+                                        </Text>
                                     ) : null}
                                 </Box>
                             </>
@@ -200,7 +205,7 @@ export const AutocompleteSuggestion = ({
                                     className="h-4 w-4 shrink-0 rounded-full border border-white/10"
                                     style={getRoleStyle(suggestion.role)}
                                 />
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-bold',
                                         index === selectedIndex
@@ -211,7 +216,7 @@ export const AutocompleteSuggestion = ({
                                     {suggestion.role.name.startsWith('@')
                                         ? suggestion.role.name
                                         : `@${suggestion.role.name}`}
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                         {suggestion.type === 'emoji' ? (
@@ -221,7 +226,7 @@ export const AutocompleteSuggestion = ({
                                         style={getSpriteStyle(suggestion.emoji)}
                                     />
                                 </Box>
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-bold',
                                         index === selectedIndex
@@ -230,7 +235,7 @@ export const AutocompleteSuggestion = ({
                                     )}
                                 >
                                     :{suggestion.emoji.short_name}:
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                         {suggestion.type === 'server-emoji' ? (
@@ -246,7 +251,7 @@ export const AutocompleteSuggestion = ({
                                         }
                                     />
                                 </Box>
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-bold',
                                         index === selectedIndex
@@ -255,7 +260,7 @@ export const AutocompleteSuggestion = ({
                                     )}
                                 >
                                     :{suggestion.emoji.name}:
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                         {suggestion.type === 'channel' ? (
@@ -274,7 +279,7 @@ export const AutocompleteSuggestion = ({
                                         return <Icon size={16} />;
                                     })()}
                                 </Box>
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-bold',
                                         index === selectedIndex
@@ -283,17 +288,20 @@ export const AutocompleteSuggestion = ({
                                     )}
                                 >
                                     {suggestion.channel.name}
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                         {suggestion.type === 'everyone' ? (
                             <>
                                 <Box className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary">
-                                    <span className="text-[10px] font-bold text-white">
+                                    <Text
+                                        className="text-[10px] text-white"
+                                        weight="bold"
+                                    >
                                         @
-                                    </span>
+                                    </Text>
                                 </Box>
-                                <span
+                                <Text
                                     className={cn(
                                         'truncate text-sm font-bold',
                                         index === selectedIndex
@@ -302,7 +310,7 @@ export const AutocompleteSuggestion = ({
                                     )}
                                 >
                                     @everyone
-                                </span>
+                                </Text>
                             </>
                         ) : null}
                     </Box>

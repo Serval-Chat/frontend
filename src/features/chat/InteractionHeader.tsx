@@ -96,14 +96,14 @@ export const InteractionHeader = React.memo(
                         title={invocationString}
                     >
                         used{' '}
-                        <span
+                        <Text
                             className={cn(
                                 'cursor-help font-bold',
                                 isDeleted ? 'text-danger' : 'text-primary',
                             )}
                         >
                             /{command}
-                        </span>
+                        </Text>
                     </Text>
                 </Box>
             </Box>

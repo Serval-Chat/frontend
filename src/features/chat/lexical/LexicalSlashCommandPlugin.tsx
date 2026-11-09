@@ -15,6 +15,7 @@ import type { TextNode } from 'lexical';
 import type { SlashCommand } from '@/api/interactions/interactions.api';
 import type { ServerMember } from '@/api/servers/servers.types';
 import { Box } from '@/ui/primitives/Box';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 import { $createSlashArgChipNode } from './SlashArgChipNode';
@@ -149,7 +150,7 @@ const MenuWrapper = ({
                             selectOptionAndCleanUp(option);
                         }}
                     >
-                        <span
+                        <Text
                             className={cn(
                                 'truncate text-sm font-bold',
                                 index === (selectedIndex ?? 0)
@@ -161,12 +162,12 @@ const MenuWrapper = ({
                                 ? `/${option.command?.name ?? ''}`
                                 : option.user?.displayName ||
                                   option.user?.username}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">
+                        </Text>
+                        <Text className="truncate" size="xs" variant="muted">
                             {option.type === 'command'
                                 ? option.command?.description
                                 : `@${option.user?.username ?? ''}`}
-                        </span>
+                        </Text>
                     </Box>
                 ))}
             </Box>

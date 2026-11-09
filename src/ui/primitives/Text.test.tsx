@@ -1,3 +1,5 @@
+import { createRef } from 'react';
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -97,5 +99,11 @@ describe('Text', (): void => {
         const outer = container.firstElementChild;
         expect(outer).toHaveAttribute('aria-hidden', 'true');
         expect(outer).toHaveClass('relative', 'inline-block', 'text-sm');
+    });
+
+    it('forwards a ref to the rendered element', (): void => {
+        const ref = createRef<HTMLElement>();
+        render(<Text ref={ref}>measured</Text>);
+        expect(ref.current).toBe(screen.getByText('measured'));
     });
 });

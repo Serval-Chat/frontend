@@ -18,6 +18,7 @@ import {
     toggleMute,
 } from '@/store/slices/voiceSlice';
 import { IconButton } from '@/ui/primitives/IconButton';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 export const ActiveVoicePanel = () => {
@@ -73,13 +74,23 @@ export const ActiveVoicePanel = () => {
                         className={cn('flex items-center gap-1.5', signalColor)}
                     >
                         <SignalIcon className="shrink-0" size={18} />
-                        <span className="truncate text-sm leading-none font-bold">
+                        <Text
+                            className="truncate"
+                            leading="none"
+                            size="sm"
+                            weight="bold"
+                        >
                             Voice Connected
-                        </span>
+                        </Text>
                     </div>
-                    <span className="mt-1 cursor-pointer truncate text-xs font-semibold text-muted-foreground hover:underline">
+                    <Text
+                        className="mt-1 cursor-pointer truncate hover:underline"
+                        size="xs"
+                        variant="muted"
+                        weight="semibold"
+                    >
                         {server?.name ?? ''} / {channel?.name ?? ''}
-                    </span>
+                    </Text>
                 </div>
                 <div className="flex items-center gap-0.5 pl-2">
                     <IconButton

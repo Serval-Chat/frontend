@@ -12,6 +12,7 @@ import type { LexicalEditor } from 'lexical';
 import { ArrowUp } from 'lucide-react';
 
 import type { SlashCommand } from '@/api/interactions/interactions.api';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { clearDraft, saveDraft } from '@/utils/drafts';
 
@@ -197,28 +198,32 @@ export const MessageComposerEditor = ({
         const hasLastMessage = lastMessage !== null;
         return (
             <div className="flex items-center gap-1.5 overflow-hidden">
-                <span className="shrink-0">Type a message...</span>
-                <span className="flex shrink items-center gap-1 text-[11px] font-medium whitespace-nowrap">
-                    <span className="ml-1">(</span>
+                <Text className="shrink-0">Type a message...</Text>
+                <Text
+                    className="flex shrink items-center gap-1 text-[11px]"
+                    weight="medium"
+                    wrap="nowrap"
+                >
+                    <Text className="ml-1">(</Text>
                     <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
                         Shift
                     </kbd>
-                    <span>+</span>
+                    <Text>+</Text>
                     <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1.5 shadow-sm">
                         Enter
                     </kbd>
-                    <span>new line</span>
+                    <Text>new line</Text>
                     {hasLastMessage ? (
                         <>
                             <span className="mx-0.5 h-3 w-px bg-white/10" />
                             <kbd className="flex h-[18px] min-w-[18px] items-center justify-center rounded border border-white/20 bg-white/10 px-1 shadow-sm">
                                 <ArrowUp size={10} strokeWidth={3} />
                             </kbd>
-                            <span>edit</span>
+                            <Text>edit</Text>
                         </>
                     ) : null}
-                    <span>)</span>
-                </span>
+                    <Text>)</Text>
+                </Text>
             </div>
         );
     };

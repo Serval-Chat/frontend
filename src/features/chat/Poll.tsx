@@ -10,6 +10,7 @@ import { useMe } from '@/api/users/users.queries';
 import { ParsedEmoji } from '@/features/messages/ParsedEmoji';
 import { ParsedUnicodeEmoji } from '@/features/messages/ParsedUnicodeEmoji';
 import { Box } from '@/ui/primitives/Box';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 import { APP_LOCALE } from '@/utils/locale';
@@ -159,9 +160,15 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                         Poll
                     </Text>
                     {isExpired ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-danger/15 px-2 py-0.5 text-[9px] font-bold tracking-widest text-danger uppercase">
+                        <Text
+                            className="inline-flex items-center gap-1 rounded-full bg-danger/15 px-2 py-0.5 text-[9px]"
+                            tracking="widest"
+                            transform="uppercase"
+                            variant="danger"
+                            weight="bold"
+                        >
                             Ended
-                        </span>
+                        </Text>
                     ) : null}
                 </Box>
                 <Box className="flex items-center gap-2">
@@ -173,13 +180,13 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                     {timeLeftMs !== null && !isExpired ? (
                         <Box className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
                             <Clock size={10} />
-                            <span
+                            <Text
                                 className={cn(
                                     timeLeftMs < 5 * 60 * 1000 && 'text-danger',
                                 )}
                             >
                                 {formatTimeLeft(timeLeftMs)}
-                            </span>
+                            </Text>
                         </Box>
                     ) : null}
                 </Box>
@@ -299,7 +306,7 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                     {totalVotes} vote{totalVotes === 1 ? '' : 's'}
                     {!isExpired && expiresAt !== null ? ' · closes ' : null}
                     {!isExpired && expiresAt !== null ? (
-                        <span
+                        <Text
                             title={new Date(expiresAt).toLocaleString(
                                 APP_LOCALE,
                             )}
@@ -313,21 +320,20 @@ export const Poll = ({ poll, messageId, serverId, channelId }: PollProps) => {
                                     minute: '2-digit',
                                 },
                             )}
-                        </span>
+                        </Text>
                     ) : null}
                 </Text>
 
                 {showVotersButton ? (
-                    <button
+                    <Pressable
                         className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2.5 py-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase transition hover:bg-white/5 hover:text-foreground active:scale-[0.98]"
-                        type="button"
                         onClick={(): void => {
                             setIsVotersModalOpen(true);
                         }}
                     >
                         <Users size={10} />
                         View voters
-                    </button>
+                    </Pressable>
                 ) : null}
             </Box>
 

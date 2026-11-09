@@ -32,6 +32,8 @@ import type {
     ServerMember,
 } from '@/api/servers/servers.types';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { colors, radius } from '@/ui/theme';
 import { mergeReducer } from '@/utils/mergeReducer';
 
@@ -385,18 +387,17 @@ function TimeSpinner({
                 borderRadius: 4,
             }}
         >
-            <button
+            <Pressable
                 aria-label={`Decrease ${label}`}
                 style={spinBtnStyle}
-                type="button"
                 onClick={dec}
                 onMouseDown={(e) => {
                     e.preventDefault();
                 }}
             >
                 <Minus size={12} />
-            </button>
-            <span
+            </Pressable>
+            <Text
                 style={{
                     width: 22,
                     textAlign: 'center',
@@ -406,18 +407,17 @@ function TimeSpinner({
                 }}
             >
                 {String(value).padStart(2, '0')}
-            </span>
-            <button
+            </Text>
+            <Pressable
                 aria-label={`Increase ${label}`}
                 style={spinBtnStyle}
-                type="button"
                 onClick={inc}
                 onMouseDown={(e) => {
                     e.preventDefault();
                 }}
             >
                 <Plus size={12} />
-            </button>
+            </Pressable>
         </div>
     );
 }
@@ -502,18 +502,17 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     marginBottom: 8,
                 }}
             >
-                <button
+                <Pressable
                     aria-label="Previous month"
                     style={navBtnStyle}
-                    type="button"
                     onClick={prevMonth}
                     onMouseDown={(e) => {
                         e.preventDefault();
                     }}
                 >
                     <ChevronLeft size={14} />
-                </button>
-                <span
+                </Pressable>
+                <Text
                     style={{
                         fontSize: '0.8rem',
                         fontWeight: 600,
@@ -521,18 +520,17 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     }}
                 >
                     {MONTH_NAMES[viewMonth]} {viewYear}
-                </span>
-                <button
+                </Text>
+                <Pressable
                     aria-label="Next month"
                     style={navBtnStyle}
-                    type="button"
                     onClick={nextMonth}
                     onMouseDown={(e) => {
                         e.preventDefault();
                     }}
                 >
                     <ChevronRight size={14} />
-                </button>
+                </Pressable>
             </div>
 
             {/* day-of-week labels */}
@@ -545,7 +543,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                 }}
             >
                 {DAY_NAMES.map((d) => (
-                    <span
+                    <Text
                         key={d}
                         style={{
                             textAlign: 'center',
@@ -555,7 +553,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                         }}
                     >
                         {d}
-                    </span>
+                    </Text>
                 ))}
             </div>
 
@@ -576,7 +574,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     (d) => {
                         const sel = d === selDay;
                         return (
-                            <button
+                            <Pressable
                                 key={d}
                                 style={{
                                     ...calendarDayButtonStyle,
@@ -585,7 +583,6 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                                         : 'transparent',
                                     color: sel ? '#fff' : 'var(--foreground)',
                                 }}
-                                type="button"
                                 onClick={() => {
                                     setSelDay(d);
                                 }}
@@ -606,7 +603,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                                 }}
                             >
                                 {d}
-                            </button>
+                            </Pressable>
                         );
                     },
                 )}
@@ -621,7 +618,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     marginTop: 10,
                 }}
             >
-                <span
+                <Text
                     style={{
                         fontSize: '0.75rem',
                         color: 'var(--muted-foreground)',
@@ -629,21 +626,21 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     }}
                 >
                     Time
-                </span>
+                </Text>
                 <TimeSpinner
                     label="hour"
                     max={23}
                     value={hour}
                     onChange={setHour}
                 />
-                <span style={{ color: 'var(--muted-foreground)' }}>:</span>
+                <Text style={{ color: 'var(--muted-foreground)' }}>:</Text>
                 <TimeSpinner
                     label="minute"
                     max={59}
                     value={minute}
                     onChange={setMinute}
                 />
-                <span style={{ color: 'var(--muted-foreground)' }}>:</span>
+                <Text style={{ color: 'var(--muted-foreground)' }}>:</Text>
                 <TimeSpinner
                     label="second"
                     max={59}
@@ -653,7 +650,7 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
             </div>
 
             {/* confirm */}
-            <button
+            <Pressable
                 disabled={selDay === null}
                 style={{
                     ...confirmDateButtonStyle,
@@ -662,14 +659,13 @@ function DateTimePicker({ onConfirm }: { onConfirm: (iso: string) => void }) {
                     color: selDay === null ? 'var(--muted-foreground)' : '#fff',
                     cursor: selDay === null ? 'default' : 'pointer',
                 }}
-                type="button"
                 onClick={handleConfirm}
                 onMouseDown={(e) => {
                     e.preventDefault();
                 }}
             >
                 Apply
-            </button>
+            </Pressable>
         </div>
     );
 }
@@ -704,10 +700,9 @@ function SearchSuggestionsDropdown({
     return (
         <div style={dropdownStyle}>
             {suggestions.map((c) => (
-                <button
+                <Pressable
                     key={c.id}
                     style={itemStyle}
-                    type="button"
                     onMouseDown={(e) => {
                         e.preventDefault();
                         onSelectSuggestion(c);
@@ -728,13 +723,12 @@ function SearchSuggestionsDropdown({
                         style={{ color: colors.mutedForeground, flexShrink: 0 }}
                     />
                     {c.name}
-                </button>
+                </Pressable>
             ))}
             {categorySuggestions.map((c) => (
-                <button
+                <Pressable
                     key={c.id}
                     style={itemStyle}
-                    type="button"
                     onMouseDown={(e) => {
                         e.preventDefault();
                         onSelectCategory(c);
@@ -755,13 +749,12 @@ function SearchSuggestionsDropdown({
                         style={{ color: colors.mutedForeground, flexShrink: 0 }}
                     />
                     {c.name}
-                </button>
+                </Pressable>
             ))}
             {userSuggestions.map((m) => (
-                <button
+                <Pressable
                     key={m.userId}
                     style={itemStyle}
-                    type="button"
                     onMouseDown={(e) => {
                         e.preventDefault();
                         onSelectUser(m);
@@ -783,20 +776,20 @@ function SearchSuggestionsDropdown({
                         src={m.user.profilePicture}
                         username={m.user.username}
                     />
-                    <span style={{ fontWeight: 500 }}>
+                    <Text style={{ fontWeight: 500 }}>
                         {m.nickname ?? m.user.displayName ?? m.user.username}
-                    </span>
+                    </Text>
                     {m.nickname || m.user.displayName ? (
-                        <span
+                        <Text
                             style={{
                                 color: colors.mutedForeground,
                                 fontSize: '0.75rem',
                             }}
                         >
                             @{m.user.username}
-                        </span>
+                        </Text>
                     ) : null}
-                </button>
+                </Pressable>
             ))}
             {showDatePicker ? (
                 <DateTimePicker onConfirm={onSelectDate} />

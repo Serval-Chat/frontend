@@ -35,6 +35,7 @@ export interface TextProps extends Omit<
     React.HTMLAttributes<HTMLElement>,
     'style'
 > {
+    ref?: React.Ref<HTMLElement>;
     as?: 'span' | 'p' | 'div' | 'label';
     variant?: TextVariant;
     size?: FontSizeKey;
@@ -146,6 +147,7 @@ export const Text = ({
     style,
     children,
     skeleton,
+    ref,
     ...props
 }: TextProps) => {
     const classes = cn(
@@ -168,6 +170,7 @@ export const Text = ({
             <Tag
                 aria-hidden
                 className={cn(classes, 'relative inline-block')}
+                ref={ref as React.Ref<never>}
                 style={style}
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...props}
@@ -181,6 +184,7 @@ export const Text = ({
     return (
         <Tag
             className={classes || undefined}
+            ref={ref as React.Ref<never>}
             style={style}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...props}

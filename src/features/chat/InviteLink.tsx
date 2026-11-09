@@ -8,6 +8,8 @@ import { useServers } from '@/api/servers/servers.queries';
 import { resolveServerBannerUrl } from '@/features/servers/bannerUtils';
 import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
+import { Link } from '@/ui/primitives/Link';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Skeleton } from '@/ui/primitives/Skeleton';
 import { Text } from '@/ui/primitives/Text';
 import { useToast } from '@/ui/primitives/Toast';
@@ -150,14 +152,9 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
                     This server invite is either invalid or has reached its
                     maximum uses.
                 </Text>
-                <a
-                    className="mt-3 text-xs text-primary transition hover:underline"
-                    href={url}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                >
+                <Link className="mt-3 text-xs transition" href={url}>
                     {url}
-                </a>
+                </Link>
             </Box>
         );
     }
@@ -179,14 +176,13 @@ export const InviteLink = ({ code, url }: InviteLinkProps) => {
         <Box className="my-2 flex w-80 flex-col overflow-hidden rounded-lg bg-bg-secondary transition">
             {/* Copy server link button */}
             <div className="relative">
-                <button
+                <Pressable
                     aria-label="Copy invite link"
                     className="absolute top-2 right-2 z-10 rounded-md p-1.5 text-muted-foreground opacity-40 transition hover:bg-bg-secondary hover:opacity-100"
-                    type="button"
                     onClick={handleCopy}
                 >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
-                </button>
+                </Pressable>
             </div>
 
             {/* Banner */}

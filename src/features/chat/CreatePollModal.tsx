@@ -12,6 +12,7 @@ import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { Input } from '@/ui/primitives/Input';
 import { Modal } from '@/ui/primitives/Modal';
+import { Select } from '@/ui/primitives/Select';
 import { Slider } from '@/ui/primitives/Slider';
 import { Text } from '@/ui/primitives/Text';
 import { Toggle } from '@/ui/primitives/Toggle';
@@ -266,10 +267,12 @@ const PollDurationSection = ({
                     onDurationValueChange(Number(e.target.value));
                 }}
             />
-            <select
+            <Select
                 aria-label="Poll duration unit"
-                className="h-10 cursor-pointer rounded-md border border-border-subtle bg-bg-secondary px-3 py-2 text-sm text-foreground transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                className="transition-colors hover:border-primary/30 focus:ring-2 focus:ring-primary/50"
                 value={durationUnit}
+                variant="secondary"
+                wrapperClassName="w-auto"
                 onChange={(e): void => {
                     onDurationUnitChange(
                         e.target.value as 'minutes' | 'hours' | 'days',
@@ -279,7 +282,7 @@ const PollDurationSection = ({
                 <option value="minutes">Minutes</option>
                 <option value="hours">Hours</option>
                 <option value="days">Days</option>
-            </select>
+            </Select>
         </Box>
         <Box className="mt-2">
             <Slider
@@ -292,9 +295,9 @@ const PollDurationSection = ({
         </Box>
         <Text className="mt-0.5 text-[10px] text-muted-foreground">
             Poll closes:{' '}
-            <span className="font-medium text-foreground/70">
+            <Text className="text-foreground/70" weight="medium">
                 {expiryPreview}
-            </span>
+            </Text>
         </Text>
     </Box>
 );

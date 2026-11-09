@@ -39,6 +39,8 @@ import { Box } from '@/ui/primitives/Box';
 import { Button } from '@/ui/primitives/Button';
 import { ContextMenu } from '@/ui/primitives/ContextMenu';
 import { Input } from '@/ui/primitives/Input';
+import { Pressable } from '@/ui/primitives/Pressable';
+import { Text } from '@/ui/primitives/Text';
 import { cn } from '@/utils/cn';
 
 type GifItem = KlipyGif;
@@ -165,17 +167,21 @@ const GifPickerItem = ({
                     {appliedTagNames
                         .slice(0, MAX_VISIBLE_TAG_BADGES)
                         .map((name) => (
-                            <span
-                                className="truncate rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white"
+                            <Text
+                                className="truncate rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] text-white"
                                 key={name}
+                                weight="medium"
                             >
                                 {name}
-                            </span>
+                            </Text>
                         ))}
                     {appliedTagNames.length > MAX_VISIBLE_TAG_BADGES ? (
-                        <span className="rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                        <Text
+                            className="rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] text-white"
+                            weight="medium"
+                        >
                             +{appliedTagNames.length - MAX_VISIBLE_TAG_BADGES}
-                        </span>
+                        </Text>
                     ) : null}
                 </div>
             ) : null}
@@ -211,9 +217,9 @@ const FavoritesShortcutTile = ({
             />
             <Box className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center text-white">
                 <Star className="h-5 w-5 fill-current" />
-                <span className="px-2 text-xs font-semibold">
+                <Text className="px-2" size="xs" weight="semibold">
                     Your Favorites
-                </span>
+                </Text>
             </Box>
         </Box>
     );
@@ -538,11 +544,10 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 ref={pickerRef}
                 style={{ width: `${size.width}px`, height: `${size.height}px` }}
             >
-                <button
+                <Pressable
                     aria-label="Resize GIF picker"
                     className="absolute -top-1 -left-1 z-[60] flex h-6 w-6 cursor-nw-resize items-center justify-center text-muted-foreground/30 transition-colors hover:text-primary/50"
                     title="Resize"
-                    type="button"
                     onKeyDown={(e): void => {
                         if (e.key === 'Enter' || e.key === ' ')
                             e.preventDefault();
@@ -552,7 +557,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                     <div className="mr-1 mb-1 rotate-45">
                         <GripHorizontal className="h-3 w-3" />
                     </div>
-                </button>
+                </Pressable>
 
                 <Box className="flex shrink-0 items-center justify-between border-b border-border-subtle p-3">
                     <Box className="flex gap-1">
@@ -649,17 +654,16 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                     />
                                 </form>
                             ) : (
-                                <button
+                                <Pressable
                                     aria-label="Create a new tag"
                                     className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-dashed border-border-subtle text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                                     title="Create a new tag"
-                                    type="button"
                                     onClick={(): void => {
                                         setIsCreatingTag(true);
                                     }}
                                 >
                                     <Plus className="h-3 w-3" />
-                                </button>
+                                </Pressable>
                             )}
                             {allTags.map((tag) => {
                                 const active = isTagActive(search, tag.name);
@@ -677,7 +681,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                         ]}
                                         key={tag.id}
                                     >
-                                        <button
+                                        <Pressable
                                             className={cn(
                                                 'rounded-full border px-2 py-0.5 text-[11px] transition-colors',
                                                 active
@@ -687,7 +691,6 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                                     'opacity-50',
                                             )}
                                             title="Ctrl+click to pick up and apply to a GIF"
-                                            type="button"
                                             onClick={(e): void => {
                                                 if (e.ctrlKey) {
                                                     e.preventDefault();
@@ -707,7 +710,7 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                                             }}
                                         >
                                             {tag.name}
-                                        </button>
+                                        </Pressable>
                                     </ContextMenu>
                                 );
                             })}
@@ -771,12 +774,22 @@ export const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
                 </Box>
 
                 <Box className="flex shrink-0 flex-col items-center justify-center gap-1 border-t border-border-subtle py-2">
-                    <span className="text-[8px] font-bold tracking-[0.2em] text-muted-foreground uppercase">
+                    <Text
+                        className="text-[8px] tracking-[0.2em]"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="bold"
+                    >
                         Powered by
-                    </span>
-                    <span className="text-[10px] font-black tracking-[0.1em] text-muted-foreground uppercase">
+                    </Text>
+                    <Text
+                        className="text-[10px] tracking-[0.1em]"
+                        transform="uppercase"
+                        variant="muted"
+                        weight="black"
+                    >
                         Klipy
-                    </span>
+                    </Text>
                 </Box>
             </Box>
             {floatingTag

@@ -61,12 +61,12 @@ export const ReplyBanner = ({
             ) : null}
             <Box className="flex items-center gap-1 truncate overflow-hidden text-xs whitespace-nowrap text-muted-foreground opacity-80">
                 {replyingTo.interaction && !replyingTo.text ? (
-                    <span className="opacity-70">
+                    <Text className="opacity-70">
                         used{' '}
-                        <span className="font-bold text-primary">
+                        <Text variant="primary" weight="bold">
                             /{replyingTo.interaction.command}
-                        </span>
-                    </span>
+                        </Text>
+                    </Text>
                 ) : null}
                 <ParsedText
                     condenseCodeBlocks

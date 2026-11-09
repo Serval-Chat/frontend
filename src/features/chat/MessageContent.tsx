@@ -25,6 +25,7 @@ import { useLimitedAnimations } from '@/providers/limitedAnimationsContext';
 import type { ButtonComponent, Embed } from '@/types/embed';
 import { Box } from '@/ui/primitives/Box';
 import { PausedAnimatedImage } from '@/ui/primitives/PausedAnimatedImage';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { Tooltip } from '@/ui/primitives/Tooltip';
 import { isAnimatedImageUrl } from '@/utils/animationPreferences';
@@ -93,9 +94,8 @@ const MessageSticker = ({
         <>
             <div className="mt-1 flex max-w-[240px] flex-col gap-1">
                 <Tooltip fullWidth content={sticker.name} position="top">
-                    <button
+                    <Pressable
                         className="block w-full cursor-pointer border-none bg-transparent p-0 transition-opacity outline-none hover:opacity-90 active:opacity-80"
-                        type="button"
                         onClick={(event): void => {
                             showStickerInfo(
                                 {
@@ -119,7 +119,7 @@ const MessageSticker = ({
                             src={resolveApiUrl(sticker.imageUrl) || ''}
                             onLoad={onResize}
                         />
-                    </button>
+                    </Pressable>
                 </Tooltip>
             </div>
             {selectedSticker && infoBoxPosition ? (
@@ -289,14 +289,14 @@ const MessageContentBody = React.memo(
                                     className="flex justify-between gap-3"
                                     key={option.id}
                                 >
-                                    <span>
+                                    <Text>
                                         {option.emoji ? `${option.emoji} ` : ''}
                                         {option.text}
-                                    </span>
-                                    <span className="text-text-muted">
+                                    </Text>
+                                    <Text className="text-text-muted">
                                         {option.votes}{' '}
                                         {option.votes === 1 ? 'vote' : 'votes'}
-                                    </span>
+                                    </Text>
                                 </div>
                             ))}
                         </div>

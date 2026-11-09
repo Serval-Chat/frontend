@@ -26,6 +26,7 @@ import { ParsedText } from '@/features/messages/ParsedText';
 import { UserProfilePicture } from '@/features/users/UserProfilePicture';
 import { useMemberMaps } from '@/hooks/chat/useMemberMaps';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Pressable } from '@/ui/primitives/Pressable';
 import { Text } from '@/ui/primitives/Text';
 import { colors, radius } from '@/ui/theme';
 import { resolveApiUrl } from '@/utils/apiUrl';
@@ -361,7 +362,7 @@ export function SearchResultItem({
     }
 
     return (
-        <button
+        <Pressable
             aria-label="Navigate to message"
             className="group relative flex w-full flex-col text-left transition duration-150 hover:bg-white/2"
             style={{
@@ -371,7 +372,6 @@ export function SearchResultItem({
                 cursor: 'pointer',
                 padding: 0,
             }}
-            type="button"
             onClick={() => {
                 onNavigate(hit.id, {
                     serverId: hit.serverId,
@@ -433,7 +433,7 @@ export function SearchResultItem({
                     </div>
                 </div>
             </div>
-        </button>
+        </Pressable>
     );
 }
 
@@ -520,10 +520,9 @@ const SearchFilterShortcuts = ({
                 </Text>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {chips.map(({ token, label: chipLabel }) => (
-                        <button
+                        <Pressable
                             key={token}
                             style={searchChipButtonStyle}
-                            type="button"
                             onClick={() => {
                                 onAppend(token);
                             }}
@@ -545,7 +544,7 @@ const SearchFilterShortcuts = ({
                             }}
                         >
                             {chipLabel}
-                        </button>
+                        </Pressable>
                     ))}
                 </div>
             </div>
@@ -704,12 +703,12 @@ export function MessageSearchPanel({
                     style={{ flex: 1, position: 'relative' }}
                 >
                     {/* offscreen twin of the full placeholder, used only to measure whether it fits */}
-                    <span
+                    <Text
                         ref={placeholderMeasureRef}
                         style={measurePlaceholderStyle}
                     >
                         {SEARCH_PLACEHOLDER_FULL}
-                    </span>
+                    </Text>
                     <Search
                         size={14}
                         style={{
@@ -730,11 +729,11 @@ export function MessageSearchPanel({
                                 ErrorBoundary={LexicalErrorBoundary}
                                 contentEditable={SEARCH_CONTENT_EDITABLE}
                                 placeholder={
-                                    <span style={searchPlaceholderStyle}>
+                                    <Text style={searchPlaceholderStyle}>
                                         {placeholderTooWide
                                             ? SEARCH_PLACEHOLDER_SHORT
                                             : SEARCH_PLACEHOLDER_FULL}
-                                    </span>
+                                    </Text>
                                 }
                             />
                         </div>
@@ -750,14 +749,13 @@ export function MessageSearchPanel({
                     </LexicalComposer>
                 </div>
 
-                <button
+                <Pressable
                     aria-label="Close search"
                     style={closeSearchButtonStyle}
-                    type="button"
                     onClick={onClose}
                 >
                     <X size={16} />
-                </button>
+                </Pressable>
             </div>
 
             {/* results count */}
@@ -842,11 +840,10 @@ export function MessageSearchPanel({
                         flexShrink: 0,
                     }}
                 >
-                    <button
+                    <Pressable
                         aria-label="Previous page"
                         disabled={!canGoPrev}
                         style={navButtonStyle(canGoPrev)}
-                        type="button"
                         onClick={() => {
                             setPageState({
                                 page: page - 1,
@@ -855,15 +852,14 @@ export function MessageSearchPanel({
                         }}
                     >
                         <ChevronLeft size={16} />
-                    </button>
+                    </Pressable>
                     <Text size="xs" variant="muted">
                         {page + 1} / {totalPages}
                     </Text>
-                    <button
+                    <Pressable
                         aria-label="Next page"
                         disabled={!canGoNext}
                         style={navButtonStyle(canGoNext)}
-                        type="button"
                         onClick={() => {
                             setPageState({
                                 page: page + 1,
@@ -872,7 +868,7 @@ export function MessageSearchPanel({
                         }}
                     >
                         <ChevronRight size={16} />
-                    </button>
+                    </Pressable>
                 </div>
             ) : null}
         </div>
